@@ -1,0 +1,106 @@
+███████████████████████████████████████████
+█ CAVECODE GAME TEMPLATE — v1.0
+█ For use in CaveCode Arcade Planet
+███████████████████████████████████████████
+
+================================================
+🪨 BLOCK 1 — GAME SHELL
+================================================
+Title: (🖍️ EDIT ME)
+Short Description: (🖍️ EDIT ME)
+Category: (haze-maze | scarlet-crush | retro-quarter | ember-adventures | cavern-run | mind-chambers | buckeye-bash)
+
+Goal:
+  🌐 (One or two sentences explaining what the player is trying to do.)
+
+End Conditions:
+  🌐 (How the run ends: time, lives, levels, etc.)
+
+(LOCKED SHELL — change content freely, keep structure.)
+
+================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+================================================
+Tick Rate:
+  🖍️ e.g. "60 FPS" or "tick every 100ms"
+
+On Each Tick:
+  1) (🎮 brief step)
+  2) (🎮 brief step)
+  3) (🎮 brief step)
+
+Player Input:
+  - Key / touch mapping summary (🖍️ editable text)
+
+(This block is a human-readable map of what the JS will do.)
+
+================================================
+🎮 BLOCK 3 — SCORING & PROGRESSION
+================================================
+Starting Score: 0
+Gain Points When:
+  - (🖍️ condition → points)
+  - (🖍️ condition → points)
+
+Lose Points When:
+  - (optional)
+
+Level / Difficulty Progression:
+  - (🖍️ simple rules: speed, spawn density, enemy type)
+
+================================================
+🖍️ BLOCK 4 — TUNING KNOBS
+================================================
+# These values should map directly into the JS config.
+
+SPEED_BASE:        (e.g. 1.0)
+SPEED_INCREMENT:   (e.g. 0.1 per level)
+MAX_SPEED:         (e.g. 3.0)
+
+SPAWN_RATE_BASE:   (e.g. 800 ms)
+SPAWN_RATE_MIN:    (e.g. 200 ms)
+
+STARTING_LIVES:    (e.g. 3)
+MAX_LIVES:         (e.g. 5)
+
+COLOR_BG:          (e.g. "#000000")
+COLOR_PLAYER:      (e.g. "#ffcc00")
+COLOR_ENEMY:       (e.g. "#ff3366")
+COLOR_TEXT:        (e.g. "#ffffff")
+
+================================================
+🌐 BLOCK 5 — PLAYER-FACING TEXT
+================================================
+TITLE_TEXT:        (what appears on screen title)
+START_MESSAGE:     (short instruction)
+GAME_OVER_MESSAGE: (what players see when they fail)
+VICTORY_MESSAGE:   (optional)
+
+CREDITS_LINE:
+  "Forged in CaveCode Arcade Planet — SageWire Syndicate."
+
+================================================
+🔧 BLOCK 6 — OPTIONAL MODES / POWERUPS
+================================================
+# List any extra features planned or implemented.
+# Example:
+# - "Slow-mo token drops rarely; when collected, halves game speed for 3 seconds."
+# - "Shield pickup that gives 1 free hit."
+
+================================================
+🪨 BLOCK 7 — IMPLEMENTATION NOTES (DEV ONLY)
+================================================
+# Map Blocks to actual code files:
+# - index.html → renders canvas + text
+# - game.js    → core loop, input, scoring
+# - config.js  → values mirrored from BLOCK 4
+
+# Keep this in sync when you refactor.
+
+================================================
+🖍️ BLOCK 8 — HUMAN NOTES
+================================================
+# Freeform notes for designers, testers, teachers.
+# Example:
+# - "Kids found level 3 too hard; maybe slow down ramp."
+# - "Color contrast was an issue on bright screens."
