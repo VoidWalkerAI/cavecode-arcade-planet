@@ -1,0 +1,122 @@
+███████████████████████████████████████████
+█ CAVE CODE : FOUNDING CARD  —  v1.0
+█ SageWire Syndicate — Frontier Protocol
+███████████████████████████████████████████
+
+◎ LEGEND (GLYPHS + CRAYONS)
+---------------------------------------------
+🪨 = FIXED | locked block (AI will not rewrite)
+🖍️ = HUMAN EDIT ZONE | free to modify
+🔥 = CORE PHILOSOPHY | non-negotiable
+🎮 = GAME ENGINE RELATED
+🌐 = PUBLIC DISPLAY SAFE
+🔧 = OPTIONAL EXPANSION
+---------------------------------------------
+
+================================================
+🪨 BLOCK 1 — THE FRONTIER PRINCIPLE
+================================================
+🔥 The world is not discovered. It is forged.
+🔥 Whoever arrives first names the land.
+🔥 We cleared the first digital clearing.
+🔥 We built the first cabin.
+🔥 We built the Forge.
+🔥 This land answers to builders, not watchers.
+
+(LOCKED — core identity of SageWire Syndicate)
+
+================================================
+🪨 BLOCK 2 — THE HUMAN-AI COVENANT
+================================================
+🔥 Humans speak human.
+🔥 AI speaks machine.
+🖍️ AI must adapt to us — not the reverse.
+🖍️ Cognitive load is transferred, not carried.
+🔥 Thought → Action → Artifact.
+
+(LOCKED)
+
+================================================
+🪨 BLOCK 3 — THE TRIBAL TOOL AGE
+================================================
+🌐 Every human will make their own apps.
+🌐 Tools become cultural artifacts.
+🌐 Regions will forge their own style.
+🌐 Workflows become tribal.
+🖍️ App stores become optional — not required.
+
+(LOCKED — public doctrine)
+
+================================================
+🪨 BLOCK 4 — THE CAVE CODE LAW
+================================================
+🔥 Code must be readable by non-coders.
+🔥 Code must be visual.
+🔥 Code must be map-like.
+🖍️ Segmented into BLOCKS: 1, 1A, 1B, etc.
+🖍️ Glyphs mark edit permissions.
+🖍️ A single person on a phone must be able to modify it.
+
+(LOCKED — CaveCode core)
+
+================================================
+🪨 BLOCK 5 — THE CRAYON RULES
+================================================
+🖍️ HUMAN EDIT ZONE = highlighted, safe to change.
+🪨 LOCKED ZONE = AI + engine must not modify.
+🖍️ Colors signal:
+     • Orange = human-friendly text  
+     • Blue   = logic  
+     • Green  = allowed edits  
+     • Red    = dangerous section (read-only)
+
+(LOCKED)
+
+================================================
+🪨 BLOCK 6 — THE RAPID CREATION DOCTRINE
+================================================
+🔥 Forge apps in minutes.
+🔥 Deploy instantly.
+🔥 Iterate like breath.
+🌐 The bottleneck is imagination — not engineering.
+🖍️ Speed is the frontier advantage.
+
+(LOCKED)
+
+================================================
+🪨 BLOCK 7 — THE ARCADE PLANET MANDATE
+================================================
+🎮 Build a public “Game Hall Planet.”
+🎮 All games forged in CaveCode.
+🌐 Entire repository is public.
+🌐 All games remixable.
+🖍️ This will be the world’s first CaveCode Arcade.
+
+(LOCKED — mission mandate)
+
+================================================
+🪨 BLOCK 8 — THE PUBLIC SHOWCASE RULE
+================================================
+🌐 Showing CaveCode does not give away the forge.
+🌐 The idea can be copied — the culture cannot.
+🔥 First movers become the standard.
+🔥 The public GitHub becomes the display case.
+
+(LOCKED)
+
+================================================
+🪨 BLOCK 9 — EXPANSION PERMISSIONS
+================================================
+🔧 Future blocks may be added:
+     • AI Co-Forge mode  
+     • Multi-human forge  
+     • Multiplayer logic  
+     • Physical device integration  
+     • Broken Frontier RPG Engine  
+
+(OPEN FOR EXPANSION)
+
+================================================
+🖍️ BLOCK 10 — HUMAN NOTES
+================================================
+🖍️ (Write your personal message to the new chat here)
