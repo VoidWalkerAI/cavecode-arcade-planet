@@ -1,0 +1,69 @@
+🪨 BLOCK 1 — IDENTITY (LOCKED)
+ID: ARC-XXX
+TITLE: <Game Title Here>
+FOLDER: <arcade/subfolder/game-name>
+GENRE: <haze-maze | cavern-run | ember-adventures | etc.>
+VERSION: v1.0.0
+STATUS: DRAFT
+ENGINE_NOTES:
+  - Single HTML file (index.html)
+  - Inline CSS + JS
+  - Mobile + desktop friendly
+
+🎚️ BLOCK 2 — TUNING KNOBS
+CORE_LOOP:
+  - <short description of the main loop>
+DIFFICULTY_SCALE:
+  - START: <easy/medium/hard>
+  - RAMP: <linear | curve | wave>
+SESSION_LENGTH:
+  - TARGET_MINUTES: <5–10>
+INPUTS:
+  - KEYBOARD: <arrows/space/etc.>
+  - TOUCH: <tap/swipe/none>
+SCORE_MODEL:
+  - PRIMARY: <time survived | matches cleared | etc.>
+  - SECONDARY: <combos | streaks | etc.>
+
+🌐 BLOCK 3 — PUBLIC TEXT
+TAGLINE: "<Short hook line for the game.>"
+BLURB:
+  - "<One or two sentences describing the game for players.>"
+UI_COPY:
+  START_BUTTON: "Play"
+  RETRY_BUTTON: "Try Again"
+  PAUSE_LABEL: "Paused"
+  SCORE_LABEL: "Score"
+  HIGH_SCORE_LABEL: "Best"
+
+🔧 BLOCK 4 — BEHAVIOR
+LOOP_SUMMARY:
+  - "On each frame: update player, update world, detect collisions, update score, render."
+SYSTEMS:
+  PLAYER:
+    - POSITION: x,y
+    - STATE: idle/moving/dead
+  WORLD:
+    - OBJECTS: <tiles/lanes/hazards/etc.>
+    - SPAWN_RULES: <how new elements appear>
+  COLLISIONS:
+    - LOSE_CONDITION: <what ends a run>
+WIN/LOSE:
+  - WIN_CONDITION: "<optional, or 'endless'>"
+  - LOSE_CONDITION: "<hit obstacle, timer out, etc.>"
+LOOPS_AND_SCENES:
+  SCENES:
+    - "Title screen"
+    - "Game loop"
+    - "Game over"
+
+📝 BLOCK 5 — HUMAN NOTES
+NOTES_FOR_HUMANS:
+  - "Use this as a starting point for any new game."
+  - "Keep Blocks 1–5 in this exact order."
+  - "Do not remove glyphs (🪨 🎚️ 🌐 🔧 📝)."
+TODO:
+  - "Name the game."
+  - "Pick a genre folder under /arcade/."
+  - "Fill in the tuning knobs for the actual design."
+  - "Then build index.html next to this file."
