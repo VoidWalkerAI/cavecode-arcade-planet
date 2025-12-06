@@ -1,0 +1,125 @@
+---
+
+## 2️⃣ `arcade/mind-chambers/focus-relay/focus-relay.cavecode`
+
+```text
+CAVECODE SPEC — FOCUS RELAY (ARC-MC-002)
+Category: mind-chambers
+Engine: visual sequence memory
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Mind Chambers — Focus Relay
+Game ID: ARC-MC-002
+Category: mind-chambers
+Genre: sequence-memory / focus
+One-Liner: Memorize the numbered flashes and click the nodes in the correct order.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+High-level loop:
+
+  - STATE = IDLE
+  - Player presses "Start Round" → generate pattern.
+
+Round flow:
+
+  1. Generate a unique set of grid cells of length patternLength.
+  2. Enter REVEAL state:
+       - For revealTimeMs, display numbers 1..patternLength on those cells.
+       - After the timer expires, hide numbers and switch to INPUT state.
+  3. INPUT state:
+       - Wait for player clicks/taps.
+       - Keep an index expectedIndex starting at 1.
+       - When a node is clicked:
+            - If that node corresponds to expectedIndex:
+                  - Mark it as correct.
+                  - Increment expectedIndex.
+                  - If expectedIndex > patternLength:
+                        - Round success → increment score.
+                        - Increase patternLength and adjust revealTime.
+                        - Go back to REVEAL state for next round.
+            - Else: mistake → GAME OVER.
+  4. GAME OVER:
+       - Show score, allow restarting from Round 1.
+
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop:
+  - Mouse click on nodes during INPUT state.
+
+Mobile:
+  - Touch / tap on nodes during INPUT state.
+
+The "Start Round" button:
+  - Starts a new run from Round 1 if in GAME OVER or IDLE.
+  - Starts Round 1 if no run active yet.
+
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Score:
+  - score = number of successfully completed rounds.
+
+Progression:
+  - patternLength starts at startPatternLength.
+  - After each successful round:
+        - patternLength += patternIncrement
+        - revealTimeMs = max(minRevealTimeMs, revealTimeMs - revealTimeDecayMs)
+
+Game ends when:
+  - Player clicks any node that is not the expected next index.
+
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+gridSize:            3          # 3x3 grid
+startPatternLength:  3
+patternIncrement:    1
+revealTimeMs:        1600
+minRevealTimeMs:     700
+revealTimeDecayMs:   100
+
+(PENCIL — keep in sync with index.html script)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Focus Relay"
+subtitle: "Remember the order. Tap it back."
+startLabel: "Start Round"
+statusIdle: "Tap Start Round to begin."
+statusReveal: "Memorize the numbers..."
+statusInput: "Tap the nodes in order."
+statusRoundSuccess: "Nice. Get ready for the next pattern."
+statusGameOver: "Sequence broken. Tap Start to try again."
+(Globe)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+- Add sound tones mapped to each index.
+- Add time pressure (input timer).
+- Add multi-grid modes (4x4, 5x5).
+- Add life system (e.g., 3 mistakes allowed).
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Pedagogical:
+  - Clean state machine design.
+  - Random unique selections from a grid.
+  - Simple but scalable difficulty.
+
+(END)
