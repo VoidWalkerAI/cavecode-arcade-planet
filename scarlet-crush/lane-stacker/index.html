@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scarlet Crush — Lane Stacker (ARC-SC-001)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --accent: #f97316;
+      --accent-soft: #fed7aa;
+      --danger: #f97373;
+
+      --tile-1: #f97316;
+      --tile-2: #22c55e;
+      --tile-3: #3b82f6;
+      --tile-4: #eab308;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #game-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    header {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    header .sub {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    #top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    #score-panel {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 0.2rem 0.75rem;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    #next-pill span.color-chip {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.9);
+    }
+
+    #reset-btn {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: radial-gradient(circle at top, rgba(148, 163, 184, 0.1), rgba(15, 23, 42, 1));
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    #reset-btn:active {
+      transform: translateY(1px);
+      filter: brightness(0.95);
+    }
+
+    #game-frame {
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    #board-wrapper {
+      margin: 0 auto;
+      max-width: 420px;
+      aspect-ratio: 4 / 10;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 1);
+      background: radial-gradient(circle at top, #020617 0, #020617 65%);
+      padding: 0.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    #lane-headers {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.35rem;
+    }
+
+    .lane-header {
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      text-align: center;
+      font-size: 0.78rem;
+      padding: 0.25rem 0;
+      color: var(--text-soft);
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.95);
+      user-select: none;
+    }
+
+    .lane-header:active {
+      transform: translateY(1px);
+      filter: brightness(0.96);
+    }
+
+    #board {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.35rem;
+    }
+
+    .lane {
+      display: grid;
+      grid-template-rows: repeat(10, 1fr);
+      gap: 0.15rem;
+      align-items: end;
+    }
+
+    .cell {
+      border-radius: 0.35rem;
+      background: rgba(15, 23, 42, 0.8);
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tile {
+      width: 100%;
+      height: 100%;
+      border-radius: 0.28rem;
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.7),
+        0 3px 6px rgba(0, 0, 0, 0.55);
+      transition: transform 0.1s ease-out, opacity 0.12s ease-out;
+    }
+
+    .tile[data-v="1"] { background: var(--tile-1); }
+    .tile[data-v="2"] { background: var(--tile-2); }
+    .tile[data-v="3"] { background: var(--tile-3); }
+    .tile[data-v="4"] { background: var(--tile-4); }
+
+    .tile.clearing {
+      opacity: 0.15;
+      transform: scale(0.85);
+    }
+
+    #hint-text {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      text-align: center;
+    }
+
+    #game-over-banner {
+      display: none;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--danger);
+    }
+
+    @media (min-width: 768px) {
+      header h1 { font-size: 1.2rem; }
+      #hint-text { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-shell">
+    <header>
+      <h1>Scarlet Crush — Lane Stacker · ARC-SC-001</h1>
+      <div class="sub">
+        <span>CaveCode Arcade Planet · Scarlet-Crush Line</span>
+        <span>Tap a lane header to drop the next block.</span>
+      </div>
+    </header>
+
+    <main id="game-frame">
+      <div id="top-row">
+        <div id="score-panel">
+          <div class="pill">Score: <span id="scoreVal">0</span></div>
+          <div class="pill">Last Clear: <span id="lastClearVal">0</span></div>
+          <div class="pill" id="next-pill">
+            Next:
+            <span class="color-chip" id="nextColorChip"></span>
+          </div>
+        </div>
+        <button id="reset-btn">↻ New Game</button>
+      </div>
+
+      <div id="board-wrapper">
+        <div id="lane-headers"></div>
+        <div id="board"></div>
+      </div>
+
+      <div id="hint-text">
+        Stack blocks in 4 lanes. Make a run of 3+ same-colored blocks in a lane to clear them.
+        Don't let a lane reach the top.
+      </div>
+
+      <div id="game-over-banner">
+        Board Overflow — No more space! Press "New Game" to reset.
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING KNOBS (reflecting lane-stacker.cavecode)
+    // ============================================================
+    const TUNING = {
+      laneCount:   4,
+      laneHeight:  10,
+      tileTypes:   4,
+      matchLength: 3,
+      clearScore:  10,
+      comboBonus:  5
+    };
+
+    // ============================================================
+    // 🔧 STATE
+    // ============================================================
+    const laneHeadersEl = document.getElementById("lane-headers");
+    const boardEl = document.getElementById("board");
+    const scoreValEl = document.getElementById("scoreVal");
+    const lastClearValEl = document.getElementById("lastClearVal");
+    const nextColorChipEl = document.getElementById("nextColorChip");
+    const resetBtn = document.getElementById("reset-btn");
+    const gameOverBannerEl = document.getElementById("game-over-banner");
+
+    let lanes = [];        // lanes[c] = array of tile values (bottom at index 0)
+    let score = 0;
+    let gameOver = false;
+    let nextTile = 1;
+
+    // ============================================================
+    // 🧠 HELPERS
+    // ============================================================
+    function randomTile() {
+      return Math.floor(Math.random() * TUNING.tileTypes) + 1;
+    }
+
+    function initLanes() {
+      lanes = [];
+      for (let c = 0; c < TUNING.laneCount; c++) {
+        lanes[c] = []; // empty column, bottom-up
+      }
+    }
+
+    function laneIsFull(columnIndex) {
+      return lanes[columnIndex].length >= TUNING.laneHeight;
+    }
+
+    function anyLaneOverflow() {
+      return lanes.some(col => col.length > TUNING.laneHeight);
+    }
+
+    // ============================================================
+    // 🎮 GAME FLOW
+    // ============================================================
+    function newGame() {
+      score = 0;
+      gameOver = false;
+      lastClearValEl.textContent = 0;
+      scoreValEl.textContent = score;
+      gameOverBannerEl.style.display = "none";
+
+      initLanes();
+      nextTile = randomTile();
+      updateNextColorChip();
+      render();
+    }
+
+    function updateNextColorChip() {
+      nextColorChipEl.style.backgroundColor = getTileColor(nextTile);
+    }
+
+    function dropTileIntoLane(columnIndex) {
+      if (gameOver) return;
+      if (laneIsFull(columnIndex)) {
+        return; // ignore invalid move
+      }
+
+      // drop tile at "top" position of this lane
+      lanes[columnIndex].push(nextTile);
+      nextTile = randomTile();
+      updateNextColorChip();
+
+      // After placement: check for matches in that lane
+      const cleared = resolveMatchesInLane(columnIndex);
+      if (cleared > 0) {
+        lastClearValEl.textContent = cleared;
+        score += cleared;
+        scoreValEl.textContent = score;
+      } else {
+        lastClearValEl.textContent = 0;
+      }
+
+      if (anyLaneOverflow()) {
+        gameOver = true;
+        gameOverBannerEl.style.display = "block";
+      }
+
+      render();
+    }
+
+    function resolveMatchesInLane(columnIndex) {
+      let totalPoints = 0;
+      let keepChecking = true;
+
+      while (keepChecking) {
+        const lane = lanes[columnIndex];
+        if (lane.length === 0) break;
+
+        const runs = [];
+        let runVal = lane[0];
+        let runStart = 0;
+
+        for (let i = 1; i <= lane.length; i++) {
+          const val = i < lane.length ? lane[i] : null;
+          if (val === runVal) continue;
+          const runLen = i - runStart;
+          if (runVal != null && runLen >= TUNING.matchLength) {
+            runs.push({ start: runStart, len: runLen, val: runVal });
+          }
+          runVal = val;
+          runStart = i;
+        }
+
+        if (!runs.length) {
+          keepChecking = false;
+          break;
+        }
+
+        // Clear runs, scoring
+        let clearedThisRound = 0;
+        const toClear = new Set();
+        for (const r of runs) {
+          for (let i = r.start; i < r.start + r.len; i++) {
+            toClear.add(i);
+          }
+          const extra = Math.max(0, r.len - TUNING.matchLength);
+          const baseScore = r.len * TUNING.clearScore;
+          const comboScore = extra * TUNING.comboBonus;
+          clearedThisRound += baseScore + comboScore;
+        }
+
+        totalPoints += clearedThisRound;
+
+        // Build new lane omitting cleared indices
+        const newLane = [];
+        for (let i = 0; i < lane.length; i++) {
+          if (!toClear.has(i)) {
+            newLane.push(lane[i]);
+          }
+        }
+        lanes[columnIndex] = newLane;
+      }
+
+      return totalPoints;
+    }
+
+    // ============================================================
+    // 🎨 RENDER
+    // ============================================================
+    function getTileColor(val) {
+      switch (val) {
+        case 1: return getComputedStyle(document.documentElement).getPropertyValue("--tile-1");
+        case 2: return getComputedStyle(document.documentElement).getPropertyValue("--tile-2");
+        case 3: return getComputedStyle(document.documentElement).getPropertyValue("--tile-3");
+        case 4: return getComputedStyle(document.documentElement).getPropertyValue("--tile-4");
+        default: return "#666";
+      }
+    }
+
+    function render() {
+      // Headers
+      laneHeadersEl.innerHTML = "";
+      for (let c = 0; c < TUNING.laneCount; c++) {
+        const hdr = document.createElement("div");
+        hdr.className = "lane-header";
+        hdr.textContent = "Lane " + (c + 1);
+        hdr.dataset.col = c;
+        if (laneIsFull(c)) {
+          hdr.style.opacity = "0.4";
+        }
+        hdr.addEventListener("click", () => dropTileIntoLane(c));
+        hdr.addEventListener("touchstart", e => {
+          e.preventDefault();
+          dropTileIntoLane(c);
+        }, { passive: false });
+        laneHeadersEl.appendChild(hdr);
+      }
+
+      // Board
+      boardEl.innerHTML = "";
+      // Create lane containers
+      for (let c = 0; c < TUNING.laneCount; c++) {
+        const laneDiv = document.createElement("div");
+        laneDiv.className = "lane";
+        laneDiv.dataset.col = c;
+
+        const lane = lanes[c];
+        // Build from top row (height-1) down to 0
+        for (let row = TUNING.laneHeight - 1; row >= 0; row--) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          const tileVal = lane[row]; // undefined if no tile
+
+          if (tileVal != null) {
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.dataset.v = tileVal;
+            tile.style.backgroundColor = getTileColor(tileVal);
+            cell.appendChild(tile);
+          }
+
+          laneDiv.appendChild(cell);
+        }
+
+        boardEl.appendChild(laneDiv);
+      }
+    }
+
+    // ============================================================
+    // 🚀 BOOTSTRAP
+    // ============================================================
+    resetBtn.addEventListener("click", newGame);
+
+    newGame();
+  </script>
+</body>
+</html>
