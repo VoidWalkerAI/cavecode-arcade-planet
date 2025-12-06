@@ -1,0 +1,84 @@
+CAVECODE SPEC — BASIC SWAP (ARC-HM-001)
+Category: haze-maze
+Engine: Match-3 Swap
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Haze Maze — Basic Swap
+Game ID: ARC-HM-001
+Category: haze-maze
+Genre: match-3 swap
+One-Liner: Swap tiles to form matches. Tiles clear, new ones fall.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Each tick:
+  - Wait for player input (select tile A → select tile B).
+  - If adjacent, attempt swap.
+  - If swap creates a match → resolve matches → gravity → refill.
+  - If no match created → swap back (invalid swap).
+Loop is event-driven, not time-driven.
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop:
+  - Click tile 1, then click tile 2.
+Mobile:
+  - Tap tile 1, then tap tile 2.
+Optional drag gesture: detect direction to pick adjacent tile.
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Each cleared tile: +10 points
+Combo clearing: +5 bonus per extra match in chain
+No level system; score accumulates indefinitely
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+gridRows: 8
+gridCols: 8
+tileTypes: 5          # Number of different colored tiles
+clearScore: 10
+comboBonus: 5
+gravityEnabled: true
+refillMode: "top-down"   # drop new tiles from above
+matchLength: 3
+(PENCIL — safe to modify)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Haze Maze — Basic Swap"
+subtitle: "A simple match-3 tile swap engine."
+helpText: "Tap two adjacent tiles to swap them. Make a match of 3+ to clear tiles."
+(Globe — public text)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+- Timed mode
+- Move-limited puzzles
+- Special tiles (bomb, color-clear, row-clear)
+- Gravity variants
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Ideal starter project for teaching:
+  - grid systems
+  - match detection
+  - gravity + refill logic
+  - tile swap validation
+  - event-driven loops
+(END)
