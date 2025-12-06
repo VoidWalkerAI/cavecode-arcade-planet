@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Retro Quarter — Pixel Paddle (ARC-RQ-001)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --accent: #3b82f6;
+      --danger: #f87171;
+
+      --brick1: #ef4444;
+      --brick2: #f97316;
+      --brick3: #22c55e;
+      --brick4: #3b82f6;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text-main);
+      font-family: system-ui, sans-serif;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    #game-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem;
+    }
+
+    header {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.65rem;
+      background: rgba(15, 23, 42, 0.9);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    #hud {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #0a0f1c;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(2, 6, 23, 0.85);
+      text-align: center;
+      padding: 1rem;
+      gap: 0.5rem;
+    }
+
+    #overlay h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    #overlay p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+
+    .btn {
+      margin-top: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 0.5rem;
+      background: radial-gradient(circle at top, #3b82f6, #1e3a8a);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn:active { transform: translateY(1px); }
+  </style>
+</head>
+<body>
+  <div id="game-shell">
+    <header>
+      <h1>Retro Quarter — Pixel Paddle · ARC-RQ-001</h1>
+    </header>
+
+    <div id="hud">
+      <div>Score: <span id="scoreText">0</span></div>
+      <div>Bricks Left: <span id="bricksText">0</span></div>
+    </div>
+
+    <div id="game-container">
+      <canvas id="canvas" width="500" height="600"></canvas>
+      <div id="overlay">
+        <h2>Pixel Paddle</h2>
+        <p>Break all bricks. Don’t lose the ball.</p>
+        <button class="btn" id="startBtn">Play</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING
+    // ============================================================
+    const TUNING = {
+      paddleWidth: 70,
+      paddleSpeed: 420,
+      ballSpeed: 300,
+      brickRows: 4,
+      brickCols: 8,
+      brickScore: 10,
+      ballAngleRandom: 0.12
+    };
+
+    // ============================================================
+    // CANVAS + STATE
+    // ============================================================
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const scoreText = document.getElementById("scoreText");
+    const bricksText = document.getElementById("bricksText");
+    const overlay = document.getElementById("overlay");
+    const startBtn = document.getElementById("startBtn");
+
+    let paddle = {
+      x: canvas.width / 2 - TUNING.paddleWidth / 2,
+      y: canvas.height - 40,
+      w: TUNING.paddleWidth,
+      h: 12
+    };
+
+    let ball = {
+      x: canvas.width / 2,
+      y: canvas.height - 60,
+      r: 6,
+      vx: 1,
+      vy: -1
+    };
+
+    let bricks = [];
+    let score = 0;
+    let running = false;
+    let leftHeld = false;
+    let rightHeld = false;
+
+    // ============================================================
+    // BRICK SETUP
+    // ============================================================
+    function initBricks() {
+      bricks = [];
+      const w = canvas.width / TUNING.brickCols;
+      const h = 20;
+
+      for (let r = 0; r < TUNING.brickRows; r++) {
+        for (let c = 0; c < TUNING.brickCols; c++) {
+          bricks.push({
+            x: c * w,
+            y: 60 + r * (h + 4),
+            w,
+            h,
+            alive: true,
+            color: ["var(--brick1)", "var(--brick2)", "var(--brick3)", "var(--brick4)"][r]
+          });
+        }
+      }
+      bricksText.textContent = bricks.length;
+    }
+
+    // ============================================================
+    // INPUT HANDLING
+    // ============================================================
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = true;
+      if (e.key === "ArrowRight" || e.key === "d") rightHeld = true;
+    });
+
+    document.addEventListener("keyup", e => {
+      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = false;
+      if (e.key === "ArrowRight" || e.key === "d") rightHeld = false;
+    });
+
+    canvas.addEventListener("touchstart", e => {
+      const x = e.changedTouches[0].clientX - canvas.getBoundingClientRect().left;
+      if (x < canvas.width / 2) leftHeld = true;
+      else rightHeld = true;
+    });
+
+    canvas.addEventListener("touchend", () => {
+      leftHeld = rightHeld = false;
+    });
+
+    // ============================================================
+    // CORE LOOP
+    // ============================================================
+    let last = 0;
+    function gameLoop(ts) {
+      if (!running) return;
+      const dt = (ts - last) / 1000;
+      last = ts;
+
+      update(dt);
+      draw();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update(dt) {
+      // Move paddle
+      if (leftHeld) paddle.x -= TUNING.paddleSpeed * dt;
+      if (rightHeld) paddle.x += TUNING.paddleSpeed * dt;
+
+      paddle.x = Math.max(0, Math.min(canvas.width - paddle.w, paddle.x));
+
+      // Move ball
+      ball.x += ball.vx * TUNING.ballSpeed * dt;
+      ball.y += ball.vy * TUNING.ballSpeed * dt;
+
+      // Wall collisions
+      if (ball.x - ball.r < 0 || ball.x + ball.r > canvas.width) {
+        ball.vx *= -1;
+      }
+      if (ball.y - ball.r < 0) {
+        ball.vy *= -1;
+      }
+
+      // Paddle collision
+      if (
+        ball.y + ball.r >= paddle.y &&
+        ball.x >= paddle.x &&
+        ball.x <= paddle.x + paddle.w
+      ) {
+        ball.vy *= -1;
+
+        const hitPos = (ball.x - paddle.x) / paddle.w - 0.5;
+        ball.vx += hitPos * TUNING.ballAngleRandom;
+      }
+
+      // Bottom = game over
+      if (ball.y - ball.r > canvas.height) {
+        running = false;
+        overlay.innerHTML = `
+          <h2>Ball Lost</h2>
+          <p>Score: ${score}</p>
+          <button class="btn" id="restartBtn">Play Again</button>`;
+        overlay.style.display = "flex";
+
+        document.getElementById("restartBtn").onclick = () => startGame();
+      }
+
+      // Brick collisions
+      for (const b of bricks) {
+        if (!b.alive) continue;
+
+        if (
+          ball.x + ball.r > b.x &&
+          ball.x - ball.r < b.x + b.w &&
+          ball.y + ball.r > b.y &&
+          ball.y - ball.r < b.y + b.h
+        ) {
+          b.alive = false;
+          score += TUNING.brickScore;
+          bricksText.textContent = bricks.filter(x => x.alive).length;
+          scoreText.textContent = score;
+
+          ball.vy *= -1;
+        }
+      }
+
+      // Victory
+      if (bricks.every(b => !b.alive)) {
+        running = false;
+        overlay.innerHTML = `
+          <h2>All Bricks Cleared!</h2>
+          <p>Score: ${score}</p>
+          <button class="btn" id="restartBtn">Play Again</button>`;
+        overlay.style.display = "flex";
+        document.getElementById("restartBtn").onclick = () => startGame();
+      }
+    }
+
+    // ============================================================
+    // DRAW
+    // ============================================================
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Bricks
+      for (const b of bricks) {
+        if (!b.alive) continue;
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+      }
+
+      // Paddle
+      ctx.fillStyle = "#e5e7eb";
+      ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+
+      // Ball
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#e2e8f0";
+      ctx.fill();
+    }
+
+    // ============================================================
+    // START GAME
+    // ============================================================
+    function startGame() {
+      overlay.style.display = "none";
+      score = 0;
+      scoreText.textContent = score;
+
+      initBricks();
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height - 60;
+      ball.vx = 1;
+      ball.vy = -1;
+
+      last = performance.now();
+      running = true;
+      requestAnimationFrame(gameLoop);
+    }
+
+    startBtn.onclick = () => startGame();
+  </script>
+</body>
+</html>
