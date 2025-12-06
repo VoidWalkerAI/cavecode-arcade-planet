@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ember Trail: Crossroads (ARC-EA-001)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --accent: #fb923c;
+      --accent-soft: #fed7aa;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #game-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    header {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    header .sub {
+      margin-top: 0.1rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    #main-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      #main-row {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+
+    #story-panel {
+      flex: 2;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+      padding: 0.9rem 0.9rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    #scene-title {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-soft);
+    }
+
+    #scene-text {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text-main);
+      white-space: pre-line;
+    }
+
+    #choices {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .choice-btn {
+      text-align: left;
+      border-radius: 0.6rem;
+      border: 1px solid rgba(248, 250, 252, 0.15);
+      background: radial-gradient(circle at top, rgba(251, 146, 60, 0.22), rgba(15, 23, 42, 0.95));
+      color: var(--text-main);
+      padding: 0.45rem 0.7rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .choice-btn span.secondary {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .choice-btn:active {
+      transform: translateY(1px);
+      filter: brightness(0.97);
+    }
+
+    #ending-banner {
+      border-radius: 0.6rem;
+      border: 1px solid rgba(251, 146, 60, 0.6);
+      background: rgba(15, 23, 42, 0.95);
+      padding: 0.5rem 0.7rem;
+      font-size: 0.8rem;
+      color: var(--accent-soft);
+      display: none;
+    }
+
+    #controls-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.3rem;
+    }
+
+    #restart-btn {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: radial-gradient(circle at top, rgba(148, 163, 184, 0.15), rgba(15, 23, 42, 1));
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    #restart-btn:active {
+      transform: translateY(1px);
+    }
+
+    #stats-panel {
+      flex: 1;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.96);
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    #stats-panel h2 {
+      font-size: 0.85rem;
+      margin: 0;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stat-label {
+      color: var(--text-soft);
+    }
+
+    .stat-bar-outer {
+      flex: 1;
+      margin-left: 0.3rem;
+      height: 6px;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      overflow: hidden;
+    }
+
+    .stat-bar-inner {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(to right, #fb923c, #f97316);
+      width: 0%;
+    }
+
+    #ending-summary {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      border-top: 1px solid rgba(148, 163, 184, 0.4);
+      padding-top: 0.4rem;
+      margin-top: 0.2rem;
+    }
+
+    @media (max-width: 767px) {
+      #stats-panel {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-shell">
+    <header>
+      <h1>Ember Trail: Crossroads · ARC-EA-001</h1>
+      <div class="sub">A tiny Ember-Adventures story · Tap choices to walk the trail.</div>
+    </header>
+
+    <div id="main-row">
+      <section id="story-panel">
+        <div id="scene-title"></div>
+        <div id="scene-text"></div>
+
+        <div id="choices"></div>
+
+        <div id="ending-banner"></div>
+
+        <div id="controls-row">
+          <button id="restart-btn">↻ Restart Story</button>
+        </div>
+      </section>
+
+      <aside id="stats-panel">
+        <h2>Trail Stats</h2>
+        <div class="stat-row">
+          <span class="stat-label">Health</span>
+          <div class="stat-bar-outer">
+            <div class="stat-bar-inner" id="stat-health"></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Bravery</span>
+          <div class="stat-bar-outer">
+            <div class="stat-bar-inner" id="stat-bravery"></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Caution</span>
+          <div class="stat-bar-outer">
+            <div class="stat-bar-inner" id="stat-caution"></div>
+          </div>
+        </div>
+
+        <div id="ending-summary">
+          Walk once to unlock your first ending.  
+          Different choices shift the balance between bravery and caution.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING / INITIAL STATS
+    // ============================================================
+    const STATS_START = {
+      health: 10,
+      bravery: 5,
+      caution: 5
+    };
+
+    const MAX_STAT = 15; // for bar scaling
+
+    // ============================================================
+    // SCENE GRAPH
+    // ============================================================
+    const SCENES = {
+      camp: {
+        id: "camp",
+        title: "Campfire",
+        text: "You sit by a small campfire on the edge of a dim trail.\n\nThe air has that feeling that something is about to change. Ahead, a faint path winds into the dark trees. Behind you, the embers crackle and hiss.",
+        choices: [
+          {
+            label: "Stand, shoulder your pack, and step onto the trail.",
+            note: "+1 bravery",
+            next: "crossroads",
+            effects: { bravery: +1 }
+          },
+          {
+            label: "Stoke the fire and study the shadows a little longer.",
+            note: "+1 caution",
+            next: "crossroads",
+            effects: { caution: +1 }
+          }
+        ],
+        final: false
+      },
+
+      crossroads: {
+        id: "crossroads",
+        title: "Crossroads",
+        text: "Not far from camp, the trail splits.\n\nLeft: the trees close in thick and dark.\nRight: a rocky ridge climbs toward a pale, watchful sky.\n\nStraight back leads to camp.",
+        choices: [
+          {
+            label: "Take the forest path to the left.",
+            note: "+1 caution, -1 health (scratches)",
+            next: "ruins",
+            effects: { caution: +1, health: -1 }
+          },
+          {
+            label: "Climb the ridge to see what lies ahead.",
+            note: "+1 bravery",
+            next: "summit",
+            effects: { bravery: +1 }
+          },
+          {
+            label: "Circle down toward the sound of water.",
+            note: "No stat change",
+            next: "river",
+            effects: {}
+          },
+          {
+            label: "Turn back to camp.",
+            note: "-1 bravery, +1 caution",
+            next: "home",
+            effects: { bravery: -1, caution: +1 }
+          }
+        ],
+        final: false
+      },
+
+      ruins: {
+        id: "ruins",
+        title: "Forest Ruins",
+        text: "The woods grow dense, but you move carefully.\n\nBetween the roots and ferns sits a low ring of stone — the remnants of some forgotten shelter. Moss has softened everything, and the air is cool and still.",
+        choices: [
+          {
+            label: "Sit at the stones and rest awhile.",
+            note: "+1 health, +1 caution",
+            next: "home",
+            effects: { health: +1, caution: +1 }
+          },
+          {
+            label: "Mark the stones with a small ember-sign, then press deeper.",
+            note: "+1 bravery, -1 health (you push yourself)",
+            next: "summit",
+            effects: { bravery: +1, health: -1 }
+          }
+        ],
+        final: false
+      },
+
+      river: {
+        id: "river",
+        title: "Riverbank",
+        text: "You follow a faint path until you hear it — the steady rush of water.\n\nThe river is narrow but swift, cutting a silver line through the dark. Stones glisten along the bank.",
+        choices: [
+          {
+            label: "Kneel, cup your hands, and drink.",
+            note: "+1 health, +1 caution",
+            next: "home",
+            effects: { health: +1, caution: +1 }
+          },
+          {
+            label: "Leap across to the other side, just to prove you can.",
+            note: "+2 bravery, -1 health (slip on landing)",
+            next: "summit",
+            effects: { bravery: +2, health: -1 }
+          }
+        ],
+        final: false
+      },
+
+      summit: {
+        id: "summit",
+        title: "Ridge Summit",
+        text: "The climb is steeper than it seemed, but eventually you stand high above the camp.\n\nFrom here, you can see the trail winding in every direction — forest, river, even a faint orange glow where your campfire still lives.",
+        choices: [
+          {
+            label: "Stand tall, breathe the cold air, and vow to go farther next time.",
+            note: "+1 bravery",
+            next: "home",
+            effects: { bravery: +1 }
+          }
+        ],
+        final: false
+      },
+
+      home: {
+        id: "home",
+        title: "Back at Camp",
+        text: "You return to the campfire by a different route than you left.\n\nThe embers welcome you with a soft rush of heat. You have not gone far — not yet — but the trail already feels changed.\n\nYou sit. You think. You measure how this small walk has shifted something inside.",
+        choices: [],
+        final: true
+      }
+    };
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let stats = { ...STATS_START };
+    let currentSceneId = "camp";
+
+    const sceneTitleEl = document.getElementById("scene-title");
+    const sceneTextEl = document.getElementById("scene-text");
+    const choicesEl = document.getElementById("choices");
+    const endingBannerEl = document.getElementById("ending-banner");
+    const restartBtn = document.getElementById("restart-btn");
+    const healthBar = document.getElementById("stat-health");
+    const braveryBar = document.getElementById("stat-bravery");
+    const cautionBar = document.getElementById("stat-caution");
+    const endingSummaryEl = document.getElementById("ending-summary");
+
+    // ============================================================
+    // RENDERING
+    // ============================================================
+    function clampStat(value) {
+      return Math.max(0, Math.min(MAX_STAT, value));
+    }
+
+    function updateStatsUI() {
+      const h = clampStat(stats.health);
+      const b = clampStat(stats.bravery);
+      const c = clampStat(stats.caution);
+
+      healthBar.style.width = (h / MAX_STAT * 100) + "%";
+      braveryBar.style.width = (b / MAX_STAT * 100) + "%";
+      cautionBar.style.width = (c / MAX_STAT * 100) + "%";
+    }
+
+    function renderScene() {
+      const scene = SCENES[currentSceneId];
+      if (!scene) return;
+
+      sceneTitleEl.textContent = scene.title;
+      sceneTextEl.textContent = scene.text;
+      choicesEl.innerHTML = "";
+      endingBannerEl.style.display = "none";
+
+      if (scene.final) {
+        // Ending scene: show banner based on stats
+        const summary = buildEndingSummary();
+        endingBannerEl.textContent = summary;
+        endingBannerEl.style.display = "block";
+        return;
+      }
+
+      scene.choices.forEach((choice, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+
+        const main = document.createElement("span");
+        main.textContent = choice.label;
+        btn.appendChild(main);
+
+        if (choice.note) {
+          const sub = document.createElement("span");
+          sub.className = "secondary";
+          sub.textContent = choice.note;
+          btn.appendChild(sub);
+        }
+
+        btn.addEventListener("click", () => {
+          applyChoice(choice);
+        });
+
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function buildEndingSummary() {
+      const { health, bravery, caution } = stats;
+
+      let flavor = "";
+
+      if (bravery > caution + 2) {
+        flavor = "Tonight, the trail remembers you as bold — someone who steps forward before the embers fade.";
+      } else if (caution > bravery + 2) {
+        flavor = "Tonight, the trail marks you as careful — someone who weighs every shadow before moving on.";
+      } else {
+        flavor = "Tonight, the trail sees you as balanced — cautious enough to survive, brave enough to keep walking.";
+      }
+
+      if (health <= 6) {
+        flavor += " Your muscles ache and your hands are scraped; small costs for learning the shape of the path.";
+      } else if (health >= 11) {
+        flavor += " You return mostly unscathed, with enough strength left to walk a little farther next time.";
+      }
+
+      return flavor;
+    }
+
+    // ============================================================
+    // LOGIC
+    // ============================================================
+    function applyChoice(choice) {
+      // Apply stat effects
+      const effects = choice.effects || {};
+      for (const key of Object.keys(effects)) {
+        stats[key] = (stats[key] ?? 0) + effects[key];
+      }
+      updateStatsUI();
+
+      // Move to next scene
+      currentSceneId = choice.next;
+      renderScene();
+    }
+
+    function restartStory() {
+      stats = { ...STATS_START };
+      currentSceneId = "camp";
+      updateStatsUI();
+      endingSummaryEl.textContent = "Walk once to unlock your first ending.\nDifferent choices shift the balance between bravery and caution.";
+      renderScene();
+    }
+
+    // ============================================================
+    // BOOTSTRAP
+    // ============================================================
+    restartBtn.addEventListener("click", restartStory);
+
+    updateStatsUI();
+    renderScene();
+  </script>
+</body>
+</html>
