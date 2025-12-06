@@ -1,0 +1,113 @@
+---
+
+## 2️⃣ `arcade/ember-adventures/ember-trail/ember-trail.cavecode`
+
+```text
+CAVECODE SPEC — EMBER TRAIL: CROSSROADS (ARC-EA-001)
+Category: ember-adventures
+Engine: Node-based micro RPG
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Ember Adventures — Ember Trail: Crossroads
+Game ID: ARC-EA-001
+Category: ember-adventures
+Genre: micro-rpg / choice-engine
+One-Liner: Walk a short trail of choices, track your courage and caution, and see how your story ends.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Loop (event-driven):
+  - Display current scene text and available choices.
+  - Wait for player to select a choice.
+  - Apply any stat changes attached to that choice.
+  - Move to the target scene.
+  - If the new scene is marked FINAL:
+      - Display ending summary and stats.
+      - Offer "Restart" back to the first scene.
+
+There is no randomization in the base version.
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop & Mobile:
+  - Click / tap on a choice button to advance.
+  - Click / tap "Restart Story" to reset stats and return to the first scene.
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — STATS / PROGRESSION
+------------------------------------------------------------
+Tracked stats:
+  - health
+  - bravery
+  - caution
+
+Starting values:
+  - health: 10
+  - bravery: 5
+  - caution: 5
+
+Choices can:
+  - Modify one or more stats (+/-).
+  - Lead to different endings.
+
+Progression is purely narrative; there are no levels or inventories in this ancestor.
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+startingHealth:  10
+startingBravery: 5
+startingCaution: 5
+showStats:       true
+
+Scenes (high-level):
+  - "camp": starting campfire scene
+  - "crossroads": fork in the trail (left woods / right ridge / back)
+  - "ruins": quiet ruins scene
+  - "river": cold riverbank scene
+  - "summit": windy ridge overlook
+  - "home": return to camp, reflective ending
+
+matchToScript: "See scene graph in index.html for exact structure."
+
+(PENCIL — safe to modify; must stay in sync with engine)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT (KEY STRINGS)
+------------------------------------------------------------
+title: "Ember Trail: Crossroads"
+subtitle: "A tiny Ember-Adventures story."
+restartLabel: "Restart Story"
+statsLabel: "Trail Stats"
+endingLabel: "Your Ending"
+(Globe — public text strings)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+Possible future additions:
+  - Random encounters
+  - Simple inventory (torch, rope, coin)
+  - Branch-specific art or background themes
+  - Persistent "codex" of endings discovered
+
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching hooks:
+  - Scenes are represented as a simple JSON-like object map.
+  - Each scene has text + an array of choices.
+  - This pattern can scale into larger RPGs, VN engines, or quest systems.
+
+(END)
