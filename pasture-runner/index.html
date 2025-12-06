@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pasture Runner – ARC-001</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --accent: #22c55e;
+      --accent-soft: #4ade80;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --danger: #f97373;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #game-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    header {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    header .sub {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    #info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    #info-row span.label {
+      color: var(--text-soft);
+    }
+
+    #game-frame {
+      position: relative;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+      overflow: hidden;
+    }
+
+    #hud {
+      position: absolute;
+      inset: 0.5rem 0.5rem auto 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+      pointer-events: none;
+      font-size: 0.8rem;
+    }
+
+    #score, #best {
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    #score {
+      color: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    #best {
+      color: var(--text-soft);
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 canvas box */
+    }
+
+    #gameCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.96));
+      z-index: 5;
+      text-align: center;
+      padding: 1.5rem 1.25rem;
+    }
+
+    .overlay h2 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .overlay p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+
+    .overlay .big-score {
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      color: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.9);
+      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.2), rgba(15, 23, 42, 1));
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      filter: brightness(0.95);
+    }
+
+    #mobile-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .control-btn {
+      flex: 1;
+      padding: 0.5rem 0;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-soft);
+      font-size: 0.8rem;
+      text-align: center;
+      user-select: none;
+    }
+
+    .control-btn:active {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-soft);
+    }
+
+    @media (min-width: 768px) {
+      header h1 { font-size: 1.2rem; }
+      #info-row { font-size: 0.85rem; }
+      #hud { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="game-shell">
+    <header>
+      <h1>Pasture Runner · ARC-001</h1>
+      <div id="info-row">
+        <span class="sub">CaveCode Arcade Planet · Cavern-Run Line</span>
+        <span class="sub">
+          <span class="label">Controls:</span> ← / → or tap buttons
+        </span>
+      </div>
+    </header>
+
+    <main id="game-frame">
+      <div id="hud">
+        <div id="score">Score: 0</div>
+        <div id="best">Best: 0</div>
+      </div>
+
+      <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Start overlay -->
+        <div id="startScreen" class="overlay">
+          <h2>Pasture Runner</h2>
+          <p>Dodge rolling hay bales and survive as long as you can.</p>
+          <p class="big-score">Tap Play to begin.</p>
+          <button class="btn" id="startButton">▶ Play</button>
+          <p>Keyboard: ← / → &nbsp;·&nbsp; Mobile: use the on-screen buttons.</p>
+        </div>
+
+        <!-- Game over overlay -->
+        <div id="gameOverScreen" class="overlay" style="display:none;">
+          <h2>Run Over</h2>
+          <p>You caught a bale to the ribs.</p>
+          <p class="big-score" id="finalScoreText">Score: 0</p>
+          <p class="big-score" id="finalBestText">Best: 0</p>
+          <button class="btn" id="retryButton">↻ Run Again</button>
+        </div>
+      </div>
+    </main>
+
+    <section id="mobile-controls">
+      <div class="control-btn" id="btnLeft">⟵ Move Left</div>
+      <div class="control-btn" id="btnRight">Move Right ⟶</div>
+    </section>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING KNOBS (Block 2 in CaveCode terms)
+    // Edit these values to change the feel of the game.
+    // ============================================================
+    const TUNING = {
+      laneCount: 5,
+      playerSpeed: 420,        // pixels per second
+      obstacleSpeed: 360,      // pixels per second
+      spawnIntervalMin: 650,   // ms
+      spawnIntervalMax: 1300,  // ms
+      obstacleWidth: 50,
+      obstacleHeight: 50,
+      playerWidth: 52,
+      playerHeight: 52,
+      scoreRate: 0.015         // score per ms (approx)
+    };
+
+    // ============================================================
+    // 🔧 ENGINE STATE
+    // ============================================================
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let width = 640;
+    let height = 360;
+
+    let lanes = [];
+    let player = null;
+    let obstacles = [];
+    let lastTime = null;
+    let spawnTimer = 0;
+    let nextSpawnIn = 1000;
+
+    let isRunning = false;
+    let isGameOver = false;
+
+    let moveLeft = false;
+    let moveRight = false;
+
+    let score = 0;
+    let bestScore = 0;
+
+    const scoreEl = document.getElementById("score");
+    const bestEl = document.getElementById("best");
+    const startScreen = document.getElementById("startScreen");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+    const finalScoreText = document.getElementById("finalScoreText");
+    const finalBestText = document.getElementById("finalBestText");
+    const startButton = document.getElementById("startButton");
+    const retryButton = document.getElementById("retryButton");
+    const btnLeft = document.getElementById("btnLeft");
+    const btnRight = document.getElementById("btnRight");
+
+    // ============================================================
+    // 🧠 Helpers
+    // ============================================================
+    function randRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function chooseLane() {
+      const idx = Math.floor(Math.random() * lanes.length);
+      return lanes[idx];
+    }
+
+    function rectsOverlap(a, b) {
+      return !(
+        a.x + a.w < b.x ||
+        a.x > b.x + b.w ||
+        a.y + a.h < b.y ||
+        a.y > b.y + b.h
+      );
+    }
+
+    // ============================================================
+    // 🪨 INIT WORLD
+    // ============================================================
+    function resizeCanvas() {
+      const container = document.getElementById("game-container");
+      const rect = container.getBoundingClientRect();
+      const aspect = 16 / 9;
+
+      let w = rect.width;
+      let h = w / aspect;
+      if (h > rect.height) {
+        h = rect.height;
+        w = h * aspect;
+      }
+
+      width = w;
+      height = h;
+      canvas.width = width;
+      canvas.height = height;
+
+      setupLanes();
+      if (player) {
+        player.y = height - player.h - 8;
+        player.x = lanes[player.laneIndex] - player.w / 2;
+      }
+    }
+
+    function setupLanes() {
+      lanes = [];
+      const padding = 40;
+      const usableWidth = width - padding * 2;
+      const step = usableWidth / (TUNING.laneCount - 1);
+
+      for (let i = 0; i < TUNING.laneCount; i++) {
+        lanes.push(padding + step * i);
+      }
+    }
+
+    function createPlayer() {
+      const laneIndex = Math.floor(TUNING.laneCount / 2);
+      const laneX = lanes[laneIndex];
+
+      return {
+        laneIndex,
+        x: laneX - TUNING.playerWidth / 2,
+        y: height - TUNING.playerHeight - 8,
+        w: TUNING.playerWidth,
+        h: TUNING.playerHeight
+      };
+    }
+
+    // ============================================================
+    // 🎮 GAME FLOW
+    // ============================================================
+    function resetGame() {
+      obstacles = [];
+      score = 0;
+      spawnTimer = 0;
+      nextSpawnIn = randRange(TUNING.spawnIntervalMin, TUNING.spawnIntervalMax);
+      lastTime = null;
+      isGameOver = false;
+      isRunning = true;
+
+      setupLanes();
+      player = createPlayer();
+
+      startScreen.style.display = "none";
+      gameOverScreen.style.display = "none";
+      window.requestAnimationFrame(gameLoop);
+    }
+
+    function endGame() {
+      isRunning = false;
+      isGameOver = true;
+
+      if (score > bestScore) {
+        bestScore = score;
+      }
+
+      finalScoreText.textContent = "Score: " + Math.floor(score);
+      finalBestText.textContent = "Best: " + Math.floor(bestScore);
+      gameOverScreen.style.display = "flex";
+    }
+
+    function gameLoop(timestamp) {
+      if (!isRunning) return;
+
+      if (lastTime === null) lastTime = timestamp;
+      const delta = timestamp - lastTime;
+      lastTime = timestamp;
+
+      update(delta);
+      render();
+
+      window.requestAnimationFrame(gameLoop);
+    }
+
+    function update(deltaMs) {
+      const deltaSec = deltaMs / 1000;
+
+      // Move player
+      let moveDir = 0;
+      if (moveLeft && !moveRight) moveDir = -1;
+      if (moveRight && !moveLeft) moveDir = 1;
+
+      const laneTarget = player.laneIndex + moveDir * 1;
+      if (laneTarget !== player.laneIndex) {
+        if (laneTarget >= 0 && laneTarget < lanes.length) {
+          player.laneIndex = laneTarget;
+          player.x = lanes[player.laneIndex] - player.w / 2;
+        }
+      }
+
+      // Update obstacles
+      for (const o of obstacles) {
+        o.y += TUNING.obstacleSpeed * deltaSec;
+      }
+      obstacles = obstacles.filter(o => o.y < height + o.h);
+
+      // Spawn new obstacles
+      spawnTimer += deltaMs;
+      if (spawnTimer >= nextSpawnIn) {
+        spawnTimer = 0;
+        nextSpawnIn = randRange(TUNING.spawnIntervalMin, TUNING.spawnIntervalMax);
+        const laneX = chooseLane();
+        obstacles.push({
+          x: laneX - TUNING.obstacleWidth / 2,
+          y: -TUNING.obstacleHeight,
+          w: TUNING.obstacleWidth,
+          h: TUNING.obstacleHeight
+        });
+      }
+
+      // Collision check
+      const pRect = { x: player.x, y: player.y, w: player.w, h: player.h };
+      for (const o of obstacles) {
+        if (rectsOverlap(pRect, o)) {
+          endGame();
+          return;
+        }
+      }
+
+      // Score
+      score += deltaMs * TUNING.scoreRate;
+      scoreEl.textContent = "Score: " + Math.floor(score);
+      bestEl.textContent = "Best: " + Math.floor(bestScore);
+    }
+
+    // ============================================================
+    // 🎨 RENDER
+    // ============================================================
+    function render() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Ground
+      const groundY = height - 32;
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, height);
+      skyGradient.addColorStop(0, "#020617");
+      skyGradient.addColorStop(1, "#064e3b");
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Horizon
+      ctx.fillStyle = "#022c22";
+      ctx.fillRect(0, groundY, width, height - groundY);
+
+      // Lane markers (faint)
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+      ctx.setLineDash([6, 10]);
+      ctx.lineWidth = 1;
+      for (const laneX of lanes) {
+        ctx.beginPath();
+        ctx.moveTo(laneX, 0);
+        ctx.lineTo(laneX, height);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Obstacles (bales)
+      for (const o of obstacles) {
+        ctx.fillStyle = "#facc15";
+        ctx.beginPath();
+        const r = 10;
+        ctx.moveTo(o.x + r, o.y);
+        ctx.lineTo(o.x + o.w - r, o.y);
+        ctx.quadraticCurveTo(o.x + o.w, o.y, o.x + o.w, o.y + r);
+        ctx.lineTo(o.x + o.w, o.y + o.h - r);
+        ctx.quadraticCurveTo(o.x + o.w, o.y + o.h, o.x + o.w - r, o.y + o.h);
+        ctx.lineTo(o.x + r, o.y + o.h);
+        ctx.quadraticCurveTo(o.x, o.y + o.h, o.x, o.y + o.h - r);
+        ctx.lineTo(o.x, o.y + r);
+        ctx.quadraticCurveTo(o.x, o.y, o.x + r, o.y);
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(0,0,0,0.25)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(o.x + 8, o.y + 10);
+        ctx.lineTo(o.x + o.w - 8, o.y + o.h - 10);
+        ctx.stroke();
+      }
+
+      // Player (cow silhouette block)
+      ctx.fillStyle = "#22c55e";
+      const px = player.x;
+      const py = player.y;
+      const pw = player.w;
+      const ph = player.h;
+
+      ctx.beginPath();
+      const pr = 12;
+      ctx.moveTo(px + pr, py);
+      ctx.lineTo(px + pw - pr, py);
+      ctx.quadraticCurveTo(px + pw, py, px + pw, py + pr);
+      ctx.lineTo(px + pw, py + ph - pr);
+      ctx.quadraticCurveTo(px + pw, py + ph, px + pw - pr, py + ph);
+      ctx.lineTo(px + pr, py + ph);
+      ctx.quadraticCurveTo(px, py + ph, px, py + ph - pr);
+      ctx.lineTo(px, py + pr);
+      ctx.quadraticCurveTo(px, py, px + pr, py);
+      ctx.fill();
+
+      // simple "ears"
+      ctx.fillStyle = "#16a34a";
+      ctx.fillRect(px + 6, py - 6, 10, 6);
+      ctx.fillRect(px + pw - 16, py - 6, 10, 6);
+    }
+
+    // ============================================================
+    // 🎛️ INPUT HANDLERS
+    // ============================================================
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        moveLeft = true;
+        e.preventDefault();
+      }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        moveRight = true;
+        e.preventDefault();
+      }
+      if (isGameOver && (e.key === " " || e.key === "Enter")) {
+        resetGame();
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        moveLeft = false;
+      }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        moveRight = false;
+      }
+    });
+
+    function attachButtonHold(btn, direction) {
+      const start = (e) => {
+        e.preventDefault();
+        if (direction === "left") moveLeft = true;
+        if (direction === "right") moveRight = true;
+      };
+      const end = (e) => {
+        e.preventDefault();
+        if (direction === "left") moveLeft = false;
+        if (direction === "right") moveRight = false;
+      };
+
+      btn.addEventListener("touchstart", start, { passive: false });
+      btn.addEventListener("touchend", end, { passive: false });
+      btn.addEventListener("touchcancel", end, { passive: false });
+      btn.addEventListener("mousedown", start);
+      btn.addEventListener("mouseup", end);
+      btn.addEventListener("mouseleave", end);
+    }
+
+    attachButtonHold(btnLeft, "left");
+    attachButtonHold(btnRight, "right");
+
+    // ============================================================
+    // 🚀 BOOTSTRAP
+    // ============================================================
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      if (!isRunning && !isGameOver) {
+        render(); // keep start screen background clean
+      }
+    });
+
+    startButton.addEventListener("click", resetGame);
+    retryButton.addEventListener("click", resetGame);
+
+    // Initial layout
+    resizeCanvas();
+    // draw idle background with default player
+    setupLanes();
+    player = createPlayer();
+    render();
+  </script>
+</body>
+</html>
