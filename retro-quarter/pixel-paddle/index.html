@@ -2,367 +2,1174 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Retro Quarter — Pixel Paddle (ARC-RQ-001)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Retro Quarter – Pixel Paddle · ARC-RQ-001</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
+  <!--
+    BLOCK 1 — SHELL & BRAND (LOCKED)
+    CaveCode Arcade Planet · Retro-Quarter Line
+  -->
   <style>
     :root {
-      --bg: #020617;
-      --panel: #0b1120;
-      --border: #1f2937;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-      --accent: #3b82f6;
-      --danger: #f87171;
-
-      --brick1: #ef4444;
-      --brick2: #f97316;
-      --brick3: #22c55e;
-      --brick4: #3b82f6;
+      --cc-bg: #020617;
+      --cc-panel: #02081b;
+      --cc-panel-soft: #0b1120;
+      --cc-border: #1f2937;
+      --cc-accent: #fb923c;
+      --cc-accent-soft: #fed7aa;
+      --cc-text-main: #e5e7eb;
+      --cc-text-soft: #9ca3af;
+      --badge-bg: #020817;
+      --badge-border: #1f2937;
+      --fail: #f97373;
+      --win: #4ade80;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
-      background: radial-gradient(circle at top, #111827 0, #020617 60%);
-      color: var(--text-main);
-      font-family: system-ui, sans-serif;
-      user-select: none;
-      overflow: hidden;
-    }
-
-    #game-shell {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0.75rem 1rem;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #111827 0, var(--cc-bg) 55%);
+      color: var(--cc-text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.25rem 0.75rem 2.5rem;
     }
 
     header {
-      padding: 0.5rem;
-      border: 1px solid var(--border);
-      border-radius: 0.65rem;
-      background: rgba(15, 23, 42, 0.9);
-      text-align: center;
-      margin-bottom: 0.5rem;
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, #020617, #030712);
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
+    @media (min-width: 640px) {
+      header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+    }
+
+    .title-line {
+      font-size: clamp(1rem, 2.1vw, 1.3rem);
+      font-weight: 700;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
-    #hud {
+    .title-accent {
+      color: var(--cc-accent);
+    }
+
+    .subtitle-line {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--cc-text-soft);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .subtitle-dot::before {
+      content: "•";
+      margin: 0 0.35rem 0 0.15rem;
+      opacity: 0.65;
+    }
+
+    main {
+      width: 100%;
+      max-width: 960px;
+      margin-top: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .panel {
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #02081b 100%);
+      border-radius: 1.4rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+      padding: 1rem 1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .panel-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cc-text-soft);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--badge-border);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--cc-text-soft);
+      white-space: nowrap;
+    }
+
+    .badge-pill {
+      background: rgba(15, 23, 42, 0.96);
+      border-color: var(--cc-accent-soft);
+      color: var(--cc-accent-soft);
+    }
+
+    .copy-soft {
+      font-size: 0.8rem;
+      color: var(--cc-text-soft);
+      line-height: 1.4;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+
+    @media (min-width: 640px) {
+      .stat-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .stat {
+      background: radial-gradient(circle at top, #020617 0, #020617 45%, #020716 100%);
+      border-radius: 0.9rem;
+      border: 1px solid #111827;
+      padding: 0.45rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--cc-text-soft);
+    }
+
+    .stat-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .stat-value.win {
+      color: var(--win);
+    }
+
+    .stat-value.fail {
+      color: var(--fail);
+    }
+
+    .play-wrapper {
+      margin-top: 0.5rem;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #020617 100%);
+      border-radius: 1.2rem;
+      border: 1px solid #111827;
+      padding: 0.75rem 0.75rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--cc-text-soft);
+    }
+
+    .controls-chunk {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .key-pill {
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.4rem;
+      background: #020617;
+      border: 1px solid #1f2937;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--cc-text-main);
+    }
+
+    .canvas-frame {
+      margin-top: 0.3rem;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #020617 100%);
+      border-radius: 1rem;
+      border: 1px solid #111827;
+      padding: 0.7rem;
       display: flex;
       justify-content: center;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
-      color: var(--text-soft);
-    }
-
-    #game-container {
-      position: relative;
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
     }
 
     canvas {
-      width: 100%;
+      background: radial-gradient(circle at top, #020617 0, #020617 55%, #020617 100%);
+      border-radius: 0.8rem;
+      border: 1px solid #111827;
+      max-width: 100%;
       height: auto;
-      display: block;
-      background: #0a0f1c;
-      border-radius: 0.5rem;
-      border: 1px solid var(--border);
+      image-rendering: pixelated;
     }
 
-    #overlay {
-      position: absolute;
+    .footer-line {
+      margin-top: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+    }
+
+    .footer-line span {
+      color: var(--cc-accent-soft);
+    }
+
+    /* Modal */
+
+    .modal-backdrop {
+      position: fixed;
       inset: 0;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(3, 7, 18, 0.96));
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      padding: 1.25rem;
+    }
+
+    .modal-backdrop.visible {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 360px;
+      background: #020617;
+      border-radius: 1.3rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.8);
+      padding: 1.3rem 1.1rem 1.1rem;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: rgba(2, 6, 23, 0.85);
+      gap: 0.7rem;
       text-align: center;
-      padding: 1rem;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .modal-title.win {
+      color: var(--win);
+    }
+
+    .modal-title.fail {
+      color: var(--fail);
+    }
+
+    .modal-body {
+      font-size: 0.86rem;
+      color: var(--cc-text-soft);
+    }
+
+    .modal-buttons {
+      margin-top: 0.35rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 0.5rem;
     }
 
-    #overlay h2 {
-      margin: 0;
-      font-size: 1.2rem;
-    }
-
-    #overlay p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: var(--text-soft);
-    }
-
-    .btn {
-      margin-top: 0.5rem;
-      padding: 0.4rem 1rem;
-      border-radius: 0.5rem;
-      background: radial-gradient(circle at top, #3b82f6, #1e3a8a);
-      color: white;
-      border: none;
+    .btn-pill {
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      background: #020617;
+      color: var(--cc-text-main);
       cursor: pointer;
-      font-size: 0.9rem;
     }
 
-    .btn:active { transform: translateY(1px); }
+    .btn-pill.primary {
+      background: linear-gradient(135deg, #fb923c, #f97316);
+      border-color: #fdba74;
+      color: #0b1120;
+    }
+
+    .btn-pill:active {
+      transform: translateY(1px);
+    }
+
+    .modal-sub {
+      font-size: 0.68rem;
+      color: var(--cc-text-soft);
+      opacity: 0.8;
+    }
+
+    /* Tile pop effect (on brick destroy) */
+
+    .pop {
+      animation: pop 180ms ease-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); opacity: 1; }
+      60% { transform: scale(1.18); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <div id="game-shell">
-    <header>
-      <h1>Retro Quarter — Pixel Paddle · ARC-RQ-001</h1>
-    </header>
-
-    <div id="hud">
-      <div>Score: <span id="scoreText">0</span></div>
-      <div>Bricks Left: <span id="bricksText">0</span></div>
+  <header>
+    <div class="title-line">
+      RETRO QUARTER — <span class="title-accent">PIXEL PADDLE</span> · ARC-RQ-001
     </div>
+    <div class="subtitle-line">
+      <span>CaveCode Arcade Planet</span>
+      <span class="subtitle-dot">Retro-Quarter Line</span>
+      <span class="subtitle-dot">Paddle &amp; Ball Engine</span>
+      <span class="subtitle-dot">Single-File HTML</span>
+    </div>
+  </header>
 
-    <div id="game-container">
-      <canvas id="canvas" width="500" height="600"></canvas>
-      <div id="overlay">
-        <h2>Pixel Paddle</h2>
-        <p>Break all bricks. Don’t lose the ball.</p>
-        <button class="btn" id="startBtn">Play</button>
+  <main>
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Track Overview</div>
+        <div class="badge-row">
+          <span class="badge badge-pill">Level Track</span>
+          <span class="badge">Classic Paddle &amp; Ball</span>
+          <span class="badge">Brick Clears</span>
+          <span class="badge">Score Multipliers</span>
+          <span class="badge">Special Bricks</span>
+          <span class="badge">Sound &amp; Pop</span>
+        </div>
+        <p class="copy-soft">
+          Guide the paddle, keep the ball in play, and clear every brick to advance.
+          Big chains forge special bricks: row beams and burst bombs. Clear clean, keep momentum, and chase a high score across the run.
+        </p>
       </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="stat-level">1</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Score</div>
+          <div class="stat-value" id="stat-score">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Bricks Left</div>
+          <div class="stat-value" id="stat-bricks">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Best Chain</div>
+          <div class="stat-value" id="stat-chain">x1.0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Ball Count</div>
+          <div class="stat-value" id="stat-lives">3</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Speed</div>
+          <div class="stat-value" id="stat-speed">Slow</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Specials Seen</div>
+          <div class="stat-value" id="stat-specials">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Run Status</div>
+          <div class="stat-value" id="stat-status">In Play</div>
+        </div>
+      </div>
+
+      <div class="play-wrapper">
+        <div class="controls-row">
+          <div class="controls-chunk">
+            <span>Move</span>
+            <span class="key-pill">◀</span>
+            <span class="key-pill">▶</span>
+            <span class="key-pill">A</span>
+            <span class="key-pill">D</span>
+          </div>
+          <div class="controls-chunk">
+            <span>Tap / click inside the playfield to steer the paddle under the ball.</span>
+          </div>
+        </div>
+
+        <div class="canvas-frame">
+          <canvas id="gameCanvas" width="480" height="320"></canvas>
+        </div>
+
+        <div class="footer-line">
+          Match clean hits, ride the chain, and light up the grid.  
+          <span>Forged in CaveCode Arcade Planet · SageWire Syndicate</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal-card">
+      <div class="modal-title" id="modal-title">Level Clear</div>
+      <div class="modal-body" id="modal-body">
+        You cleared every brick on this level.
+      </div>
+      <div class="modal-buttons" id="modal-buttons">
+        <!-- Buttons injected by script -->
+      </div>
+      <div class="modal-sub" id="modal-sub"></div>
     </div>
   </div>
 
+  <!--
+    BLOCK 2 — GAME ENGINE SCRIPT
+    Single-file Retro-Quarter Paddle Engine
+  -->
   <script>
-    // ============================================================
-    // 🎚️ TUNING
-    // ============================================================
-    const TUNING = {
-      paddleWidth: 70,
-      paddleSpeed: 420,
-      ballSpeed: 300,
-      brickRows: 4,
-      brickCols: 8,
-      brickScore: 10,
-      ballAngleRandom: 0.12
-    };
+    // --- Core canvas + helpers ---------------------------------------------
 
-    // ============================================================
-    // CANVAS + STATE
-    // ============================================================
-    const canvas = document.getElementById("canvas");
+    const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const scoreText = document.getElementById("scoreText");
-    const bricksText = document.getElementById("bricksText");
-    const overlay = document.getElementById("overlay");
-    const startBtn = document.getElementById("startBtn");
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
 
-    let paddle = {
-      x: canvas.width / 2 - TUNING.paddleWidth / 2,
-      y: canvas.height - 40,
-      w: TUNING.paddleWidth,
-      h: 12
+    function clamp(v, min, max) {
+      return v < min ? min : v > max ? max : v;
+    }
+
+    // --- Audio (simple beeps) ----------------------------------------------
+
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+    }
+
+    function beep(freq = 440, duration = 90, type = "sine", gain = 0.09) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      osc.connect(g);
+      g.connect(audioCtx.destination);
+      g.gain.value = gain;
+      osc.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration / 1000);
+      osc.stop(audioCtx.currentTime + duration / 1000);
+    }
+
+    const sounds = {
+      paddle: () => beep(420, 80, "square", 0.08),
+      brick: () => beep(640, 70, "square", 0.07),
+      special: () => beep(780, 110, "sawtooth", 0.08),
+      lose: () => beep(220, 200, "triangle", 0.11),
+      level: () => beep(520, 200, "square", 0.1),
     };
 
-    let ball = {
-      x: canvas.width / 2,
-      y: canvas.height - 60,
-      r: 6,
-      vx: 1,
-      vy: -1
+    // --- Level data ---------------------------------------------------------
+
+    const LEVELS = [
+      {
+        name: "Warm-Up Wall",
+        rows: 3,
+        cols: 9,
+        lives: 3,
+        speed: 3.4,
+        specialChance: 0,
+      },
+      {
+        name: "Staggered Grid",
+        rows: 4,
+        cols: 9,
+        lives: 3,
+        speed: 3.7,
+        specialChance: 0.06,
+      },
+      {
+        name: "Twin Rows",
+        rows: 5,
+        cols: 9,
+        lives: 3,
+        speed: 4.0,
+        specialChance: 0.09,
+      },
+      {
+        name: "Beamforge",
+        rows: 5,
+        cols: 10,
+        lives: 3,
+        speed: 4.4,
+        specialChance: 0.13,
+      },
+      {
+        name: "Bomb Run",
+        rows: 6,
+        cols: 10,
+        lives: 3,
+        speed: 4.8,
+        specialChance: 0.18,
+      },
+    ];
+
+    const SPECIAL_TYPES = {
+      NORMAL: "normal",
+      ROW: "row",
+      BOMB: "bomb",
     };
+
+    // --- Game state ---------------------------------------------------------
+
+    let currentLevelIndex = 0;
+    let score = 0;
+    let bestChainMultiplier = 1.0;
+    let specialsSeen = 0;
+    let lives = 3;
 
     let bricks = [];
-    let score = 0;
-    let running = false;
-    let leftHeld = false;
-    let rightHeld = false;
+    let bricksRemaining = 0;
 
-    // ============================================================
-    // BRICK SETUP
-    // ============================================================
-    function initBricks() {
+    const paddle = {
+      width: 80,
+      height: 10,
+      x: WIDTH / 2 - 40,
+      y: HEIGHT - 40,
+      speed: 6.0,
+      movingLeft: false,
+      movingRight: false,
+    };
+
+    const ball = {
+      radius: 7,
+      x: WIDTH / 2,
+      y: HEIGHT / 2,
+      vx: 3,
+      vy: -3.4,
+      speedBase: 3,
+      speedBoost: 0,
+      attached: true, // start stuck to paddle until first launch
+    };
+
+    let lastFrameTime = performance.now();
+    let chainCount = 0;
+    let lastBrickHitTime = 0;
+    const CHAIN_WINDOW = 260; // ms
+    let statusText = "In Play";
+    let modalLocked = false;
+
+    // --- UI refs ------------------------------------------------------------
+
+    const statLevelEl = document.getElementById("stat-level");
+    const statScoreEl = document.getElementById("stat-score");
+    const statBricksEl = document.getElementById("stat-bricks");
+    const statChainEl = document.getElementById("stat-chain");
+    const statLivesEl = document.getElementById("stat-lives");
+    const statSpeedEl = document.getElementById("stat-speed");
+    const statSpecialsEl = document.getElementById("stat-specials");
+    const statStatusEl = document.getElementById("stat-status");
+
+    const modalEl = document.getElementById("modal");
+    const modalTitleEl = document.getElementById("modal-title");
+    const modalBodyEl = document.getElementById("modal-body");
+    const modalButtonsEl = document.getElementById("modal-buttons");
+    const modalSubEl = document.getElementById("modal-sub");
+
+    // --- Brick grid generation ---------------------------------------------
+
+    function buildBricks(levelIndex) {
+      const level = LEVELS[levelIndex];
+      const cols = level.cols;
+      const rows = level.rows;
+      const gutterX = 40;
+      const gutterY = 40;
+      const areaWidth = WIDTH - gutterX * 2;
+      const brickWidth = areaWidth / cols;
+      const brickHeight = 14;
+      const padding = 2;
+
       bricks = [];
-      const w = canvas.width / TUNING.brickCols;
-      const h = 20;
+      bricksRemaining = 0;
 
-      for (let r = 0; r < TUNING.brickRows; r++) {
-        for (let c = 0; c < TUNING.brickCols; c++) {
-          bricks.push({
-            x: c * w,
-            y: 60 + r * (h + 4),
-            w,
-            h,
+      const colors = ["#38bdf8", "#f97316", "#22c55e", "#a855f7"];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = gutterX + c * brickWidth;
+          const y = gutterY + r * (brickHeight + padding);
+
+          let type = SPECIAL_TYPES.NORMAL;
+          // special bricks come in on higher levels
+          if (level.specialChance > 0 && Math.random() < level.specialChance) {
+            // 60% row, 40% bomb
+            type = Math.random() < 0.6 ? SPECIAL_TYPES.ROW : SPECIAL_TYPES.BOMB;
+          }
+
+          const brick = {
+            x,
+            y,
+            width: brickWidth - 1.5,
+            height: brickHeight,
+            color: colors[(r + c) % colors.length],
+            type,
             alive: true,
-            color: ["var(--brick1)", "var(--brick2)", "var(--brick3)", "var(--brick4)"][r]
-          });
+            pop: false,
+          };
+          bricks.push(brick);
+          bricksRemaining++;
         }
       }
-      bricksText.textContent = bricks.length;
     }
 
-    // ============================================================
-    // INPUT HANDLING
-    // ============================================================
-    document.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = true;
-      if (e.key === "ArrowRight" || e.key === "d") rightHeld = true;
-    });
+    // --- Level control ------------------------------------------------------
 
-    document.addEventListener("keyup", e => {
-      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = false;
-      if (e.key === "ArrowRight" || e.key === "d") rightHeld = false;
-    });
-
-    canvas.addEventListener("touchstart", e => {
-      const x = e.changedTouches[0].clientX - canvas.getBoundingClientRect().left;
-      if (x < canvas.width / 2) leftHeld = true;
-      else rightHeld = true;
-    });
-
-    canvas.addEventListener("touchend", () => {
-      leftHeld = rightHeld = false;
-    });
-
-    // ============================================================
-    // CORE LOOP
-    // ============================================================
-    let last = 0;
-    function gameLoop(ts) {
-      if (!running) return;
-      const dt = (ts - last) / 1000;
-      last = ts;
-
-      update(dt);
-      draw();
-
-      requestAnimationFrame(gameLoop);
+    function speedLabel(speed) {
+      if (speed < 3.6) return "Slow";
+      if (speed < 4.1) return "Normal";
+      if (speed < 4.6) return "Fast";
+      return "Wild";
     }
+
+    function startLevel(index) {
+      currentLevelIndex = index;
+      const level = LEVELS[index];
+
+      lives = level.lives;
+      chainCount = 0;
+      bricksRemaining = 0;
+      statusText = "In Play";
+
+      paddle.x = WIDTH / 2 - paddle.width / 2;
+
+      ball.x = WIDTH / 2;
+      ball.y = HEIGHT - 60;
+      ball.vx = level.speed * 0.7;
+      ball.vy = -level.speed;
+      ball.speedBase = level.speed;
+      ball.speedBoost = 0;
+      ball.attached = true;
+
+      buildBricks(index);
+      updateStats();
+
+      hideModal();
+    }
+
+    function resetBallAfterLoss() {
+      const level = LEVELS[currentLevelIndex];
+      ball.x = WIDTH / 2;
+      ball.y = HEIGHT - 60;
+      ball.vx = level.speed * (Math.random() < 0.5 ? -0.8 : 0.8);
+      ball.vy = -level.speed;
+      ball.speedBase = level.speed;
+      ball.speedBoost = 0;
+      ball.attached = true;
+      chainCount = 0;
+      statusText = "In Play";
+      updateStats();
+    }
+
+    function handleLevelClear() {
+      sounds.level();
+      statusText = "Level Clear";
+      updateStats();
+      const level = LEVELS[currentLevelIndex];
+
+      modalTitleEl.textContent = "Level Clear";
+      modalTitleEl.className = "modal-title win";
+      modalBodyEl.textContent = `You cleared “${level.name}” with ${score} points.`;
+      modalButtonsEl.innerHTML = "";
+
+      const nextIndex =
+        currentLevelIndex + 1 < LEVELS.length ? currentLevelIndex + 1 : null;
+
+      const btnContinue = document.createElement("button");
+      btnContinue.className = "btn-pill primary";
+      btnContinue.textContent = nextIndex === null ? "Restart Run" : "Next Level";
+      btnContinue.onclick = () => {
+        if (nextIndex === null) {
+          score = 0;
+          bestChainMultiplier = 1.0;
+          specialsSeen = 0;
+          startLevel(0);
+        } else {
+          startLevel(nextIndex);
+        }
+      };
+      modalButtonsEl.appendChild(btnContinue);
+
+      const btnReplay = document.createElement("button");
+      btnReplay.className = "btn-pill";
+      btnReplay.textContent = "Replay Level";
+      btnReplay.onclick = () => {
+        startLevel(currentLevelIndex);
+      };
+      modalButtonsEl.appendChild(btnReplay);
+
+      modalSubEl.textContent = `Best chain this run: x${bestChainMultiplier.toFixed(
+        1
+      )}`;
+      showModal();
+    }
+
+    function handleGameOver() {
+      sounds.lose();
+      statusText = "Game Over";
+      updateStats();
+
+      const level = LEVELS[currentLevelIndex];
+      modalTitleEl.textContent = "Run Ended";
+      modalTitleEl.className = "modal-title fail";
+      modalBodyEl.textContent = `You ran out of balls on “${level.name}”. Final score: ${score}.`;
+
+      modalButtonsEl.innerHTML = "";
+
+      const btnRetry = document.createElement("button");
+      btnRetry.className = "btn-pill primary";
+      btnRetry.textContent = "Retry Level";
+      btnRetry.onclick = () => startLevel(currentLevelIndex);
+      modalButtonsEl.appendChild(btnRetry);
+
+      const btnRestart = document.createElement("button");
+      btnRestart.className = "btn-pill";
+      btnRestart.textContent = "Restart Run";
+      btnRestart.onclick = () => {
+        score = 0;
+        bestChainMultiplier = 1.0;
+        specialsSeen = 0;
+        startLevel(0);
+      };
+      modalButtonsEl.appendChild(btnRestart);
+
+      modalSubEl.textContent = "Try to string longer chains next run.";
+      showModal();
+    }
+
+    // --- UI helpers ---------------------------------------------------------
+
+    function updateStats() {
+      const level = LEVELS[currentLevelIndex];
+      statLevelEl.textContent = `${currentLevelIndex + 1}`;
+      statScoreEl.textContent = score;
+      statBricksEl.textContent = bricksRemaining;
+      statChainEl.textContent = `x${bestChainMultiplier.toFixed(1)}`;
+      statLivesEl.textContent = lives;
+      statSpeedEl.textContent = speedLabel(level.speed);
+      statSpecialsEl.textContent = specialsSeen;
+      statStatusEl.textContent = statusText;
+      statStatusEl.className =
+        "stat-value " +
+        (statusText === "Level Clear"
+          ? "win"
+          : statusText === "Game Over"
+          ? "fail"
+          : "");
+    }
+
+    function showModal() {
+      modalLocked = true;
+      modalEl.classList.add("visible");
+    }
+
+    function hideModal() {
+      modalLocked = false;
+      modalEl.classList.remove("visible");
+    }
+
+    // --- Input --------------------------------------------------------------
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        paddle.movingLeft = true;
+      } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        paddle.movingRight = true;
+      } else if (e.key === " " && ball.attached) {
+        // launch from paddle
+        ball.attached = false;
+        initAudio();
+        beep(520, 120, "square", 0.08);
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        paddle.movingLeft = false;
+      } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        paddle.movingRight = false;
+      }
+    });
+
+    function handlePointer(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const target = x - paddle.width / 2;
+      paddle.x = clamp(target, 10, WIDTH - paddle.width - 10);
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      initAudio();
+      handlePointer(e.clientX);
+      if (ball.attached) {
+        ball.attached = false;
+        beep(520, 120, "square", 0.08);
+      }
+    });
+
+    canvas.addEventListener("pointermove", (e) => {
+      if (e.pressure > 0 || e.buttons !== 0) {
+        handlePointer(e.clientX);
+      }
+    });
+
+    // --- Game loop + physics -----------------------------------------------
 
     function update(dt) {
-      // Move paddle
-      if (leftHeld) paddle.x -= TUNING.paddleSpeed * dt;
-      if (rightHeld) paddle.x += TUNING.paddleSpeed * dt;
-
-      paddle.x = Math.max(0, Math.min(canvas.width - paddle.w, paddle.x));
-
-      // Move ball
-      ball.x += ball.vx * TUNING.ballSpeed * dt;
-      ball.y += ball.vy * TUNING.ballSpeed * dt;
-
-      // Wall collisions
-      if (ball.x - ball.r < 0 || ball.x + ball.r > canvas.width) {
-        ball.vx *= -1;
+      // paddle movement (keyboard)
+      if (paddle.movingLeft) {
+        paddle.x -= paddle.speed;
+      } else if (paddle.movingRight) {
+        paddle.x += paddle.speed;
       }
-      if (ball.y - ball.r < 0) {
-        ball.vy *= -1;
+      paddle.x = clamp(paddle.x, 10, WIDTH - paddle.width - 10);
+
+      // ball
+      if (ball.attached) {
+        // sit above paddle
+        ball.x = paddle.x + paddle.width / 2;
+        ball.y = paddle.y - ball.radius - 1;
+        return;
       }
 
-      // Paddle collision
-      if (
-        ball.y + ball.r >= paddle.y &&
-        ball.x >= paddle.x &&
-        ball.x <= paddle.x + paddle.w
-      ) {
-        ball.vy *= -1;
+      const speedFactor = 1 + ball.speedBoost;
+      ball.x += ball.vx * speedFactor;
+      ball.y += ball.vy * speedFactor;
 
-        const hitPos = (ball.x - paddle.x) / paddle.w - 0.5;
-        ball.vx += hitPos * TUNING.ballAngleRandom;
+      // walls
+      if (ball.x - ball.radius < 10) {
+        ball.x = 10 + ball.radius;
+        ball.vx = Math.abs(ball.vx);
+      } else if (ball.x + ball.radius > WIDTH - 10) {
+        ball.x = WIDTH - 10 - ball.radius;
+        ball.vx = -Math.abs(ball.vx);
       }
 
-      // Bottom = game over
-      if (ball.y - ball.r > canvas.height) {
-        running = false;
-        overlay.innerHTML = `
-          <h2>Ball Lost</h2>
-          <p>Score: ${score}</p>
-          <button class="btn" id="restartBtn">Play Again</button>`;
-        overlay.style.display = "flex";
-
-        document.getElementById("restartBtn").onclick = () => startGame();
+      if (ball.y - ball.radius < 20) {
+        ball.y = 20 + ball.radius;
+        ball.vy = Math.abs(ball.vy);
       }
 
-      // Brick collisions
-      for (const b of bricks) {
-        if (!b.alive) continue;
-
-        if (
-          ball.x + ball.r > b.x &&
-          ball.x - ball.r < b.x + b.w &&
-          ball.y + ball.r > b.y &&
-          ball.y - ball.r < b.y + b.h
-        ) {
-          b.alive = false;
-          score += TUNING.brickScore;
-          bricksText.textContent = bricks.filter(x => x.alive).length;
-          scoreText.textContent = score;
-
-          ball.vy *= -1;
+      // bottom = ball lost
+      if (ball.y - ball.radius > HEIGHT) {
+        lives -= 1;
+        statusText = "Ball Lost";
+        sounds.lose();
+        if (lives <= 0) {
+          updateStats();
+          handleGameOver();
+          return;
+        } else {
+          updateStats();
+          resetBallAfterLoss();
+          return;
         }
       }
 
-      // Victory
-      if (bricks.every(b => !b.alive)) {
-        running = false;
-        overlay.innerHTML = `
-          <h2>All Bricks Cleared!</h2>
-          <p>Score: ${score}</p>
-          <button class="btn" id="restartBtn">Play Again</button>`;
-        overlay.style.display = "flex";
-        document.getElementById("restartBtn").onclick = () => startGame();
+      // paddle collision
+      if (
+        ball.y + ball.radius >= paddle.y &&
+        ball.y + ball.radius <= paddle.y + paddle.height + 4 &&
+        ball.x >= paddle.x - 4 &&
+        ball.x <= paddle.x + paddle.width + 4 &&
+        ball.vy > 0
+      ) {
+        // offset from center [-1, 1]
+        const hitPos = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+        const levelSpeed = LEVELS[currentLevelIndex].speed;
+        ball.vx = hitPos * levelSpeed * 1.05;
+        ball.vy = -Math.abs(levelSpeed + Math.abs(hitPos) * 0.6);
+        ball.speedBoost = clamp(ball.speedBoost + 0.02, 0, 0.45);
+        chainCount = 0; // paddle resets combo window
+        sounds.paddle();
+      }
+
+      // brick collisions
+      const now = performance.now();
+      let bricksHitThisFrame = [];
+      for (const brick of bricks) {
+        if (!brick.alive) continue;
+        if (
+          ball.x + ball.radius >= brick.x &&
+          ball.x - ball.radius <= brick.x + brick.width &&
+          ball.y + ball.radius >= brick.y &&
+          ball.y - ball.radius <= brick.y + brick.height
+        ) {
+          bricksHitThisFrame.push(brick);
+        }
+      }
+
+      if (bricksHitThisFrame.length > 0) {
+        // basic bounce: flip vertical; if overlap is wider horizontally, flip horizontal
+        const first = bricksHitThisFrame[0];
+        const overlapLeft = ball.x + ball.radius - first.x;
+        const overlapRight = first.x + first.width - (ball.x - ball.radius);
+        const overlapTop = ball.y + ball.radius - first.y;
+        const overlapBottom = first.y + first.height - (ball.y - ball.radius);
+
+        const minOverlapX = Math.min(overlapLeft, overlapRight);
+        const minOverlapY = Math.min(overlapTop, overlapBottom);
+
+        if (minOverlapX < minOverlapY) {
+          ball.vx = -ball.vx;
+        } else {
+          ball.vy = -ball.vy;
+        }
+
+        const timeSinceLastHit = now - lastBrickHitTime;
+        if (timeSinceLastHit < CHAIN_WINDOW) {
+          chainCount += bricksHitThisFrame.length;
+        } else {
+          chainCount = bricksHitThisFrame.length;
+        }
+        lastBrickHitTime = now;
+
+        const chainMultiplier = 1 + Math.min(chainCount - 1, 6) * 0.15;
+        if (chainMultiplier > bestChainMultiplier) {
+          bestChainMultiplier = chainMultiplier;
+        }
+
+        let totalBricksRemoved = 0;
+
+        for (const brick of bricksHitThisFrame) {
+          if (!brick.alive) continue;
+          brick.alive = false;
+          brick.pop = true;
+          bricksRemaining -= 1;
+          totalBricksRemoved += 1;
+
+          let baseScore = 40;
+          if (brick.type === SPECIAL_TYPES.ROW || brick.type === SPECIAL_TYPES.BOMB) {
+            baseScore = 90;
+          }
+          score += Math.round(baseScore * chainMultiplier);
+          sounds.brick();
+        }
+
+        // handle specials: row clears / bomb bursts
+        for (const brick of bricksHitThisFrame) {
+          if (brick.type === SPECIAL_TYPES.ROW) {
+            specialsSeen++;
+            rowClear(brick);
+          } else if (brick.type === SPECIAL_TYPES.BOMB) {
+            specialsSeen++;
+            bombBurst(brick);
+          }
+        }
+
+        if (totalBricksRemoved > 0) {
+          ball.speedBoost = clamp(ball.speedBoost + totalBricksRemoved * 0.01, 0, 0.5);
+        }
+
+        if (bricksRemaining <= 0 && !modalLocked) {
+          handleLevelClear();
+        }
+
+        updateStats();
       }
     }
 
-    // ============================================================
-    // DRAW
-    // ============================================================
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function rowClear(brick) {
+      const rowY = brick.y;
+      const rowTolerance = brick.height * 0.6;
+      let cleared = 0;
 
-      // Bricks
       for (const b of bricks) {
         if (!b.alive) continue;
-        ctx.fillStyle = b.color;
-        ctx.fillRect(b.x, b.y, b.w, b.h);
+        if (Math.abs(b.y - rowY) <= rowTolerance) {
+          b.alive = false;
+          b.pop = true;
+          bricksRemaining -= 1;
+          cleared++;
+        }
       }
 
-      // Paddle
-      ctx.fillStyle = "#e5e7eb";
-      ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+      if (cleared > 0) {
+        score += cleared * 35;
+        sounds.special();
+      }
+    }
 
-      // Ball
+    function bombBurst(brick) {
+      const radiusX = brick.width * 1.5;
+      const radiusY = brick.height * 2.2;
+      let cleared = 0;
+
+      const cx = brick.x + brick.width / 2;
+      const cy = brick.y + brick.height / 2;
+
+      for (const b of bricks) {
+        if (!b.alive) continue;
+        const dx = Math.abs((b.x + b.width / 2) - cx);
+        const dy = Math.abs((b.y + b.height / 2) - cy);
+        if (dx <= radiusX && dy <= radiusY) {
+          b.alive = false;
+          b.pop = true;
+          bricksRemaining -= 1;
+          cleared++;
+        }
+      }
+
+      if (cleared > 0) {
+        score += cleared * 40;
+        sounds.special();
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+      // playfield frame
+      ctx.save();
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(10.5, 20.5, WIDTH - 21, HEIGHT - 40);
+      ctx.restore();
+
+      // bricks
+      for (const brick of bricks) {
+        if (!brick.alive) continue;
+        ctx.save();
+        ctx.fillStyle = brick.color;
+        ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+
+        if (brick.type === SPECIAL_TYPES.ROW) {
+          ctx.fillStyle = "rgba(15,23,42,0.7)";
+          ctx.fillRect(brick.x + 2, brick.y + brick.height / 2 - 2, brick.width - 4, 3);
+        } else if (brick.type === SPECIAL_TYPES.BOMB) {
+          ctx.fillStyle = "rgba(15,23,42,0.8)";
+          ctx.beginPath();
+          ctx.arc(
+            brick.x + brick.width / 2,
+            brick.y + brick.height / 2,
+            brick.height / 2.1,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // paddle
+      ctx.save();
+      const grd = ctx.createLinearGradient(
+        paddle.x,
+        paddle.y,
+        paddle.x + paddle.width,
+        paddle.y
+      );
+      grd.addColorStop(0, "#0f172a");
+      grd.addColorStop(1, "#1d283a");
+      ctx.fillStyle = grd;
+      ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+      ctx.restore();
+
+      // ball
+      ctx.save();
+      const ballGrad = ctx.createRadialGradient(
+        ball.x - 2,
+        ball.y - 2,
+        1,
+        ball.x,
+        ball.y,
+        ball.radius
+      );
+      ballGrad.addColorStop(0, "#fee2e2");
+      ballGrad.addColorStop(1, "#fb923c");
+      ctx.fillStyle = ballGrad;
       ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-      ctx.fillStyle = "#e2e8f0";
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
+
+      // subtle chain text
+      if (chainCount > 1) {
+        ctx.save();
+        ctx.font = "10px system-ui, -apple-system, BlinkMacSystemFont";
+        ctx.fillStyle = "rgba(248, 250, 252, 0.7)";
+        ctx.fillText(
+          `Chain x${(1 + Math.min(chainCount - 1, 6) * 0.15).toFixed(1)}`,
+          18,
+          HEIGHT - 14
+        );
+        ctx.restore();
+      }
     }
 
-    // ============================================================
-    // START GAME
-    // ============================================================
-    function startGame() {
-      overlay.style.display = "none";
-      score = 0;
-      scoreText.textContent = score;
+    function loop(timestamp) {
+      const dt = timestamp - lastFrameTime;
+      lastFrameTime = timestamp;
 
-      initBricks();
-      ball.x = canvas.width / 2;
-      ball.y = canvas.height - 60;
-      ball.vx = 1;
-      ball.vy = -1;
-
-      last = performance.now();
-      running = true;
-      requestAnimationFrame(gameLoop);
+      if (!modalLocked) {
+        update(dt);
+      }
+      render();
+      requestAnimationFrame(loop);
     }
 
-    startBtn.onclick = () => startGame();
+    // --- Boot ---------------------------------------------------------------
+
+    startLevel(0);
+    requestAnimationFrame(loop);
   </script>
 </body>
 </html>
