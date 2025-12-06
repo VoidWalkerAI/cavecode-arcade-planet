@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mind Chambers — Echo Sequence (ARC-MC-001)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --accent: #22c55e;
+
+      --pad-0: #f97316;
+      --pad-1: #22c55e;
+      --pad-2: #3b82f6;
+      --pad-3: #eab308;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #game-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    header {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    header .sub {
+      margin-top: 0.15rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    #main-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      #main-row {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+
+    #board-panel {
+      flex: 2;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    #pads-wrapper {
+      width: min(320px, 100%);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+
+    .pad {
+      border-radius: 1rem;
+      position: relative;
+      cursor: pointer;
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.9),
+        0 10px 18px rgba(0, 0, 0, 0.7);
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, filter 0.08s ease-out, opacity 0.15s ease-out;
+    }
+
+    .pad[data-id="0"] { background: var(--pad-0); }
+    .pad[data-id="1"] { background: var(--pad-1); }
+    .pad[data-id="2"] { background: var(--pad-2); }
+    .pad[data-id="3"] { background: var(--pad-3); }
+
+    .pad::after {
+      content: "";
+      position: absolute;
+      inset: 10%;
+      border-radius: inherit;
+      background: radial-gradient(circle at top, rgba(249, 250, 251, 0.22), transparent 55%);
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+
+    .pad.active {
+      transform: translateY(2px) scale(1.02);
+      filter: brightness(1.15);
+      box-shadow:
+        0 0 0 1px rgba(248, 250, 252, 0.6),
+        0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .pad.disabled {
+      cursor: default;
+      opacity: 0.65;
+      filter: grayscale(0.1);
+    }
+
+    #status-text {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    #hud-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    #level-panel {
+      display: flex;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    .pill {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 0.1rem 0.6rem;
+      font-size: 0.78rem;
+      background: rgba(15, 23, 42, 0.95);
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    #start-btn {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.4), rgba(15, 23, 42, 1));
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    #start-btn:active {
+      transform: translateY(1px);
+    }
+
+    #info-panel {
+      flex: 1;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.96);
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    #info-panel h2 {
+      margin: 0;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+
+    #info-panel ul {
+      margin: 0.2rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    #info-panel li {
+      margin-bottom: 0.18rem;
+    }
+
+    @media (max-width: 767px) {
+      #info-panel {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-shell">
+    <header>
+      <h1>Mind Chambers — Echo Sequence · ARC-MC-001</h1>
+      <div class="sub">Watch the pattern. Remember it. Echo it back.</div>
+    </header>
+
+    <div id="main-row">
+      <section id="board-panel">
+        <div id="pads-wrapper">
+          <div class="pad" data-id="0"></div>
+          <div class="pad" data-id="1"></div>
+          <div class="pad" data-id="2"></div>
+          <div class="pad" data-id="3"></div>
+        </div>
+
+        <div id="hud-row">
+          <div id="level-panel">
+            <span class="pill">Level: <span id="levelVal">0</span></span>
+            <span class="pill">Best: <span id="bestVal">0</span></span>
+          </div>
+          <button id="start-btn">Start</button>
+        </div>
+
+        <div id="status-text">Press Start to begin.</div>
+      </section>
+
+      <aside id="info-panel">
+        <h2>How to Play</h2>
+        <p>Echo Sequence is a pattern memory game:</p>
+        <ul>
+          <li>Press <strong>Start</strong> to watch the pads flash.</li>
+          <li>Wait until it says <em>Your turn</em>.</li>
+          <li>Tap the pads back in the exact same order.</li>
+          <li>Each round adds one more step to the sequence.</li>
+        </ul>
+        <p>If you tap the wrong pad, the run ends, but your best level remains.</p>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING (must match echo-sequence.cavecode)
+    // ============================================================
+    const TUNING = {
+      padCount: 4,
+      startLength: 1,
+      flashDurationMs: 550,
+      stepDelayMs: 250,
+      inputFlashMs: 200,
+      maxLevel: 32 // soft cap; not enforced hard
+    };
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    const pads = Array.from(document.querySelectorAll(".pad"));
+    const statusTextEl = document.getElementById("status-text");
+    const levelValEl = document.getElementById("levelVal");
+    const bestValEl = document.getElementById("bestVal");
+    const startBtn = document.getElementById("start-btn");
+
+    let sequence = [];
+    let inputIndex = 0;
+    let level = 0;
+    let bestLevel = 0;
+    let state = "IDLE"; // IDLE, SHOWING, INPUT, FAIL
+    let showTimeouts = [];
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function setState(newState) {
+      state = newState;
+      if (state === "IDLE") {
+        statusTextEl.textContent = "Press Start to begin.";
+      } else if (state === "SHOWING") {
+        statusTextEl.textContent = "Watch the sequence…";
+      } else if (state === "INPUT") {
+        statusTextEl.textContent = "Your turn. Tap the pads in order.";
+      } else if (state === "FAIL") {
+        statusTextEl.textContent = "Wrong pad. Tap Start to try again.";
+      }
+      updatePadDisabledState();
+    }
+
+    function updatePadDisabledState() {
+      const disable = state !== "INPUT";
+      pads.forEach(p => {
+        if (disable) p.classList.add("disabled");
+        else p.classList.remove("disabled");
+      });
+    }
+
+    function randomPadIndex() {
+      return Math.floor(Math.random() * TUNING.padCount);
+    }
+
+    function resetTimers() {
+      showTimeouts.forEach(id => clearTimeout(id));
+      showTimeouts = [];
+    }
+
+    function clearSequence() {
+      sequence = [];
+      inputIndex = 0;
+      level = 0;
+      levelValEl.textContent = level;
+    }
+
+    // ============================================================
+    // GAME FLOW
+    // ============================================================
+    function startRun() {
+      resetTimers();
+      clearSequence();
+      extendSequence(TUNING.startLength);
+      level = sequence.length;
+      levelValEl.textContent = level;
+      setState("SHOWING");
+      showSequence();
+    }
+
+    function extendSequence(addCount) {
+      for (let i = 0; i < addCount; i++) {
+        sequence.push(randomPadIndex());
+      }
+    }
+
+    function showSequence() {
+      setState("SHOWING");
+      inputIndex = 0;
+      updatePadDisabledState();
+
+      pads.forEach(p => p.classList.remove("active"));
+
+      let totalDelay = 300; // small initial delay
+      sequence.forEach((padIndex, i) => {
+        const onTime = totalDelay;
+        const offTime = totalDelay + TUNING.flashDurationMs;
+
+        // turn on
+        showTimeouts.push(setTimeout(() => {
+          flashPadOn(padIndex);
+        }, onTime));
+
+        // turn off
+        showTimeouts.push(setTimeout(() => {
+          flashPadOff(padIndex);
+        }, offTime));
+
+        totalDelay = offTime + TUNING.stepDelayMs;
+      });
+
+      // After full sequence: enter INPUT state
+      showTimeouts.push(setTimeout(() => {
+        setState("INPUT");
+      }, totalDelay + 20));
+    }
+
+    function flashPadOn(idx) {
+      const pad = pads[idx];
+      pad.classList.add("active");
+    }
+
+    function flashPadOff(idx) {
+      const pad = pads[idx];
+      pad.classList.remove("active");
+    }
+
+    function flashPadInput(idx) {
+      const pad = pads[idx];
+      pad.classList.add("active");
+      setTimeout(() => pad.classList.remove("active"), TUNING.inputFlashMs);
+    }
+
+    function handlePadInput(idx) {
+      if (state !== "INPUT") return;
+
+      flashPadInput(idx);
+
+      const expected = sequence[inputIndex];
+      if (idx !== expected) {
+        // Fail
+        bestLevel = Math.max(bestLevel, level);
+        bestValEl.textContent = bestLevel;
+        setState("FAIL");
+        return;
+      }
+
+      inputIndex++;
+      if (inputIndex >= sequence.length) {
+        // Round success
+        bestLevel = Math.max(bestLevel, level);
+        bestValEl.textContent = bestLevel;
+
+        // Extend sequence
+        sequence.push(randomPadIndex());
+        level = sequence.length;
+        levelValEl.textContent = level;
+
+        setState("SHOWING");
+        resetTimers();
+        showSequence();
+      }
+    }
+
+    // ============================================================
+    // EVENT WIRING
+    // ============================================================
+    pads.forEach(pad => {
+      pad.addEventListener("click", () => {
+        const idx = parseInt(pad.dataset.id, 10);
+        handlePadInput(idx);
+      });
+      pad.addEventListener("touchstart", e => {
+        e.preventDefault();
+        const idx = parseInt(pad.dataset.id, 10);
+        handlePadInput(idx);
+      }, { passive: false });
+    });
+
+    startBtn.addEventListener("click", () => {
+      if (state === "SHOWING") return; // ignore during playback
+      startRun();
+    });
+
+    // ============================================================
+    // INITIAL
+    // ============================================================
+    setState("IDLE");
+  </script>
+</body>
+</html>
