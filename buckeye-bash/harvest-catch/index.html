@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buckeye Bash — Harvest Catch (ARC-BB-001)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --accent: #fb923c;
+      --danger: #f97373;
+
+      --lane-good: #22c55e;
+      --lane-bad: #ef4444;
+      --lane-neutral: #eab308;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #game-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    header {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    header .sub {
+      margin-top: 0.15rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    #main-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      #main-row {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+
+    #playfield-panel {
+      flex: 2;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    #hud-row {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    .pill {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      padding: 0.15rem 0.6rem;
+      background: rgba(15, 23, 42, 0.95);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+    }
+
+    #start-btn {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: radial-gradient(circle at top, rgba(251, 146, 60, 0.5), rgba(15, 23, 42, 1));
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    #start-btn:active {
+      transform: translateY(1px);
+    }
+
+    #field-wrapper {
+      width: min(360px, 100%);
+      aspect-ratio: 3 / 4;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 1);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+      overflow: hidden;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    #lanes {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .lane {
+      border-left: 1px dashed rgba(15, 23, 42, 0.8);
+      border-right: 1px dashed rgba(15, 23, 42, 0.8);
+    }
+
+    .lane:first-child {
+      border-left: none;
+    }
+    .lane:last-child {
+      border-right: none;
+    }
+
+    .item {
+      position: absolute;
+      width: calc(100% / 3 - 8px);
+      margin-left: 4px;
+      margin-right: 4px;
+      border-radius: 999px;
+      padding: 3px 0;
+      font-size: 0.7rem;
+      text-align: center;
+      color: #020617;
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.8),
+        0 4px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .item.good {
+      background: #bbf7d0;
+    }
+
+    .item.bad {
+      background: #fecaca;
+    }
+
+    #basket {
+      position: absolute;
+      bottom: 6px;
+      width: calc(100% / 3 - 16px);
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(to top, #92400e, #f97316);
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.9),
+        0 6px 10px rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #020617;
+      transition: transform 0.09s ease-out;
+    }
+
+    #status-text {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    #info-panel {
+      flex: 1;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.96);
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    #info-panel h2 {
+      margin: 0;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+
+    #info-panel ul {
+      margin: 0.25rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    #info-panel li {
+      margin-bottom: 0.18rem;
+    }
+
+    @media (max-width: 767px) {
+      #info-panel {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-shell">
+    <header>
+      <h1>Buckeye Bash — Harvest Catch · ARC-BB-001</h1>
+      <div class="sub">Slide your basket between lanes. Catch the good. Dodge the junk.</div>
+    </header>
+
+    <div id="main-row">
+      <section id="playfield-panel">
+        <div id="hud-row">
+          <div class="pill">
+            Score: <span id="scoreVal">0</span>
+          </div>
+          <div class="pill">
+            Health: <span id="healthVal">5</span>
+          </div>
+          <button id="start-btn">Start Harvest</button>
+        </div>
+
+        <div id="field-wrapper">
+          <div id="lanes">
+            <div class="lane" data-lane="0"></div>
+            <div class="lane" data-lane="1"></div>
+            <div class="lane" data-lane="2"></div>
+          </div>
+          <div id="basket">Basket</div>
+        </div>
+
+        <div id="status-text">Tap Start Harvest to begin.</div>
+      </section>
+
+      <aside id="info-panel">
+        <h2>How to Play</h2>
+        <p>Harvest Catch is a lane-based fall mini-game:</p>
+        <ul>
+          <li>Tap <strong>Start Harvest</strong> to begin a run.</li>
+          <li>Move the basket with arrow keys or by tapping left/right on the field.</li>
+          <li>Catching <strong>good</strong> items adds to your score.</li>
+          <li>Catching <strong>bad</strong> items reduces your health.</li>
+        </ul>
+        <p>The game slowly speeds up over time. When your health reaches zero, the harvest ends.</p>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING (sync with harvest-catch.cavecode)
+    // ============================================================
+    const TUNING = {
+      laneCount: 3,
+      startingHealth: 5,
+      fallSpeed: 140,           // base px/sec
+      spawnIntervalMs: 900,
+      goodItemChance: 0.7,
+      scorePerGood: 10,
+      healthLossBad: 1,
+      difficultyScale: 0.015    // small factor on elapsed time
+    };
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    const fieldWrapper = document.getElementById("field-wrapper");
+    const basketEl = document.getElementById("basket");
+    const scoreValEl = document.getElementById("scoreVal");
+    const healthValEl = document.getElementById("healthVal");
+    const statusTextEl = document.getElementById("status-text");
+    const startBtn = document.getElementById("start-btn");
+
+    let laneWidthPx = 0;
+    let basketLane = 1;         // middle lane (0,1,2)
+    let items = [];             // { id, lane, y, type }
+    let nextItemId = 1;
+    let score = 0;
+    let health = TUNING.startingHealth;
+    let running = false;
+    let lastTime = 0;
+    let spawnTimer = 0;
+    let elapsedTotal = 0;
+
+    let leftHeld = false;
+    let rightHeld = false;
+
+    // movement debounce so we don't slide continuously holding
+    let moveCooldown = 0;
+    const MOVE_COOLDOWN = 0.12; // seconds
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function recalcLaneWidth() {
+      const rect = fieldWrapper.getBoundingClientRect();
+      laneWidthPx = rect.width / TUNING.laneCount;
+    }
+
+    function placeBasket() {
+      recalcLaneWidth();
+      const x = basketLane * laneWidthPx + laneWidthPx / 2;
+      const offset = laneWidthPx / 2 - basketEl.offsetWidth / 2;
+      basketEl.style.transform = `translateX(${x - offset - laneWidthPx / 2}px)`;
+    }
+
+    function resetRun() {
+      score = 0;
+      health = TUNING.startingHealth;
+      scoreValEl.textContent = score;
+      healthValEl.textContent = health;
+      basketLane = 1;
+      items = [];
+      nextItemId = 1;
+      spawnTimer = 0;
+      elapsedTotal = 0;
+      placeBasket();
+      statusTextEl.textContent = "Catch the fall goodies. Dodge the junk.";
+    }
+
+    function randomLane() {
+      return Math.floor(Math.random() * TUNING.laneCount);
+    }
+
+    function randomItemType() {
+      return Math.random() < TUNING.goodItemChance ? "good" : "bad";
+    }
+
+    function spawnItem() {
+      const lane = randomLane();
+      const type = randomItemType();
+      items.push({
+        id: nextItemId++,
+        lane,
+        y: -24,
+        type
+      });
+    }
+
+    function updateItemPositions(dtSec) {
+      // Difficulty scaling: speed up over time
+      const speedFactor = 1 + elapsedTotal * TUNING.difficultyScale;
+      const speed = TUNING.fallSpeed * speedFactor;
+      const height = fieldWrapper.getBoundingClientRect().height;
+
+      const basketTopY = height - 36; // near basket container
+      const basketCatchWindow = 18;
+
+      const remaining = [];
+
+      for (const item of items) {
+        item.y += speed * dtSec;
+
+        // Check catch window
+        if (item.y >= basketTopY - basketCatchWindow && item.y <= basketTopY + basketCatchWindow) {
+          if (item.lane === basketLane) {
+            // Caught
+            if (item.type === "good") {
+              score += TUNING.scorePerGood;
+              scoreValEl.textContent = score;
+            } else {
+              health -= TUNING.healthLossBad;
+              healthValEl.textContent = Math.max(0, health);
+            }
+            continue; // remove this item
+          }
+        }
+
+        // Drop off bottom
+        if (item.y > height + 32) {
+          continue; // remove
+        }
+
+        remaining.push(item);
+      }
+
+      items = remaining;
+    }
+
+    function renderItems() {
+      // Remove old elements
+      const oldEls = fieldWrapper.querySelectorAll(".item");
+      oldEls.forEach(el => el.remove());
+
+      const height = fieldWrapper.getBoundingClientRect().height;
+      items.forEach(item => {
+        const el = document.createElement("div");
+        el.className = "item " + item.type;
+        el.dataset.id = item.id;
+        el.style.left = (item.lane * laneWidthPx) + "px";
+        el.style.top = item.y + "px";
+
+        if (item.type === "good") {
+          el.textContent = "🍂";
+        } else {
+          el.textContent = "🪨";
+        }
+
+        fieldWrapper.appendChild(el);
+      });
+    }
+
+    function moveBasketLeft() {
+      if (!running) return;
+      if (basketLane > 0) {
+        basketLane--;
+        placeBasket();
+      }
+    }
+
+    function moveBasketRight() {
+      if (!running) return;
+      if (basketLane < TUNING.laneCount - 1) {
+        basketLane++;
+        placeBasket();
+      }
+    }
+
+    function gameOver() {
+      running = false;
+      statusTextEl.textContent = "Harvest over. Tap Start to try again.";
+    }
+
+    // ============================================================
+    // MAIN LOOP
+    // ============================================================
+    function loop(timestamp) {
+      if (!running) return;
+      if (!lastTime) lastTime = timestamp;
+      const dtMs = timestamp - lastTime;
+      const dtSec = dtMs / 1000;
+      lastTime = timestamp;
+
+      elapsedTotal += dtSec;
+      spawnTimer += dtMs;
+      moveCooldown -= dtSec;
+
+      // Input movement
+      if (moveCooldown <= 0) {
+        if (leftHeld) {
+          moveBasketLeft();
+          moveCooldown = MOVE_COOLDOWN;
+        } else if (rightHeld) {
+          moveBasketRight();
+          moveCooldown = MOVE_COOLDOWN;
+        }
+      }
+
+      // Spawning
+      const dynamicSpawnInterval = Math.max(350, TUNING.spawnIntervalMs - elapsedTotal * 80);
+      if (spawnTimer >= dynamicSpawnInterval) {
+        spawnItem();
+        spawnTimer = 0;
+      }
+
+      // Items
+      updateItemPositions(dtSec);
+      renderItems();
+
+      // Health check
+      if (health <= 0) {
+        gameOver();
+        return;
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    // ============================================================
+    // EVENTS
+    // ============================================================
+    window.addEventListener("resize", () => {
+      placeBasket();
+      renderItems();
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = true;
+      if (e.key === "ArrowRight" || e.key === "d") rightHeld = true;
+    });
+
+    document.addEventListener("keyup", e => {
+      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = false;
+      if (e.key === "ArrowRight" || e.key === "d") rightHeld = false;
+    });
+
+    fieldWrapper.addEventListener("touchstart", e => {
+      const rect = fieldWrapper.getBoundingClientRect();
+      const x = e.changedTouches[0].clientX - rect.left;
+      const third = rect.width / 3;
+      if (x < third) {
+        leftHeld = true;
+        rightHeld = false;
+        moveBasketLeft();
+      } else if (x > 2 * third) {
+        rightHeld = true;
+        leftHeld = false;
+        moveBasketRight();
+      } else {
+        leftHeld = rightHeld = false;
+      }
+    }, { passive: true });
+
+    fieldWrapper.addEventListener("touchend", () => {
+      leftHeld = rightHeld = false;
+    }, { passive: true });
+
+    startBtn.addEventListener("click", () => {
+      running = true;
+      lastTime = 0;
+      resetRun();
+      requestAnimationFrame(loop);
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    // Kick initial layout
+    setTimeout(() => {
+      placeBasket();
+    }, 0);
+  </script>
+</body>
+</html>
