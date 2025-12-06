@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Scarlet Crush — Lane Stacker · ARC-SC-001</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!--
     BLOCK 1 — SHELL & BRAND (LOCKED)
     CaveCode Arcade Planet · Scarlet-Crush Line
   -->
-
   <style>
     :root {
       --cc-bg: #020617;
@@ -17,50 +16,61 @@
       --cc-panel-soft: #0b1120;
       --cc-border: #1f2937;
       --cc-accent: #fb7185;
-      --cc-accent-soft: #fda4af;
+      --cc-accent-soft: #fed7e2;
       --cc-text-main: #e5e7eb;
       --cc-text-soft: #9ca3af;
 
-      --tile-size: min(7vw, 2.6rem);
       --tile-radius: 0.45rem;
-      --tile-gap: 0.22rem;
+      --tile-gap: 0.24rem;
+      --tile-size: min(6vw, 2.4rem);
     }
 
     * {
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       min-height: 100vh;
-      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      background:
+        radial-gradient(circle at top, #111827 0, #020617 55%);
       color: var(--cc-text-main);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
+      align-items: flex-start;
       padding: 1.25rem 0.75rem 2.5rem;
     }
 
-    header {
+    .shell {
       width: 100%;
       max-width: 960px;
-      background: linear-gradient(135deg, #020617, #031525);
-      border-radius: 999px;
-      border: 1px solid var(--cc-border);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
-      padding: 0.9rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.15rem;
+      gap: 1.25rem;
+    }
+
+    header {
+      background: linear-gradient(135deg, #020617, #0b1120);
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      padding: 0.9rem 1.5rem;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
     }
 
     @media (min-width: 640px) {
       header {
         flex-direction: row;
-        align-items: baseline;
         justify-content: space-between;
+        align-items: baseline;
       }
     }
 
@@ -68,404 +78,334 @@
       font-size: clamp(1rem, 2.2vw, 1.15rem);
       font-weight: 700;
       letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .title-line span.code {
-      color: var(--cc-accent-soft);
+      color: var(--cc-accent);
     }
 
-    .subtitle-line {
+    .sub-line {
       font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
       color: var(--cc-text-soft);
       display: flex;
       flex-wrap: wrap;
-      gap: 0.45rem;
+      gap: 0.4rem;
     }
 
-    .subtitle-pill {
-      padding: 0.1rem 0.6rem;
+    .pill {
+      padding: 0.15rem 0.6rem;
       border-radius: 999px;
-      border: 1px solid #111827;
-      background: radial-gradient(circle at top, #0f172a, #020617);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pill.hot {
+      border-color: rgba(248, 113, 113, 0.6);
+      background: radial-gradient(circle at top left, #111827, #020617);
     }
 
     main {
-      width: 100%;
-      max-width: 960px;
-      margin-top: 1.15rem;
-    }
-
-    .panel {
-      background: radial-gradient(circle at top left, #020617, #020320 55%);
-      border-radius: 1.4rem;
-      border: 1px solid var(--cc-border);
-      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.95);
-      padding: 1.3rem 1.1rem 1.6rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
 
-    @media (min-width: 720px) {
-      .panel {
-        padding: 1.5rem 1.6rem 1.9rem;
-      }
+    .panel {
+      background: radial-gradient(circle at top, #020617 0, #020617 20%, #020617 100%);
+      border-radius: 1.25rem;
+      border: 1px solid var(--cc-border);
+      padding: 1rem 1rem 1.15rem;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .panel-title {
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--cc-text-soft);
     }
 
     .tag-row {
       display: flex;
       flex-wrap: wrap;
       gap: 0.4rem;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
     }
 
     .tag {
-      padding: 0.12rem 0.7rem;
+      padding: 0.18rem 0.55rem;
       border-radius: 999px;
-      border: 1px solid #111827;
-      background: linear-gradient(135deg, #020617, #02081b);
-      color: var(--cc-text-soft);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
 
-    .tag.highlight {
-      border-color: var(--cc-accent-soft);
+    .tag.chip {
+      background: #020617;
+    }
+
+    .tag.accent {
+      border-color: rgba(248, 113, 113, 0.7);
       color: var(--cc-accent-soft);
     }
 
-    .level-blurb {
-      font-size: 0.85rem;
+    .hint {
+      font-size: 0.83rem;
       color: var(--cc-text-soft);
-      line-height: 1.35;
     }
 
-    .stats-grid {
+    /* HUD */
+
+    .hud-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.55rem;
-      font-size: 0.78rem;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.6rem;
     }
 
-    @media (min-width: 720px) {
-      .stats-grid {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-      }
-    }
-
-    .stat-card {
+    .hud-card {
       border-radius: 0.9rem;
-      border: 1px solid #101827;
-      background: radial-gradient(circle at top, #020617, #02071a 70%);
-      padding: 0.35rem 0.55rem;
+      border: 1px solid rgba(30, 64, 175, 0.7);
+      background: radial-gradient(circle at top, #020617, #020617);
+      padding: 0.5rem 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.16rem;
+      gap: 0.15rem;
+      min-height: 3.1rem;
     }
 
-    .stat-label {
-      text-transform: uppercase;
+    .hud-label {
+      font-size: 0.68rem;
       letter-spacing: 0.16em;
-      font-size: 0.64rem;
+      text-transform: uppercase;
       color: var(--cc-text-soft);
     }
 
-    .stat-value {
-      font-size: 0.98rem;
+    .hud-value {
+      font-size: 0.95rem;
       font-weight: 600;
     }
 
-    .board-shell {
-      margin-top: 0.2rem;
-      border-radius: 1.2rem;
-      border: 1px solid #111827;
-      background: radial-gradient(circle at top, #020617, #02081b 60%);
-      padding: 0.9rem 0.8rem 0.95rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .board-header-line {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    .board-title {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--cc-text-soft);
-    }
-
-    .board-subtitle {
-      font-size: 0.76rem;
-      color: var(--cc-text-soft);
-    }
-
-    .board-meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--cc-text-soft);
-    }
-
-    .preview-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.16rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid #101827;
-      background: #020617;
-    }
-
-    .preview-label {
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-size: 0.6rem;
-    }
-
-    .preview-cell {
-      width: 1.4rem;
-      height: 1.4rem;
-      border-radius: 0.45rem;
-      background: #020617;
-      border: 1px dashed #1f2937;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .tile.preview-tile {
-      width: 100%;
-      height: 100%;
-      border-radius: inherit;
-    }
-
-    .board {
-      margin-top: 0.1rem;
-      display: grid;
-      justify-content: center;
-      grid-template-columns: repeat(7, var(--tile-size));
-      grid-auto-rows: var(--tile-size);
-      gap: var(--tile-gap);
-      padding: 0.6rem 0.2rem 0.4rem;
-      border-radius: 1rem;
-      background: radial-gradient(circle at top, #020617, #02081b 70%);
-      border: 1px solid #0f172a;
-      box-shadow: inset 0 0 20px rgba(15, 23, 42, 0.8);
-    }
-
-    .tile {
-      width: var(--tile-size);
-      height: var(--tile-size);
-      border-radius: var(--tile-radius);
-      background: #020617;
-      border: 1px solid #020617;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.8);
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.14s ease-out, box-shadow 0.14s ease-out,
-        border-color 0.14s ease-out;
-    }
-
-    .tile.empty {
-      border-color: #020617;
-      box-shadow: inset 0 0 0 1px #020617;
-      opacity: 0.16;
-    }
-
-    .tile.color-0 {
-      background: #fb7185;
-    }
-    .tile.color-1 {
-      background: #22c55e;
-    }
-    .tile.color-2 {
-      background: #3b82f6;
-    }
-    .tile.color-3 {
-      background: #facc15;
-      color: #1f2937;
-    }
-    .tile.color-4 {
-      background: #a855f7;
-    }
-
-    .tile.type-row::after,
-    .tile.type-bomb::after {
-      content: "";
-      position: absolute;
-      inset: 18%;
-      border-radius: inherit;
-      border: 2px solid rgba(15, 23, 42, 0.5);
-      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5);
-    }
-
-    .tile.type-row::before {
-      content: "";
-      position: absolute;
-      left: 17%;
-      right: 17%;
-      top: 50%;
-      height: 2px;
-      transform: translateY(-50%);
-      background: rgba(15, 23, 42, 0.7);
-      box-shadow: 0 -4px 0 rgba(15, 23, 42, 0.6),
-        0 4px 0 rgba(15, 23, 42, 0.6);
-    }
-
-    .tile.type-bomb::before {
-      content: "";
-      position: absolute;
-      inset: 30%;
-      border-radius: inherit;
-      border: 2px solid rgba(15, 23, 42, 0.9);
-      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.6);
-    }
-
-    .tile.clearing {
-      animation: tilePop 0.18s ease-out forwards;
-    }
-
-    @keyframes tilePop {
-      0% {
-        transform: scale(1);
-        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.9);
-      }
-      60% {
-        transform: scale(1.1);
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.7);
-      }
-      100% {
-        transform: scale(0.1);
-        opacity: 0;
-        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-      }
-    }
-
-    .lane-row {
-      margin-top: 0.4rem;
-      display: flex;
-      flex-wrap: nowrap;
-      justify-content: center;
-      gap: 0.4rem;
-    }
-
-    .lane-btn {
-      min-width: 2.1rem;
-      padding: 0.26rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid #111827;
-      background: radial-gradient(circle at top, #020617, #071427 70%);
-      color: var(--cc-text-main);
-      font-size: 0.75rem;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.85);
-      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out,
-        border-color 0.1s ease-out, background 0.1s ease-out;
-    }
-
-    .lane-btn:hover {
-      border-color: var(--cc-accent-soft);
-      background: radial-gradient(circle at top, #020617, #0b1120 70%);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.95);
-    }
-
-    .lane-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.8);
-    }
-
-    .board-footer {
-      font-size: 0.75rem;
-      color: var(--cc-text-soft);
-      margin-top: 0.35rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-
-    .board-footer strong {
+    .hud-value.accent {
       color: var(--cc-accent-soft);
     }
 
-    .controls-row {
+    /* Playfield */
+
+    .playfield-wrapper {
+      margin-top: 0.35rem;
+      border-radius: 1.25rem;
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      background:
+        radial-gradient(circle at top left, #020617, #020617 45%, #020617 100%);
+      padding: 0.75rem 0.85rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .board-frame {
+      border-radius: 1.1rem;
+      border: 1px solid rgba(30, 64, 175, 0.7);
+      background: radial-gradient(circle at top, #020617, #020617 55%, #020617);
+      padding: 0.65rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .board {
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 7 / 12;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(12, 1fr);
+      gap: var(--tile-gap);
+    }
+
+    .cell {
+      border-radius: var(--tile-radius);
+      background: radial-gradient(circle at top, #020617, #020617 60%, #020617);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tile {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--tile-radius);
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9),
+                  0 6px 14px rgba(0, 0, 0, 0.8);
+      transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+    }
+
+    .tile.spawn {
+      animation: drop-in 0.2s ease-out forwards;
+    }
+
+    .tile.clearing {
+      animation: flash-out 0.24s ease-in-out 0s 3 alternate;
+    }
+
+    @keyframes drop-in {
+      0% {
+        transform: translateY(-22px);
+        box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9),
+                    0 2px 8px rgba(0, 0, 0, 0.7);
+      }
+      100% {
+        transform: translateY(0);
+        box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9),
+                    0 6px 14px rgba(0, 0, 0, 0.9);
+      }
+    }
+
+    @keyframes flash-out {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.6),
+                    0 6px 16px rgba(248, 113, 113, 0.3);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9),
+                    0 2px 8px rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    .tile.c0 { background: linear-gradient(145deg, #f97373, #b91c1c); }
+    .tile.c1 { background: linear-gradient(145deg, #38bdf8, #1d4ed8); }
+    .tile.c2 { background: linear-gradient(145deg, #4ade80, #15803d); }
+    .tile.c3 { background: linear-gradient(145deg, #facc15, #b45309); }
+    .tile.c4 { background: linear-gradient(145deg, #a855f7, #6d28d9); }
+
+    .tile.special-row {
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.8),
+                  0 6px 18px rgba(56, 189, 248, 0.5);
+    }
+
+    .tile.special-bomb {
+      box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.85),
+                  0 6px 18px rgba(248, 113, 113, 0.55);
+    }
+
+    /* Lane controls */
+
+    .lane-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .lane-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--cc-text-soft);
+    }
+
+    .lane-buttons {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.35rem;
+    }
+
+    .lane-btn {
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: radial-gradient(circle at top, #020617, #020617 65%, #020617);
+      color: var(--cc-text-main);
+      font-size: 0.78rem;
+      padding: 0.35rem 0.15rem;
+      border-radius: 999px;
+      cursor: pointer;
+      text-align: center;
+      user-select: none;
+      transition: background 0.15s ease-out, transform 0.1s ease-out,
+        box-shadow 0.15s ease-out;
+    }
+
+    .lane-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .lane-btn.disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .lane-btn.hot {
+      border-color: rgba(248, 113, 113, 0.7);
+      color: var(--cc-accent-soft);
+    }
+
+    /* Footer / actions */
+
+    .actions-row {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
+      align-items: center;
       justify-content: space-between;
       margin-top: 0.3rem;
     }
 
-    .btn-secondary,
-    .btn-primary {
+    .btn {
       border-radius: 999px;
-      padding: 0.36rem 0.9rem;
-      font-size: 0.75rem;
-      cursor: pointer;
+      padding: 0.45rem 1.1rem;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: radial-gradient(circle at top, #020617, #020617 60%);
+      color: var(--cc-text-main);
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 0.35rem;
-      border: 1px solid #111827;
-      background: radial-gradient(circle at top, #020617, #071427 70%);
-      color: var(--cc-text-main);
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.9);
-      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out,
-        border-color 0.1s ease-out, background 0.1s ease-out;
+      user-select: none;
     }
 
-    .btn-secondary:hover,
-    .btn-primary:hover {
-      border-color: var(--cc-accent-soft);
-      background: radial-gradient(circle at top, #020617, #0b1120 75%);
-      transform: translateY(-1px);
-      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.95);
+    .btn.primary {
+      border-color: rgba(248, 113, 113, 0.85);
+      background: radial-gradient(circle at top, #7f1d1d, #b91c1c);
+      color: #fef2f2;
     }
 
-    .btn-secondary:active,
-    .btn-primary:active {
-      transform: translateY(0);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.9);
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
     }
 
-    .btn-primary {
-      border-color: var(--cc-accent);
-      background: radial-gradient(circle at top, #fb7185, #be123c 90%);
-      color: #0b1120;
-    }
-
-    .btn-primary:hover {
-      background: radial-gradient(circle at top, #f97373, #9f1239 90%);
-    }
-
-    .footer-line {
-      margin-top: 1rem;
-      font-size: 0.72rem;
-      text-align: center;
+    .footer-note {
+      font-size: 0.78rem;
       color: var(--cc-text-soft);
     }
 
-    .footer-line span {
-      color: var(--cc-accent-soft);
+    .status-text {
+      font-size: 0.78rem;
+      color: var(--cc-text-soft);
+      min-height: 1.1rem;
     }
+
+    .brand-line {
+      font-size: 0.76rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+      margin-top: 0.4rem;
+    }
+
+    /* Modal */
 
     .modal-backdrop {
       position: fixed;
@@ -477,282 +417,307 @@
       z-index: 40;
     }
 
-    .modal-hidden {
+    .modal-backdrop.hidden {
       display: none;
     }
 
-    .modal-box {
-      width: min(420px, 92vw);
-      border-radius: 1.4rem;
-      border: 1px solid var(--cc-border);
-      background: radial-gradient(circle at top, #020617, #02081b 65%);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
-      padding: 1.2rem 1.15rem 1.3rem;
+    .modal {
+      width: 100%;
+      max-width: 360px;
+      border-radius: 1.25rem;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: radial-gradient(circle at top, #020617, #020617 65%);
+      padding: 1.25rem 1.35rem 1.1rem;
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
-      gap: 0.7rem;
+      gap: 0.75rem;
     }
 
-    .modal-title {
-      font-size: 1.02rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    .modal h2 {
+      font-size: 1.05rem;
+      margin: 0;
     }
 
-    .modal-body {
+    .modal p {
       font-size: 0.86rem;
+      margin: 0;
       color: var(--cc-text-soft);
-      line-height: 1.4;
     }
 
-    .modal-buttons {
+    .modal-actions {
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
       gap: 0.5rem;
-      margin-top: 0.2rem;
+      margin-top: 0.35rem;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      justify-content: center;
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="title-line">
-      SCARLET CRUSH — LANE STACKER · <span class="code">ARC-SC-001</span>
-    </div>
-    <div class="subtitle-line">
-      <span class="subtitle-pill">CaveCode Arcade Planet</span>
-      <span class="subtitle-pill">Scarlet-Crush Line</span>
-      <span class="subtitle-pill">Falling Blocks · Lane Puzzle</span>
-      <span class="subtitle-pill">Single-File Engine</span>
-    </div>
-  </header>
-
-  <main>
-    <section class="panel">
-      <div class="tag-row">
-        <span class="tag highlight">Level Track</span>
-        <span class="tag">Lane Stacking</span>
-        <span class="tag">Row Clears</span>
-        <span class="tag">Score Multipliers</span>
-        <span class="tag">Special Gems</span>
-        <span class="tag">Sound & Pop</span>
+  <div class="shell">
+    <header>
+      <div class="title-line">
+        SCARLET CRUSH — <span class="code">LANE STACKER · ARC-SC-001</span>
       </div>
+      <div class="sub-line">
+        <span>CaveCode Arcade Planet</span>
+        <span>•</span>
+        <span>Falling Blocks · Lane Puzzle</span>
+        <span>•</span>
+        <span>Single-file HTML Engine</span>
+      </div>
+    </header>
 
-      <p class="level-blurb" id="level-blurb">
-        Drop colored blocks into the seven lanes. Fill full-color rows to clear
-        them and keep the stack from overflowing.
+    <main>
+      <section class="panel">
+        <div class="panel-title">Track Overview</div>
+        <div class="tag-row">
+          <span class="tag accent">Level Track</span>
+          <span class="tag chip">Lane Stacking</span>
+          <span class="tag chip">Row Clears</span>
+          <span class="tag chip">Score Multipliers</span>
+          <span class="tag chip">Special Gems</span>
+          <span class="tag chip">Sound &amp; Pop</span>
+        </div>
+        <p class="hint">
+          Tap a lane to drop the next block. Make solid-color rows before the stack reaches the top.
+          Build chains for bonus multipliers.
+        </p>
+
+        <div class="hud-grid">
+          <div class="hud-card">
+            <div class="hud-label">Level</div>
+            <div class="hud-value" id="hud-level">1</div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label">Score</div>
+            <div class="hud-value accent" id="hud-score">0</div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label">Target</div>
+            <div class="hud-value" id="hud-target">0</div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label">Drops Left</div>
+            <div class="hud-value" id="hud-drops">0</div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label">Rows Cleared</div>
+            <div class="hud-value" id="hud-rows">0</div>
+          </div>
+          <div class="hud-card">
+            <div class="hud-label">Best Chain</div>
+            <div class="hud-value" id="hud-chain">x1.0</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">Playfield</div>
+        <div class="playfield-wrapper">
+          <div class="board-frame">
+            <div class="board" id="board"></div>
+          </div>
+
+          <div class="lane-row">
+            <div class="lane-label-row">
+              <span>Next Block: <span id="nextColorLabel">●</span></span>
+              <span>Tap a lane button to drop.</span>
+            </div>
+            <div class="lane-buttons">
+              <button class="lane-btn hot" data-lane="0">1</button>
+              <button class="lane-btn" data-lane="1">2</button>
+              <button class="lane-btn" data-lane="2">3</button>
+              <button class="lane-btn" data-lane="3">4</button>
+              <button class="lane-btn" data-lane="4">5</button>
+              <button class="lane-btn" data-lane="5">6</button>
+              <button class="lane-btn" data-lane="6">7</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-text" id="statusText"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">Controls &amp; Rules</div>
+        <p class="hint">
+          Match full rows of a single color to clear them. Clearing multiple rows in one cascade
+          builds a chain multiplier. Special gems appear on big chains:
+          <strong>Row</strong> clears a whole row; <strong>Bomb</strong> blasts a 3×3 chunk.
+        </p>
+        <div class="actions-row">
+          <div class="actions-left">
+            <button class="btn" id="btn-restart">
+              ↻ Restart Level
+            </button>
+          </div>
+          <div class="actions-right">
+            <button class="btn primary" id="btn-next">
+              ➜ Next Level
+            </button>
+          </div>
+        </div>
+        <div class="brand-line">
+          Forged in CaveCode Arcade Planet · SageWire Syndicate
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop hidden" id="modal">
+    <div class="modal">
+      <h2 id="modal-title">Level Complete</h2>
+      <p id="modal-body">
+        You reached the target. Ready for the next stack?
       </p>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Level</div>
-          <div class="stat-value" id="stat-level">1</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Score</div>
-          <div class="stat-value" id="stat-score">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Target</div>
-          <div class="stat-value" id="stat-target">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Drops Left</div>
-          <div class="stat-value" id="stat-moves">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Rows Cleared</div>
-          <div class="stat-value" id="stat-rows">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Best Chain</div>
-          <div class="stat-value" id="stat-chain">0</div>
-        </div>
-      </div>
-
-      <div class="board-shell">
-        <div class="board-header-line">
-          <div class="board-title">Tap a lane to drop the next block.</div>
-          <div class="board-subtitle">
-            Make solid-color rows before the stack hits the top.
-          </div>
-        </div>
-
-        <div class="board-meta-row">
-          <div class="preview-pill">
-            <span class="preview-label">Next Block</span>
-            <div class="preview-cell">
-              <div id="preview-tile" class="tile preview-tile empty"></div>
-            </div>
-          </div>
-          <div class="preview-pill">
-            <span class="preview-label">Chain</span>
-            <div class="preview-cell">
-              <span id="preview-chain" style="font-size: 0.78rem;">x1.0</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="board" class="board" aria-label="Lane stack board"></div>
-
-        <div class="lane-row" id="lane-row"></div>
-
-        <div class="controls-row">
-          <button class="btn-secondary" id="btn-restart">
-            Restart Level
-          </button>
-          <button class="btn-primary" id="btn-next">
-            Next Level
-          </button>
-        </div>
-
-        <div class="board-footer">
-          <div>
-            Match full rows of a single color to clear them. Clearing multiple
-            rows in one cascade builds a <strong>chain multiplier</strong>.
-          </div>
-          <div>
-            Special gems:
-            <strong>Row</strong> (striped) clears its row. 
-            <strong>Bomb</strong> (boxed) blasts a 3×3 chunk.
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-line">
-        Forged in CaveCode Arcade Planet · <span>SageWire Syndicate</span>
-      </div>
-    </section>
-  </main>
-
-  <div id="result-modal" class="modal-backdrop modal-hidden">
-    <div class="modal-box">
-      <div class="modal-title" id="modal-title">Line Cleared</div>
-      <div class="modal-body" id="modal-body">
-        You reached the target score before the stack overflowed.
-      </div>
-      <div class="modal-buttons">
-        <button class="btn-secondary" id="modal-restart">Restart</button>
-        <button class="btn-primary" id="modal-next">Next Level</button>
+      <div class="modal-actions">
+        <button class="btn" id="modal-restart">↻ Replay Level</button>
+        <button class="btn primary" id="modal-next">➜ Continue</button>
       </div>
     </div>
   </div>
-  
-<script>
-    /*
-      BLOCK 2 — TUNING KNOBS (EDITABLE)
-      Rows, columns, level track, scoring, and special-spawn odds.
-    */
+
+  <!--
+    BLOCK 5 — GAME SCRIPT (EDITABLE)
+    Lane Stacker Engine · Animated Drops
+  -->
+  <script>
+    // --- Config -------------------------------------------------------------
 
     const ROWS = 12;
     const COLS = 7;
 
-    const COLORS = [0, 1, 2, 3, 4]; // mapped in CSS as color-0..4
-
-    const LEVELS = [
-      {
-        id: 1,
-        name: "Warm-Up Stack",
-        target: 900,
-        moves: 18,
-        colors: 4,
-      },
-      {
-        id: 2,
-        name: "Scarlet Lines",
-        target: 2200,
-        moves: 22,
-        colors: 5,
-      },
-      {
-        id: 3,
-        name: "Overflow Brink",
-        target: 4200,
-        moves: 26,
-        colors: 5,
-      },
+    const COLORS = [
+      { id: 0, label: "Red", className: "c0" },
+      { id: 1, label: "Blue", className: "c1" },
+      { id: 2, label: "Green", className: "c2" },
+      { id: 3, label: "Gold", className: "c3" },
+      { id: 4, label: "Violet", className: "c4" }
     ];
 
-    const TILE_TYPES = {
-      NORMAL: "normal",
-      ROW: "row",
-      BOMB: "bomb",
-    };
+    // Difficulty tuned to feel like "Beginner Tetris → Arcade Tetris"
+    const LEVELS = [
+      {
+        name: "Level 1 — Warm-Up Stack",
+        targetScore: 900,
+        maxDrops: 30,
+        colorCount: 3
+      },
+      {
+        name: "Level 2 — Color Ramp",
+        targetScore: 2200,
+        maxDrops: 28,
+        colorCount: 4
+      },
+      {
+        name: "Level 3 — Chain Builder",
+        targetScore: 3800,
+        maxDrops: 26,
+        colorCount: 4
+      },
+      {
+        name: "Level 4 — Scarlet Crest",
+        targetScore: 5200,
+        maxDrops: 24,
+        colorCount: 5
+      }
+    ];
 
-    const SPECIAL_ODDS = {
-      ROW: 0.08, // 8% chance
-      BOMB: 0.04, // 4% chance
-    };
+    const SCORE_PER_ROW = 200;
+    const SCORE_CHAIN_BONUS = 0.35; // each extra row in a cascade
 
-    const BASE_POINTS_PER_TILE = 45;
-    const CHAIN_STEP = 0.35; // x1.0, x1.35, x1.7, ...
-
-    /*
-      BLOCK 3 — LAYOUT WIRING
-      Grabs DOM nodes, draws board grid & lane buttons.
-    */
-
-    const boardEl = document.getElementById("board");
-    const laneRowEl = document.getElementById("lane-row");
-
-    const levelBlurbEl = document.getElementById("level-blurb");
-    const statLevelEl = document.getElementById("stat-level");
-    const statScoreEl = document.getElementById("stat-score");
-    const statTargetEl = document.getElementById("stat-target");
-    const statMovesEl = document.getElementById("stat-moves");
-    const statRowsEl = document.getElementById("stat-rows");
-    const statChainEl = document.getElementById("stat-chain");
-
-    const previewTileEl = document.getElementById("preview-tile");
-    const previewChainEl = document.getElementById("preview-chain");
-
-    const btnRestartEl = document.getElementById("btn-restart");
-    const btnNextEl = document.getElementById("btn-next");
-
-    const modalEl = document.getElementById("result-modal");
-    const modalTitleEl = document.getElementById("modal-title");
-    const modalBodyEl = document.getElementById("modal-body");
-    const modalRestartEl = document.getElementById("modal-restart");
-    const modalNextEl = document.getElementById("modal-next");
-
-    // Build lane buttons
-    for (let c = 0; c < COLS; c++) {
-      const btn = document.createElement("button");
-      btn.className = "lane-btn";
-      btn.textContent = c + 1;
-      btn.addEventListener("click", () => handleLaneClick(c));
-      laneRowEl.appendChild(btn);
-    }
-
-    // NEW: allow tapping the board to choose a column
-    boardEl.addEventListener("click", (evt) => {
-      const tileEl = evt.target.closest(".tile");
-      if (!tileEl || !boardEl.contains(tileEl)) return;
-
-      const children = Array.from(boardEl.children);
-      const idx = children.indexOf(tileEl);
-      if (idx === -1) return;
-
-      const col = idx % COLS;
-      handleLaneClick(col);
-    });
-
-    /*
-      BLOCK 4 — GAME ENGINE
-      Board state, drop logic, row clears, specials, scoring, sound, modals.
-    */
+    // --- State --------------------------------------------------------------
 
     let board = [];
     let currentLevelIndex = 0;
     let score = 0;
-    let movesLeft = 0;
-    let rowsCleared = 0;
-    let bestChain = 0;
-    let specialsSeen = 0;
-    let currentTile = null;
-    let gameOver = false;
-    let lastResultWasWin = false;
+    let dropsLeft = 0;
+    let rowsClearedTotal = 0;
+    let bestChain = 1;
+    let currentChain = 1;
+    let nextColorId = 0;
+    let isResolving = false;
+    let isGameOver = false;
+
+    // track which tile just spawned for animation
+    let lastSpawn = null;
+
+    // --- Elements -----------------------------------------------------------
+
+    const boardEl = document.getElementById("board");
+    const statusTextEl = document.getElementById("statusText");
+    const nextColorLabelEl = document.getElementById("nextColorLabel");
+
+    const hudLevel = document.getElementById("hud-level");
+    const hudScore = document.getElementById("hud-score");
+    const hudTarget = document.getElementById("hud-target");
+    const hudDrops = document.getElementById("hud-drops");
+    const hudRows = document.getElementById("hud-rows");
+    const hudChain = document.getElementById("hud-chain");
+
+    const btnRestart = document.getElementById("btn-restart");
+    const btnNext = document.getElementById("btn-next");
+    const laneButtons = Array.from(document.querySelectorAll(".lane-btn"));
+
+    const modalBackdrop = document.getElementById("modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalBody = document.getElementById("modal-body");
+    const modalRestart = document.getElementById("modal-restart");
+    const modalNext = document.getElementById("modal-next");
+
+    // --- Simple Web Audio beeps --------------------------------------------
+
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      return audioCtx;
+    }
+
+    function playBeep(freq, duration, gain = 0.12) {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+
+      const osc = ctx.createOscillator();
+      const vol = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      vol.gain.value = gain;
+      osc.connect(vol);
+      vol.connect(ctx.destination);
+      const now = ctx.currentTime;
+      osc.start(now);
+      osc.stop(now + duration);
+    }
+
+    function playDropSound() {
+      playBeep(220, 0.05);
+    }
+
+    function playRowClearSound() {
+      playBeep(520, 0.08, 0.14);
+    }
+
+    function playLevelUpSound() {
+      playBeep(660, 0.12, 0.16);
+      setTimeout(() => playBeep(880, 0.1, 0.16), 90);
+    }
+
+    function playFailSound() {
+      playBeep(120, 0.12, 0.16);
+    }
+
+    // --- Helpers ------------------------------------------------------------
 
     function makeEmptyBoard() {
       board = Array.from({ length: ROWS }, () =>
@@ -760,405 +725,342 @@
       );
     }
 
-    function randomInt(maxExclusive) {
-      return Math.floor(Math.random() * maxExclusive);
-    }
-
-    function spawnTileSpec(level) {
-      const colorPool = COLORS.slice(0, level.colors);
-      const color = colorPool[randomInt(colorPool.length)];
-
-      const roll = Math.random();
-      let type = TILE_TYPES.NORMAL;
-      if (roll < SPECIAL_ODDS.BOMB) {
-        type = TILE_TYPES.BOMB;
-      } else if (roll < SPECIAL_ODDS.BOMB + SPECIAL_ODDS.ROW) {
-        type = TILE_TYPES.ROW;
-      }
-
-      if (type !== TILE_TYPES.NORMAL) {
-        specialsSeen++;
-      }
-
-      return { color, type };
-    }
-
     function setStatus(text) {
-      levelBlurbEl.textContent = text;
+      statusTextEl.textContent = text;
     }
 
-    function updateStats() {
-      const lvl = LEVELS[currentLevelIndex];
-      statLevelEl.textContent = lvl.id;
-      statScoreEl.textContent = score.toString();
-      statTargetEl.textContent = lvl.target.toString();
-      statMovesEl.textContent = movesLeft.toString();
-      statRowsEl.textContent = rowsCleared.toString();
-      statChainEl.textContent = bestChain.toString();
+    function updateHud() {
+      const level = LEVELS[currentLevelIndex];
+      hudLevel.textContent = currentLevelIndex + 1;
+      hudScore.textContent = score.toString();
+      hudTarget.textContent = level.targetScore.toString();
+      hudDrops.textContent = dropsLeft.toString();
+      hudRows.textContent = rowsClearedTotal.toString();
+      hudChain.textContent = "x" + currentChain.toFixed(1);
     }
 
-    function renderBoard(highlightSet) {
+    function chooseNextColor() {
+      const level = LEVELS[currentLevelIndex];
+      const available = COLORS.slice(0, level.colorCount);
+      const choice = available[Math.floor(Math.random() * available.length)];
+      nextColorId = choice.id;
+
+      nextColorLabelEl.textContent = "●";
+      nextColorLabelEl.style.color = getColorCSS(choice.id);
+    }
+
+    function getColorCSS(id) {
+      switch (id) {
+        case 0: return "#f97373";
+        case 1: return "#38bdf8";
+        case 2: return "#4ade80";
+        case 3: return "#facc15";
+        case 4: return "#a855f7";
+        default: return "#e5e7eb";
+      }
+    }
+
+    function renderBoard() {
       boardEl.innerHTML = "";
-      const highlight =
-        highlightSet || new Set(); /* keys are "r:c" strings */
-
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
-          const cell = board[r][c];
-          const div = document.createElement("div");
-          div.className = "tile";
-          if (!cell) {
-            div.classList.add("empty");
-          } else {
-            div.classList.add("color-" + cell.color);
-            if (cell.type !== TILE_TYPES.NORMAL) {
-              div.classList.add("type-" + cell.type);
+          const cellEl = document.createElement("div");
+          cellEl.className = "cell";
+          cellEl.dataset.row = r;
+          cellEl.dataset.col = c;
+
+          const tile = board[r][c];
+          if (tile) {
+            const tileEl = document.createElement("div");
+            tileEl.className = "tile " + COLORS[tile.color].className;
+            if (tile.special === "row") tileEl.classList.add("special-row");
+            if (tile.special === "bomb") tileEl.classList.add("special-bomb");
+
+            if (lastSpawn && lastSpawn.row === r && lastSpawn.col === c) {
+              tileEl.classList.add("spawn");
             }
-            const key = r + ":" + c;
-            if (highlight.has(key)) {
-              div.classList.add("clearing");
-            }
+
+            cellEl.appendChild(tileEl);
           }
-          boardEl.appendChild(div);
+
+          boardEl.appendChild(cellEl);
         }
       }
     }
 
-    function updatePreview() {
-      if (!currentTile) {
-        previewTileEl.className = "tile preview-tile empty";
-        return;
-      }
-      previewTileEl.className = "tile preview-tile color-" + currentTile.color;
-      if (currentTile.type !== TILE_TYPES.NORMAL) {
-        previewTileEl.classList.add("type-" + currentTile.type);
-      }
-    }
-
-    function updateChainPreview(multiplier) {
-      previewChainEl.textContent = "x" + multiplier.toFixed(1);
-    }
-
-    function findDropRow(col) {
-      for (let r = ROWS - 1; r >= 0; r--) {
-        if (!board[r][col]) {
-          return r;
-        }
-      }
-      return -1; // full column
-    }
-
-    function handleLaneClick(col) {
-      if (gameOver) return;
-      if (!currentTile) return;
-
-      const row = findDropRow(col);
-      if (row === -1) {
-        Sound.fail();
-        endLevel(
-          false,
-          "That lane is full. The stack overflowed on that drop."
-        );
-        return;
-      }
-
-      const levelCfg = LEVELS[currentLevelIndex];
-
-      board[row][col] = {
-        color: currentTile.color,
-        type: currentTile.type,
-      };
-      movesLeft--;
-      Sound.drop();
-
-      resolveAfterDrop(levelCfg);
-    }
-
-    function resolveAfterDrop(levelCfg) {
-      let chain = 0;
-
-      function loop() {
-        const rowsToClear = findUniformRows();
-        if (rowsToClear.length === 0) {
-          if (chain > 0) {
-            bestChain = Math.max(bestChain, chain);
+    function highlightRows(rows) {
+      rows.forEach((rowIndex) => {
+        for (let c = 0; c < COLS; c++) {
+          const selector = `.cell[data-row="${rowIndex}"][data-col="${c}"] .tile`;
+          const tileEl = boardEl.querySelector(selector);
+          if (tileEl) {
+            tileEl.classList.add("clearing");
           }
-          updateStats();
-          updateChainPreview(1.0);
-          checkEndConditions(levelCfg);
-          if (!gameOver) {
-            currentTile = spawnTileSpec(levelCfg);
-            updatePreview();
-            renderBoard();
-          }
-          return;
         }
-
-        chain++;
-        const chainMultiplier = 1 + (chain - 1) * CHAIN_STEP;
-        updateChainPreview(chainMultiplier);
-
-        const clearSet = computeClearSet(rowsToClear);
-        rowsCleared += rowsToClear.length;
-
-        renderBoard(clearSet);
-        Sound.match();
-
-        setTimeout(() => {
-          applyClearSet(clearSet);
-          collapseBoard();
-
-          const tilesCleared = clearSet.size;
-          const delta = Math.round(
-            tilesCleared * BASE_POINTS_PER_TILE * chainMultiplier
-          );
-          score += delta;
-
-          renderBoard();
-          updateStats();
-
-          // Continue chaining
-          setTimeout(loop, 60);
-        }, 180);
-      }
-
-      loop();
+      });
     }
 
-    function findUniformRows() {
-      const rowsList = [];
+    function findFullRows() {
+      const rows = [];
       for (let r = 0; r < ROWS; r++) {
         let firstColor = null;
-        let allSame = true;
+        let solid = true;
         for (let c = 0; c < COLS; c++) {
-          const cell = board[r][c];
-          if (!cell) {
-            allSame = false;
+          const tile = board[r][c];
+          if (!tile) {
+            solid = false;
             break;
           }
           if (firstColor === null) {
-            firstColor = cell.color;
-          } else if (cell.color !== firstColor) {
-            allSame = false;
+            firstColor = tile.color;
+          } else if (tile.color !== firstColor) {
+            solid = false;
             break;
           }
         }
-        if (allSame && firstColor !== null) {
-          rowsList.push(r);
+        if (solid && firstColor !== null) {
+          rows.push(r);
         }
       }
-      return rowsList;
+      return rows;
     }
 
-    function computeClearSet(rows) {
-      const set = new Set();
-
-      function add(r, c) {
-        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
-        if (board[r][c]) {
-          set.add(r + ":" + c);
-        }
+    function removeRows(rows) {
+      rows.sort((a, b) => a - b);
+      for (let i = 0; i < rows.length; i++) {
+        const rowIndex = rows[i] - i; // board height shrinks as we splice
+        board.splice(rowIndex, 1);
+        board.unshift(Array.from({ length: COLS }, () => null));
       }
+    }
 
-      rows.forEach((r) => {
-        for (let c = 0; c < COLS; c++) {
-          const cell = board[r][c];
-          if (!cell) continue;
-          add(r, c);
+    function delay(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
-          if (cell.type === TILE_TYPES.BOMB) {
-            for (let dr = -1; dr <= 1; dr++) {
-              for (let dc = -1; dc <= 1; dc++) {
-                add(r + dr, c + dc);
-              }
-            }
-          } else if (cell.type === TILE_TYPES.ROW) {
-            for (let cc = 0; cc < COLS; cc++) {
-              add(r, cc);
-            }
+    function maybeSpawnSpecial(rowCountInCascade, clearedRowIndex) {
+      // Simple rule: big cascades have a chance to leave a special in the new top row
+      if (rowCountInCascade < 2) return;
+      const chance = Math.min(0.4, 0.15 + rowCountInCascade * 0.1);
+      if (Math.random() > chance) return;
+
+      const specialType = Math.random() < 0.6 ? "row" : "bomb";
+      const col = Math.floor(Math.random() * COLS);
+      const row = clearedRowIndex;
+
+      if (!board[row][col]) return;
+      board[row][col].special = specialType;
+    }
+
+    async function resolveBoard() {
+      isResolving = true;
+      let cascade = 0;
+      let clearedAny = false;
+
+      while (true) {
+        const fullRows = findFullRows();
+        if (!fullRows.length) {
+          if (!clearedAny) {
+            currentChain = 1.0;
+            updateHud();
           }
+          break;
         }
-      });
 
-      return set;
-    }
+        clearedAny = true;
+        cascade += 1;
+        playRowClearSound();
+        highlightRows(fullRows);
 
-    function applyClearSet(set) {
-      set.forEach((key) => {
-        const [r, c] = key.split(":").map(Number);
-        board[r][c] = null;
-      });
-    }
+        await delay(260);
 
-    function collapseBoard() {
-      for (let c = 0; c < COLS; c++) {
-        let writeRow = ROWS - 1;
-        for (let r = ROWS - 1; r >= 0; r--) {
-          const cell = board[r][c];
-          if (cell) {
-            if (writeRow !== r) {
-              board[writeRow][c] = cell;
-              board[r][c] = null;
-            }
-            writeRow--;
-          }
-        }
-      }
-    }
+        const rowsThisCascade = fullRows.length;
+        rowsClearedTotal += rowsThisCascade;
 
-    function checkEndConditions(levelCfg) {
-      if (score >= levelCfg.target) {
-        Sound.levelUp();
-        endLevel(
-          true,
-          `You reached ${score} points. Target was ${levelCfg.target}.`
+        // chain bonus: more rows in the same cascade → higher multiplier
+        const chainBoost = 1 + (rowsThisCascade - 1) * SCORE_CHAIN_BONUS;
+        currentChain = parseFloat(
+          (currentChain + 0.3 * chainBoost).toFixed(1)
         );
+        if (currentChain < 1.0) currentChain = 1.0;
+        bestChain = Math.max(bestChain, currentChain);
+
+        const addedScore =
+          rowsThisCascade * SCORE_PER_ROW * currentChain;
+        score += Math.round(addedScore);
+
+        // tiny chance to leave a special behind in the "shockwave"
+        maybeSpawnSpecial(rowsThisCascade, fullRows[0]);
+
+        removeRows(fullRows);
+        renderBoard();
+        updateHud();
+
+        await delay(80);
+      }
+
+      isResolving = false;
+      checkLevelEnd();
+    }
+
+    function dropBlockInLane(colIndex) {
+      if (isResolving || isGameOver) return;
+      if (dropsLeft <= 0) return;
+
+      // find the highest free row from the bottom
+      let targetRow = -1;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (!board[r][colIndex]) {
+          targetRow = r;
+          break;
+        }
+      }
+
+      if (targetRow === -1) {
+        setStatus("That lane is full. Try another.");
+        playFailSound();
         return;
       }
 
-      if (movesLeft <= 0) {
-        Sound.fail();
-        endLevel(
-          false,
-          `You ran out of drops with ${score}/${levelCfg.target} points.`
-        );
-      }
-    }
-
-    function endLevel(win, message) {
-      gameOver = true;
-      lastResultWasWin = win;
-      showModal(win, message);
-    }
-
-    function showModal(win, message) {
-      modalTitleEl.textContent = win ? "Line Cleared" : "Stack Overflow";
-      modalBodyEl.textContent = message;
-      modalNextEl.style.display = win ? "inline-flex" : "none";
-      modalEl.classList.remove("modal-hidden");
-    }
-
-    function hideModal() {
-      modalEl.classList.add("modal-hidden");
-    }
-
-    btnRestartEl.addEventListener("click", () => {
-      startLevel(currentLevelIndex);
-    });
-
-    btnNextEl.addEventListener("click", () => {
-      // Only allow manual Next if previous level was actually cleared
-      if (!lastResultWasWin) {
-        setStatus(
-          "Clear the target score to unlock the next level. The button will light up when you earn it."
-        );
-        Sound.fail();
-        return;
-      }
-      const next =
-        currentLevelIndex + 1 < LEVELS.length ? currentLevelIndex + 1 : 0;
-      startLevel(next);
-    });
-
-    modalRestartEl.addEventListener("click", () => {
-      hideModal();
-      startLevel(currentLevelIndex);
-    });
-
-    modalNextEl.addEventListener("click", () => {
-      hideModal();
-      const next =
-        currentLevelIndex + 1 < LEVELS.length ? currentLevelIndex + 1 : 0;
-      startLevel(next);
-    });
-
-    modalEl.addEventListener("click", (evt) => {
-      if (evt.target === modalEl) {
-        hideModal();
-      }
-    });
-
-    /*
-      Tiny synth beeps for feedback. No external audio assets.
-    */
-    const Sound = (() => {
-      let ctx = null;
-
-      function getCtx() {
-        if (!ctx) {
-          const AC = window.AudioContext || window.webkitAudioContext;
-          if (!AC) return null;
-          ctx = new AC();
-        }
-        return ctx;
-      }
-
-      function blip(freq, duration, gainPeak) {
-        const ac = getCtx();
-        if (!ac) return;
-        const osc = ac.createOscillator();
-        const gain = ac.createGain();
-        osc.type = "sine";
-        osc.frequency.value = freq;
-        osc.connect(gain);
-        gain.connect(ac.destination);
-        const now = ac.currentTime;
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(gainPeak, now + 0.01);
-        gain.gain.exponentialRampToValueAtTime(
-          0.0001,
-          now + (duration || 0.1)
-        );
-        osc.start(now);
-        osc.stop(now + (duration || 0.1) + 0.04);
-      }
-
-      return {
-        drop() {
-          blip(220, 0.07, 0.22);
-        },
-        match() {
-          blip(520, 0.09, 0.28);
-        },
-        fail() {
-          blip(130, 0.28, 0.3);
-        },
-        levelUp() {
-          blip(660, 0.09, 0.24);
-          setTimeout(() => blip(880, 0.14, 0.26), 120);
-        },
+      // place tile
+      board[targetRow][colIndex] = {
+        color: nextColorId,
+        special: null
       };
-    })();
+      lastSpawn = { row: targetRow, col: colIndex };
+      dropsLeft -= 1;
 
-    /*
-      BLOCK 5 — BOOTSTRAP
-      Start on Level 1, seed the first tile.
-    */
+      playDropSound();
+      chooseNextColor();
+      renderBoard();
+      updateHud();
+      setStatus("");
+
+      resolveBoard();
+
+      if (dropsLeft <= 0 && !isGameOver) {
+        setStatus("No drops left. Clear as many rows as you can.");
+      }
+    }
+
+    function checkLevelEnd() {
+      if (isResolving || isGameOver) return;
+
+      const level = LEVELS[currentLevelIndex];
+
+      // Check if stack reached the top (any tile in row 0)
+      const stackTouchingTop = board[0].some((tile) => tile !== null);
+
+      if (score >= level.targetScore) {
+        isGameOver = true;
+        playLevelUpSound();
+        openModal(
+          "Level Complete",
+          `${level.name} cleared with a score of ${score}.`
+        );
+        return;
+      }
+
+      if (dropsLeft <= 0 || stackTouchingTop) {
+        isGameOver = true;
+        playFailSound();
+        const reason = stackTouchingTop
+          ? "The stack reached the top."
+          : "No drops left.";
+        openModal(
+          "Stack Over",
+          `${reason} Final score: ${score}. Target was ${level.targetScore}.`
+        );
+      }
+    }
+
+    function openModal(title, body) {
+      modalTitle.textContent = title;
+      modalBody.textContent = body;
+      modalBackdrop.classList.remove("hidden");
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.add("hidden");
+    }
+
+    function restartLevel() {
+      closeModal();
+      startLevel(currentLevelIndex);
+    }
+
+    function goToNextLevel() {
+      closeModal();
+      const nextIndex =
+        currentLevelIndex + 1 < LEVELS.length ? currentLevelIndex + 1 : 0;
+      startLevel(nextIndex);
+    }
 
     function startLevel(index) {
+      const level = LEVELS[index];
       currentLevelIndex = index;
-      const cfg = LEVELS[index];
+      score = 0;
+      dropsLeft = level.maxDrops;
+      rowsClearedTotal = 0;
+      currentChain = 1.0;
+      bestChain = 1.0;
+      isResolving = false;
+      isGameOver = false;
+      lastSpawn = null;
 
       makeEmptyBoard();
-      score = 0;
-      movesLeft = cfg.moves;
-      rowsCleared = 0;
-      bestChain = 0;
-      specialsSeen = 0;
-      gameOver = false;
-      lastResultWasWin = false;
+      chooseNextColor();
+      renderBoard();
+      updateHud();
 
       setStatus(
-        `Level ${cfg.id} — ${cfg.name}. Reach ${cfg.target} points in ${cfg.moves} drops.`
+        `${level.name} · Reach ${level.targetScore} points in ${level.maxDrops} drops.`
       );
-
-      currentTile = spawnTileSpec(cfg);
-      updatePreview();
-      updateChainPreview(1.0);
-      updateStats();
-      renderBoard();
     }
 
-    // kick things off
+    // --- Wiring -------------------------------------------------------------
+
+    laneButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const col = parseInt(btn.dataset.lane, 10);
+        dropBlockInLane(col);
+      });
+    });
+
+    btnRestart.addEventListener("click", () => {
+      restartLevel();
+    });
+
+    btnNext.addEventListener("click", () => {
+      goToNextLevel();
+    });
+
+    modalRestart.addEventListener("click", () => {
+      restartLevel();
+    });
+
+    modalNext.addEventListener("click", () => {
+      goToNextLevel();
+    });
+
+    modalBackdrop.addEventListener("click", (evt) => {
+      if (evt.target === modalBackdrop) {
+        closeModal();
+      }
+    });
+
+    // First tap to unlock audio on some devices
+    document.body.addEventListener(
+      "click",
+      () => {
+        getAudioCtx();
+      },
+      { once: true }
+    );
+
+    // --- Boot ---------------------------------------------------------------
+
     startLevel(0);
-</script>
+  </script>
+</body>
+</html>
