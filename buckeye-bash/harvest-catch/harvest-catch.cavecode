@@ -1,0 +1,120 @@
+---
+
+## 2️⃣ `arcade/buckeye-bash/harvest-catch/harvest-catch.cavecode`
+
+```text
+CAVECODE SPEC — HARVEST CATCH (ARC-BB-001)
+Category: buckeye-bash
+Engine: Lane-based catcher
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Buckeye Bash — Harvest Catch
+Game ID: ARC-BB-001
+Category: buckeye-bash
+Genre: lane-catcher
+One-Liner: Slide your basket between lanes to catch fall goodies and dodge the junk.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Frame loop (~60 FPS):
+
+  - Update timers.
+  - Possibly spawn a new falling item in a random lane.
+      - Decide item type (good or bad) based on goodItemChance.
+  - Move each item downward based on fallSpeed and elapsed time.
+  - Check if any item overlaps the basket row:
+      - If in same lane as basket:
+          - If good → add score, optionally show small effect.
+          - If bad → subtract health.
+          - In all cases → remove item.
+  - Remove items that pass below the screen.
+  - Gradually increase difficulty (faster fallSpeed or lower spawnInterval) over time.
+  - If health <= 0:
+      - Enter GAME OVER state and show final score.
+
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop:
+  - Left Arrow / A: move basket one lane left (if possible)
+  - Right Arrow / D: move basket one lane right (if possible)
+
+Mobile:
+  - Tap left third of playfield: move left
+  - Tap right third: move right
+  - Tapping middle does nothing (or can be used for future actions)
+
+No jump, no pause in this ancestor.
+
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Score:
+  - +scorePerGood for each good item caught.
+  - No points for dodging bad items.
+
+Health:
+  - startingHealth at the beginning of each run.
+  - -healthLossBad for each bad item caught.
+  - Game ends when health <= 0.
+
+Difficulty:
+  - Optionally increase fallSpeed slowly over time.
+  - Optionally decrease spawnIntervalMs to make items appear faster.
+
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+laneCount:        3
+startingHealth:   5
+fallSpeed:        140          # base pixels per second
+spawnIntervalMs:  900
+goodItemChance:   0.7          # 70% chance of a "good" item
+scorePerGood:     10
+healthLossBad:    1
+difficultyScale:  0.015        # small factor applied over time
+
+(PENCIL — safe to modify; keep script in sync)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Harvest Catch"
+subtitle: "Slide the basket. Catch the good. Dodge the junk."
+startLabel: "Start Harvest"
+statusIdle: "Tap Start Harvest to begin."
+statusRunning: "Catch the fall goodies. Dodge the junk."
+statusGameOver: "Harvest over. Tap Start to try again."
+(Globe — public strings)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+Future holiday / seasonal variants:
+  - Reskin with winter, spring, summer themes.
+  - Lane hazards (blocked lanes).
+  - Powerups: double score, shield against bad items.
+  - Timed mode / wave-based mode.
+
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching hooks:
+  - Items as a list of objects with lane + y-position.
+  - Collision as "same lane + y-range overlap".
+  - Difficulty scaling by modifying knobs over time.
+
+(END)
