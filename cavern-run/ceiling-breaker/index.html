@@ -1,324 +1,1066 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Cavern Run — Ceiling Breaker (ARC-CR-002)</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <title>Ceiling Breaker · ARC-CB-001</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
-<style>
-  :root {
-    --bg: #020617;
-    --border: #1f2937;
-    --text-main: #e5e7eb;
-    --text-soft: #9ca3af;
-    --platform: #4ade80;
-    --platform-crumble: #f87171;
-    --player: #facc15;
-  }
+  <!--
+    BLOCK 1 — SHELL & BRAND (LOCKED)
+    CaveCode Arcade Planet · Cavern-Run Line
+  -->
+  <style>
+    :root {
+      --cc-bg: #020617;
+      --cc-panel: #02081b;
+      --cc-panel-soft: #0b1120;
+      --cc-border: #1f2937;
+      --cc-accent: #fb923c;
+      --cc-accent-soft: #fed7aa;
+      --cc-text-main: #e5e7eb;
+      --cc-text-soft: #9ca3af;
+      --cc-badge-bg: #020617;
+      --runner: #22c55e;
+      --platform: #4b5563;
+      --platform-safe: #e5e7eb;
+      --platform-boost: #38bdf8;
+      --hazard: #ef4444;
+    }
 
-  body {
-    margin: 0;
-    background: radial-gradient(circle at top, #111827 0, #020617 60%);
-    color: var(--text-main);
-    font-family: system-ui, sans-serif;
-    user-select: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    * {
+      box-sizing: border-box;
+    }
 
-  header {
-    padding: 0.5rem;
-    text-align: center;
-  }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%);
+      color: var(--cc-text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.25rem 0.75rem 2.5rem;
+    }
 
-  h1 {
-    margin: 0;
-    font-size: 1.1rem;
-    letter-spacing: 0.05em;
-  }
+    header {
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, #020617, #030712);
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+      padding: 0.9rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
 
-  #hud {
-    margin-top: 0.25rem;
-    font-size: 0.85rem;
-    color: var(--text-soft);
-    display: flex;
-    gap: 1rem;
-  }
-
-  canvas {
-    width: 320px;
-    height: 480px;
-    max-width: 100vw;
-    background: #000;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    margin-top: 0.6rem;
-    touch-action: manipulation;
-  }
-
-  #startBtn {
-    margin-top: 0.5rem;
-    padding: 0.25rem 0.8rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border);
-    background: #1e293b;
-    color: var(--text-main);
-    cursor: pointer;
-  }
-
-  #status {
-    margin-top: 0.5rem;
-    font-size: 0.85rem;
-    color: var(--text-soft);
-  }
-</style>
-</head>
-<body>
-<header>
-  <h1>Cavern Run — Ceiling Breaker · ARC-CR-002</h1>
-</header>
-
-<div id="hud">
-  <div>Height: <span id="scoreText">0</span></div>
-  <div>Best: <span id="bestText">0</span></div>
-</div>
-
-<canvas id="game" width="320" height="480"></canvas>
-<button id="startBtn">Begin Ascent</button>
-<div id="status">Tap Begin Ascent to start.</div>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-const scoreText = document.getElementById("scoreText");
-const bestText = document.getElementById("bestText");
-const startBtn = document.getElementById("startBtn");
-const statusEl = document.getElementById("status");
-
-// TUNING
-const T = {
-  gravity: 1400,
-  jumpVelocity: -600,
-  playerSpeed: 200,
-  scrollSpeed: 40,
-  scrollSpeedIncrease: 5,
-  platformSpacingMin: 60,
-  platformSpacingMax: 110,
-  platformWidthMin: 40,
-  platformWidthMax: 90,
-  crumbleChance: 0.25,
-  crumbleDelay: 0.35
-};
-
-// STATE
-let player;
-let platforms = [];
-let running = false;
-let lastTime = 0;
-let scrollOffset = 0;
-let heightClimbed = 0;
-let bestScore = 0;
-
-let leftHeld = false;
-let rightHeld = false;
-let jumpQueued = false;
-
-// INIT
-function resetGame() {
-  player = {
-    x: canvas.width / 2,
-    y: canvas.height - 40,
-    w: 20,
-    h: 20,
-    vy: 0,
-    grounded: false
-  };
-
-  platforms = [];
-  scrollOffset = 0;
-  heightClimbed = 0;
-
-  // Add starting platform
-  platforms.push({
-    x: canvas.width / 2 - 50,
-    y: canvas.height - 20,
-    w: 100,
-    crumble: false,
-    timer: 0
-  });
-
-  // Seed some platforms
-  let seedY = canvas.height - 80;
-  for (let i = 0; i < 6; i++) {
-    seedY -= 80;
-    platforms.push(genPlatform(seedY));
-  }
-}
-
-// PLATFORM GENERATION
-function genPlatform(y) {
-  const w = rand(T.platformWidthMin, T.platformWidthMax);
-  const x = rand(0, canvas.width - w);
-  const crumble = Math.random() < T.crumbleChance;
-  return { x, y, w, crumble, timer: 0 };
-}
-
-// UTILITY
-function rand(min, max) {
-  return min + Math.random() * (max - min);
-}
-
-// INPUT
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft" || e.key === "a") leftHeld = true;
-  if (e.key === "ArrowRight" || e.key === "d") rightHeld = true;
-  if (e.key === " " || e.key === "ArrowUp" || e.key === "w") jumpQueued = true;
-});
-
-document.addEventListener("keyup", e => {
-  if (e.key === "ArrowLeft" || e.key === "a") leftHeld = false;
-  if (e.key === "ArrowRight" || e.key === "d") rightHeld = false;
-});
-
-// Mobile
-canvas.addEventListener("touchstart", e => {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.touches[0].clientX - rect.left;
-  if (x < rect.width / 2) leftHeld = true;
-  else rightHeld = true;
-});
-canvas.addEventListener("touchend", () => {
-  leftHeld = false;
-  rightHeld = false;
-});
-
-// UPDATE
-function update(dt) {
-  // Rising camera
-  let speed = T.scrollSpeed + heightClimbed * 0.01 * T.scrollSpeedIncrease;
-  scrollOffset += speed * dt;
-  heightClimbed += speed * dt;
-  scoreText.textContent = Math.floor(heightClimbed);
-
-  // Player movement
-  if (leftHeld) player.x -= T.playerSpeed * dt;
-  if (rightHeld) player.x += T.playerSpeed * dt;
-
-  player.x = Math.max(0, Math.min(canvas.width - player.w, player.x));
-
-  // Gravity
-  player.vy += T.gravity * dt;
-  player.y += player.vy * dt;
-
-  player.grounded = false;
-
-  // Platform collisions
-  for (const p of platforms) {
-    const py = p.y + scrollOffset; // moved by scroll
-    if (
-      player.vy > 0 &&
-      player.x + player.w > p.x &&
-      player.x < p.x + p.w &&
-      player.y + player.h > py &&
-      player.y + player.h < py + 10
-    ) {
-      // Land
-      player.y = py - player.h;
-      player.vy = 0;
-      player.grounded = true;
-
-      // crumble?
-      if (p.crumble) p.timer += dt;
-      if (p.timer >= T.crumbleDelay) {
-        p.remove = true;
+    @media (min-width: 640px) {
+      header {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
       }
     }
-  }
 
-  // Jump
-  if (jumpQueued && player.grounded) {
-    player.vy = T.jumpVelocity;
-  }
-  jumpQueued = false;
+    .title-line {
+      font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
 
-  // Failure: fell below screen
-  if (player.y > canvas.height) {
-    endGame();
-    return;
-  }
+    .title-line span {
+      color: var(--cc-accent-soft);
+    }
 
-  // Generate new platforms above
-  let highest = Math.min(...platforms.map(p => p.y));
-  if (highest + scrollOffset > 0) {
-    const newY = highest - rand(T.platformSpacingMin, T.platformSpacingMax);
-    platforms.push(genPlatform(newY));
-  }
+    .subtitle-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.15rem;
+    }
 
-  // Remove off-screen platforms
-  platforms = platforms.filter(p => {
-    const py = p.y + scrollOffset;
-    return py < canvas.height + 40 && !p.remove;
-  });
-}
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      background: var(--cc-badge-bg);
+      color: var(--cc-text-soft);
+      white-space: nowrap;
+    }
 
-// RENDER
-function render() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+    .badge.accent {
+      border-color: var(--cc-accent);
+      color: var(--cc-accent-soft);
+      background: radial-gradient(circle at top left, rgba(251, 146, 60, 0.35), #020617);
+    }
 
-  // Platforms
-  for (const p of platforms) {
-    const py = p.y + scrollOffset;
-    if (py > canvas.height || py < -40) continue;
+    main {
+      width: 100%;
+      max-width: 960px;
+      margin-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
 
-    ctx.fillStyle = p.crumble ? "#f87171" : "#4ade80";
-    ctx.fillRect(p.x, py, p.w, 10);
-  }
+    .panel {
+      background: radial-gradient(circle at top left, #020617, #020617 40%, #000 100%);
+      border-radius: 1.3rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+      padding: 1rem 1.1rem 1.1rem;
+    }
 
-  // Player
-  ctx.fillStyle = "#facc15";
-  ctx.fillRect(player.x, player.y, player.w, player.h);
-}
+    .panel-header-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
 
-// MAIN LOOP
-function loop(ts) {
-  if (!running) return;
-  if (!lastTime) lastTime = ts;
-  const dt = (ts - lastTime) / 1000;
-  lastTime = ts;
+    .panel-title {
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--cc-text-soft);
+    }
 
-  update(dt);
-  render();
+    .panel-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
 
-  requestAnimationFrame(loop);
-}
+    .panel-tags .badge {
+      font-size: 0.65rem;
+    }
 
-// END GAME
-function endGame() {
-  running = false;
-  statusEl.textContent = "You fell to the dark.";
+    .panel-body p {
+      margin: 0.25rem 0 0.45rem;
+      font-size: 0.86rem;
+      color: var(--cc-text-soft);
+      line-height: 1.45;
+    }
 
-  if (heightClimbed > bestScore) {
-    bestScore = Math.floor(heightClimbed);
-    bestText.textContent = bestScore;
-  }
-}
+    .stat-grid {
+      margin-top: 0.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
 
-// START
-startBtn.addEventListener("click", () => {
-  running = true;
-  lastTime = 0;
-  resetGame();
-  statusEl.textContent = "Climb before the darkness catches you.";
-  requestAnimationFrame(loop);
-});
+    @media (min-width: 720px) {
+      .stat-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+    }
 
-// Initial render
-resetGame();
-render();
-</script>
+    .stat-chip {
+      background: #020617;
+      border-radius: 0.8rem;
+      border: 1px solid var(--cc-border);
+      padding: 0.4rem 0.55rem;
+      font-size: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
 
+    .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--cc-text-soft);
+    }
+
+    .stat-value {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .stat-value.accent {
+      color: var(--cc-accent-soft);
+    }
+
+    .stat-value.danger {
+      color: #f97373;
+    }
+
+    .playfield-wrap {
+      margin-top: 0.7rem;
+      border-radius: 1rem;
+      border: 1px solid var(--cc-border);
+      background: radial-gradient(circle at top, #020617 0, #000 80%);
+      padding: 0.75rem;
+    }
+
+    #playfield {
+      position: relative;
+      margin: 0 auto;
+      width: min(420px, 100%);
+      height: min(520px, 110vw);
+      max-height: 520px;
+      background: radial-gradient(circle at 50% 0%, #020617 0, #020617 35%, #000 95%);
+      border-radius: 0.9rem;
+      overflow: hidden;
+      border: 1px solid #020617;
+      touch-action: none;
+    }
+
+    .bg-stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(148,163,184,0.25) 0, transparent 55%),
+        radial-gradient(circle at 80% 40%, rgba(55,65,81,0.4) 0, transparent 55%);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    #dangerGlow {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 22%;
+      background: linear-gradient(to bottom, rgba(248, 113, 113, 0.65), transparent);
+      mix-blend-mode: screen;
+      opacity: 0.15;
+      pointer-events: none;
+      transition: opacity 0.16s ease;
+    }
+
+    #runner {
+      position: absolute;
+      width: 26px;
+      height: 30px;
+      border-radius: 0.4rem;
+      background: radial-gradient(circle at 20% 0%, #bbf7d0, var(--runner));
+      box-shadow: 0 0 14px rgba(34,197,94,0.9);
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 40px;
+    }
+
+    .platform {
+      position: absolute;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--platform);
+      box-shadow: 0 0 10px rgba(15,23,42,0.9);
+    }
+
+    .platform.safe {
+      background: var(--platform-safe);
+      box-shadow: 0 0 14px rgba(248, 250, 252, 0.9);
+    }
+
+    .platform.boost {
+      background: var(--platform-boost);
+      box-shadow: 0 0 14px rgba(56,189,248,0.9);
+    }
+
+    .platform.crumbling {
+      opacity: 0.55;
+      transform: translateY(2px);
+    }
+
+    .debris {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 0.25rem;
+      background: radial-gradient(circle at 30% 0%, #fecaca, var(--hazard));
+      box-shadow: 0 0 10px rgba(248,113,113,0.9);
+    }
+
+    .controls-row {
+      margin-top: 0.65rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      justify-content: center;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      background: #020617;
+      color: var(--cc-text-main);
+      font-size: 0.8rem;
+      padding: 0.45rem 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cc-accent), #f97316);
+      border-color: #fb923c;
+      color: #111827;
+      font-weight: 600;
+      box-shadow: 0 12px 30px rgba(248,113,113,0.45);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .hint {
+      margin-top: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+    }
+
+    footer {
+      margin-top: 1.4rem;
+      font-size: 0.78rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+    }
+
+    footer span {
+      color: var(--cc-accent-soft);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .modal {
+      background: radial-gradient(circle at top, #020617, #000 85%);
+      border-radius: 1rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.95);
+      padding: 1.1rem 1.3rem 1rem;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .modal p {
+      margin: 0.25rem 0 0.75rem;
+      font-size: 0.85rem;
+      color: var(--cc-text-soft);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.55rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title-line">
+        CAVERN RUN — <span>CEILING BREAKER</span> · ARC-CB-001
+      </div>
+      <div class="subtitle-line">
+        <span class="badge">CaveCode Arcade Planet</span>
+        <span class="badge">Collapsing Escape Climber</span>
+        <span class="badge accent">Jump + Dash</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title">Track Overview</div>
+        <div class="panel-tags">
+          <span class="badge">5-Level Climb</span>
+          <span class="badge">Crumbling Platforms</span>
+          <span class="badge">Debris Hazards</span>
+          <span class="badge">Danger Glow</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p>
+          The cavern ceiling is collapsing. Platforms crumble seconds after you touch them, debris falls from above,
+          and a red collapse glow rides the top of the screen. Jump and dash from ledge to ledge and climb high enough
+          to clear each level before the collapse claims the shaft.
+        </p>
+        <p>
+          Tap / click to jump. Use the dash button (or A / D keys while in mid-air) to burst sideways when you need it most.
+        </p>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-chip">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="stat-level">1</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Height</div>
+          <div class="stat-value" id="stat-height">0 m</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Target</div>
+          <div class="stat-value" id="stat-target">1000 m</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Lives</div>
+          <div class="stat-value" id="stat-lives">3</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Best Run</div>
+          <div class="stat-value" id="stat-best">0 m</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Chain</div>
+          <div class="stat-value" id="stat-chain">x1.0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="playfield-wrap">
+        <div id="playfield">
+          <div class="bg-stars"></div>
+          <div id="dangerGlow"></div>
+          <div id="runner"></div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <button class="btn btn-primary" id="jumpBtn">Jump</button>
+        <button class="btn" id="dashLeftBtn">Dash ◀</button>
+        <button class="btn" id="dashRightBtn">Dash ▶</button>
+        <button class="btn" id="restartBtn">Restart</button>
+        <button class="btn" id="nextLevelBtn">Next Level</button>
+      </div>
+
+      <p class="hint">
+        Tap or click inside the cavern (or press <strong>Space / ↑ / W</strong>) to jump.  
+        Use <strong>A / D</strong> keys or the Dash buttons while in mid-air to burst sideways.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    Climb clean, time your dashes, and stay ahead of the glow. Forged in
+    <span>CaveCode Arcade Planet</span> · <span>SageWire Syndicate</span>.
+  </footer>
+
+  <!-- Modal -->
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <div class="modal">
+      <h2 id="modalTitle">Level Clear</h2>
+      <p id="modalBody">You reached the target height.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="modalPrimary">Next Level</button>
+        <button class="btn" id="modalSecondary">Replay</button>
+      </div>
+    </div>
+  </div>
+
+  <!--
+    BLOCK 4 — GAME LOGIC (EDITABLE)
+    Ceiling Breaker · Collapsing Escape · 5-Level Track
+  -->
+  <script>
+    // ---- LEVEL CONFIG ----
+    const LEVELS = [
+      { name: "Warm Cracks", target: 1000, scrollSpeed: 55, platformSpawn: 900, crumbleMin: 1800, crumbleMax: 2400, debrisInterval: 1600 },
+      { name: "Falling Echo", target: 1400, scrollSpeed: 65, platformSpawn: 830, crumbleMin: 1600, crumbleMax: 2200, debrisInterval: 1400 },
+      { name: "Breakneck Lift", target: 1800, scrollSpeed: 75, platformSpawn: 780, crumbleMin: 1400, crumbleMax: 2000, debrisInterval: 1250 },
+      { name: "Cinder Storm", target: 2200, scrollSpeed: 87, platformSpawn: 720, crumbleMin: 1200, crumbleMax: 1800, debrisInterval: 1100 },
+      { name: "Fractured Summit", target: 2600, scrollSpeed: 98, platformSpawn: 660, crumbleMin: 1000, crumbleMax: 1500, debrisInterval: 950 }
+    ];
+
+    // ---- DOM HOOKS ----
+    const playfield = document.getElementById("playfield");
+    const runnerEl = document.getElementById("runner");
+    const dangerGlow = document.getElementById("dangerGlow");
+
+    const statLevel = document.getElementById("stat-level");
+    const statHeight = document.getElementById("stat-height");
+    const statTarget = document.getElementById("stat-target");
+    const statLives = document.getElementById("stat-lives");
+    const statBest = document.getElementById("stat-best");
+    const statChain = document.getElementById("stat-chain");
+
+    const jumpBtn = document.getElementById("jumpBtn");
+    const dashLeftBtn = document.getElementById("dashLeftBtn");
+    const dashRightBtn = document.getElementById("dashRightBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const nextLevelBtn = document.getElementById("nextLevelBtn");
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalPrimary = document.getElementById("modalPrimary");
+    const modalSecondary = document.getElementById("modalSecondary");
+
+    // ---- GAME STATE ----
+    let currentLevelIndex = 0;
+    let running = false;
+    let lastTime = null;
+
+    let height = 0;
+    let bestHeight = 0;
+    let lives = 3;
+    let chain = 1.0;
+    let cleanJumps = 0;
+
+    let scrollOffset = 0;
+
+    let runnerX = 0;
+    let runnerY = 0;
+    let runnerVX = 0;
+    let runnerVY = 0;
+    let runnerWidth = 26;
+    let runnerHeight = 30;
+
+    const GRAVITY = -0.00042;
+    const JUMP_VELOCITY = 0.23;
+    const DASH_STRENGTH = 0.23;
+    const MAX_FALL_SPEED = -0.5;
+
+    let isOnGround = false;
+    let recentlyLanded = false;
+    let dashCooldown = 0;
+
+    let platformTimer = 0;
+    let debrisTimer = 0;
+    let platformIdCounter = 0;
+    let debrisIdCounter = 0;
+    const platforms = new Map();
+    const debrisPieces = new Map();
+
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+          audioCtx = null;
+        }
+      }
+    }
+
+    function beep(freq, duration, gainVal = 0.06) {
+      if (!audioCtx) return;
+      const ctx = audioCtx;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.value = gainVal;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      osc.start(now);
+      osc.stop(now + duration);
+    }
+
+    function sfxJump() {
+      ensureAudio();
+      beep(620, 0.08, 0.05);
+    }
+
+    function sfxDash() {
+      ensureAudio();
+      beep(460, 0.07, 0.05);
+    }
+
+    function sfxHit() {
+      ensureAudio();
+      beep(220, 0.18, 0.08);
+    }
+
+    function sfxLevelClear() {
+      ensureAudio();
+      beep(680, 0.12, 0.06);
+      setTimeout(() => beep(880, 0.14, 0.06), 110);
+    }
+
+    // ---- INIT / RESET ----
+    function initRunnerPosition() {
+      const pfHeight = playfield.clientHeight;
+      runnerX = playfield.clientWidth * 0.5;
+      runnerY = pfHeight * 0.2;
+      runnerVX = 0;
+      runnerVY = 0;
+      isOnGround = false;
+      recentlyLanded = false;
+      dashCooldown = 0;
+      applyRunnerTransform();
+    }
+
+    function resetLevel(levelIndex) {
+      currentLevelIndex = levelIndex;
+      const level = LEVELS[levelIndex];
+      running = true;
+      lastTime = null;
+
+      height = 0;
+      chain = 1.0;
+      cleanJumps = 0;
+      scrollOffset = 0;
+      lives = 3;
+
+      platformTimer = 0;
+      debrisTimer = 0;
+      platforms.forEach(p => p.el.remove());
+      platforms.clear();
+      debrisPieces.forEach(d => d.el.remove());
+      debrisPieces.clear();
+
+      initRunnerPosition();
+      spawnInitialPlatforms();
+
+      statLevel.textContent = (levelIndex + 1).toString();
+      statHeight.textContent = "0 m";
+      statTarget.textContent = level.target + " m";
+      statLives.textContent = lives.toString();
+      statChain.textContent = "x" + chain.toFixed(1);
+
+      updateDangerGlow(0);
+      requestAnimationFrame(gameLoop);
+    }
+
+    function spawnInitialPlatforms() {
+      const pfHeight = playfield.clientHeight;
+      const pfWidth = playfield.clientWidth;
+      // Ground-ish safe platform
+      createPlatform(pfWidth * 0.5 - 60, pfHeight * 0.1, 120, "safe");
+      // A few staggered platforms
+      createPlatform(pfWidth * 0.2, pfHeight * 0.25, 70, "normal");
+      createPlatform(pfWidth * 0.65, pfHeight * 0.4, 80, "normal");
+      createPlatform(pfWidth * 0.35, pfHeight * 0.55, 90, "boost");
+    }
+
+    // ---- OBJECT SPAWN ----
+    function createPlatform(x, y, width, type) {
+      const el = document.createElement("div");
+      el.className = "platform";
+      if (type === "safe") el.classList.add("safe");
+      if (type === "boost") el.classList.add("boost");
+
+      el.style.left = x + "px";
+      el.style.bottom = y + "px";
+      el.style.width = width + "px";
+
+      playfield.appendChild(el);
+
+      const id = platformIdCounter++;
+      const level = LEVELS[currentLevelIndex];
+      const crumbleTime =
+        type === "safe"
+          ? null
+          : performance.now() +
+            (level.crumbleMin + Math.random() * (level.crumbleMax - level.crumbleMin));
+
+      platforms.set(id, {
+        id,
+        el,
+        x,
+        y,
+        width,
+        type,
+        crumbleTime,
+        crumbling: false
+      });
+    }
+
+    function spawnPlatformFromTop() {
+      const pfWidth = playfield.clientWidth;
+      const pfHeight = playfield.clientHeight;
+      const level = LEVELS[currentLevelIndex];
+
+      const width = 60 + Math.random() * 90;
+      const x = 10 + Math.random() * (pfWidth - width - 20);
+      const y = pfHeight + 30; // slightly above view
+
+      const r = Math.random();
+      let type = "normal";
+      if (r < 0.12) type = "safe";
+      else if (r < 0.24) type = "boost";
+
+      createPlatform(x, y, width, type);
+    }
+
+    function spawnDebris() {
+      const pfWidth = playfield.clientWidth;
+      const pfHeight = playfield.clientHeight;
+      const x = 10 + Math.random() * (pfWidth - 20);
+      const y = pfHeight + 16;
+
+      const el = document.createElement("div");
+      el.className = "debris";
+      el.style.left = x + "px";
+      el.style.bottom = y + "px";
+      playfield.appendChild(el);
+
+      const id = debrisIdCounter++;
+      debrisPieces.set(id, {
+        id,
+        el,
+        x,
+        y,
+        vy: -0.23 - Math.random() * 0.08
+      });
+    }
+
+    // ---- GAME LOOP ----
+    function gameLoop(timestamp) {
+      if (!running) return;
+      if (lastTime == null) lastTime = timestamp;
+      const deltaMs = timestamp - lastTime;
+      lastTime = timestamp;
+      const dt = deltaMs / 1000;
+
+      const level = LEVELS[currentLevelIndex];
+
+      // Scroll
+      scrollOffset += level.scrollSpeed * dt;
+      const pfHeight = playfield.clientHeight;
+      const scrollPx = level.scrollSpeed * dt;
+
+      // Height climbed (scaled)
+      height += level.scrollSpeed * dt;
+      statHeight.textContent = Math.floor(height).toString() + " m";
+
+      // Update danger glow based on how close we are to top
+      const runnerScreenY = runnerY;
+      const dangerRatio = Math.max(0, Math.min(1, (runnerScreenY - pfHeight * 0.55) / (pfHeight * 0.25)));
+      updateDangerGlow(dangerRatio);
+
+      // Runner physics
+      runnerVY += GRAVITY * deltaMs;
+      if (runnerVY < MAX_FALL_SPEED) runnerVY = MAX_FALL_SPEED;
+
+      runnerY += runnerVY * deltaMs + scrollPx; // scroll pushes upward
+      runnerX += runnerVX * deltaMs;
+      runnerVX *= 0.88;
+
+      // Clamp horizontal
+      const margin = 10;
+      const pfWidth = playfield.clientWidth;
+      runnerX = Math.max(margin + runnerWidth / 2, Math.min(pfWidth - margin - runnerWidth / 2, runnerX));
+
+      // Apply runner transform
+      applyRunnerTransform();
+
+      // Move platforms with scroll
+      platforms.forEach(p => {
+        p.y += scrollPx; // scroll moves everything up
+        p.el.style.bottom = p.y + "px";
+      });
+
+      // Move debris
+      debrisPieces.forEach(d => {
+        d.y += d.vy * deltaMs + scrollPx;
+        d.el.style.bottom = d.y + "px";
+      });
+
+      // Platform crumble + removal
+      const now = performance.now();
+      platforms.forEach((p, id) => {
+        if (p.crumbleTime && now > p.crumbleTime && !p.crumbling) {
+          p.crumbling = true;
+          p.el.classList.add("crumbling");
+          setTimeout(() => {
+            p.el.style.opacity = "0";
+            setTimeout(() => {
+              p.el.remove();
+              platforms.delete(id);
+            }, 140);
+          }, 160);
+        }
+
+        if (p.y < -20) {
+          p.el.remove();
+          platforms.delete(id);
+        }
+      });
+
+      // Debris removal
+      debrisPieces.forEach((d, id) => {
+        if (d.y < -30) {
+          d.el.remove();
+          debrisPieces.delete(id);
+        }
+      });
+
+      // Spawn timers
+      platformTimer += deltaMs;
+      if (platformTimer >= level.platformSpawn) {
+        platformTimer = 0;
+        spawnPlatformFromTop();
+      }
+
+      debrisTimer += deltaMs;
+      if (debrisTimer >= level.debrisInterval) {
+        debrisTimer = 0;
+        spawnDebris();
+      }
+
+      // Dash cooldown
+      if (dashCooldown > 0) dashCooldown -= deltaMs;
+
+      // Collision checks
+      handlePlatformCollisions();
+      handleDebrisCollisions();
+
+      // Lose conditions: out bottom or too close to top glow
+      if (runnerY < -runnerHeight) {
+        handleDeath("You fell behind the collapse. Try again.");
+        return;
+      }
+
+      if (runnerY > pfHeight * 0.9) {
+        handleDeath("The collapse zone overtook you. Try again.");
+        return;
+      }
+
+      // Win condition
+      if (height >= level.target) {
+        handleLevelClear();
+        return;
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateDangerGlow(ratio) {
+      const clamped = Math.max(0.15, Math.min(1, 0.15 + ratio * 0.85));
+      dangerGlow.style.opacity = clamped.toString();
+    }
+
+    // ---- COLLISIONS ----
+    function handlePlatformCollisions() {
+      const runnerRect = runnerEl.getBoundingClientRect();
+
+      let landedThisFrame = false;
+
+      platforms.forEach(p => {
+        const rect = p.el.getBoundingClientRect();
+
+        const horizontallyAligned =
+          runnerRect.right - 6 > rect.left && runnerRect.left + 6 < rect.right;
+
+        const landingThreshold = 8;
+
+        if (
+          horizontallyAligned &&
+          runnerVY <= 0 &&
+          runnerRect.bottom >= rect.top &&
+          runnerRect.bottom <= rect.top + landingThreshold
+        ) {
+          // Land
+          runnerY += (rect.top - runnerRect.bottom);
+          runnerVY = 0;
+          isOnGround = true;
+          recentlyLanded = true;
+          landedThisFrame = true;
+          applyRunnerTransform();
+
+          cleanJumps += 1;
+          chain = Math.min(3.0, 1 + cleanJumps * 0.1);
+          statChain.textContent = "x" + chain.toFixed(1);
+
+          if (p.type === "boost") {
+            runnerVY = JUMP_VELOCITY * 1.18;
+            sfxJump();
+          }
+        }
+      });
+
+      if (!landedThisFrame && !recentlyLanded) {
+        isOnGround = false;
+      }
+      if (!landedThisFrame) {
+        recentlyLanded = false;
+      }
+    }
+
+    function handleDebrisCollisions() {
+      const runnerRect = runnerEl.getBoundingClientRect();
+
+      debrisPieces.forEach((d, id) => {
+        const rect = d.el.getBoundingClientRect();
+        const overlap =
+          rect.left < runnerRect.right - 4 &&
+          rect.right > runnerRect.left + 4 &&
+          rect.top < runnerRect.bottom - 4 &&
+          rect.bottom > runnerRect.top + 4;
+
+        if (overlap) {
+          handleDeath("Falling debris caught you mid-climb. Watch the glow and keep moving.");
+        }
+      });
+    }
+
+    // ---- RUNNER TRANSFORM ----
+    function applyRunnerTransform() {
+      const pfRect = playfield.getBoundingClientRect();
+      runnerEl.style.left = (runnerX - runnerWidth / 2) + "px";
+      runnerEl.style.bottom = runnerY + "px";
+    }
+
+    // ---- OUTCOMES ----
+    function handleDeath(message) {
+      sfxHit();
+      running = false;
+      bestHeight = Math.max(bestHeight, Math.floor(height));
+      statBest.textContent = bestHeight + " m";
+      showModal("Collapse Hit", message, "Replay Level", "Back to Level 1", () => {
+        hideModal();
+        resetLevel(currentLevelIndex);
+      }, () => {
+        hideModal();
+        resetLevel(0);
+      });
+    }
+
+    function handleLevelClear() {
+      sfxLevelClear();
+      running = false;
+      bestHeight = Math.max(bestHeight, Math.floor(height));
+      statBest.textContent = bestHeight + " m";
+
+      const last = currentLevelIndex === LEVELS.length - 1;
+      const title = last ? "Summit Survived" : "Level Clear";
+      const body = last
+        ? "You climbed through every collapsing chamber. Loop back to warm cracks and chase a cleaner run."
+        : "You outpaced the collapse for this chamber. Step into the next fracture and climb higher.";
+
+      showModal(
+        title,
+        body,
+        last ? "Loop to Level 1" : "Next Level",
+        "Replay Level",
+        () => {
+          hideModal();
+          const nextIndex = last ? 0 : currentLevelIndex + 1;
+          resetLevel(nextIndex);
+        },
+        () => {
+          hideModal();
+          resetLevel(currentLevelIndex);
+        }
+      );
+    }
+
+    function showModal(title, body, primaryText, secondaryText, onPrimary, onSecondary) {
+      modalTitle.textContent = title;
+      modalBody.textContent = body;
+      modalPrimary.textContent = primaryText;
+      modalSecondary.textContent = secondaryText;
+
+      modalPrimary.onclick = onPrimary;
+      modalSecondary.onclick = onSecondary;
+
+      modalBackdrop.classList.remove("hidden");
+    }
+
+    function hideModal() {
+      modalBackdrop.classList.add("hidden");
+    }
+
+    // ---- CONTROLS ----
+    function doJump() {
+      if (!running) return;
+      if (!isOnGround) return;
+      sfxJump();
+      runnerVY = JUMP_VELOCITY;
+      isOnGround = false;
+      recentlyLanded = false;
+    }
+
+    function doDash(direction) {
+      if (!running) return;
+      if (isOnGround) return; // dash mid-air only
+      if (dashCooldown > 0) return;
+      dashCooldown = 220; // ms
+      runnerVX += direction * DASH_STRENGTH;
+      sfxDash();
+    }
+
+    playfield.addEventListener("pointerdown", () => {
+      doJump();
+    });
+
+    jumpBtn.addEventListener("click", () => {
+      doJump();
+    });
+
+    dashLeftBtn.addEventListener("click", () => {
+      doDash(-1);
+    });
+
+    dashRightBtn.addEventListener("click", () => {
+      doDash(1);
+    });
+
+    restartBtn.addEventListener("click", () => {
+      hideModal();
+      resetLevel(currentLevelIndex);
+    });
+
+    nextLevelBtn.addEventListener("click", () => {
+      const nextIndex = (currentLevelIndex + 1) % LEVELS.length;
+      hideModal();
+      resetLevel(nextIndex);
+    });
+
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) {
+        hideModal();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
+        e.preventDefault();
+        doJump();
+      }
+      if (e.code === "KeyA" || e.code === "ArrowLeft") {
+        doDash(-1);
+      }
+      if (e.code === "KeyD" || e.code === "ArrowRight") {
+        doDash(1);
+      }
+    });
+
+    // ---- BOOTSTRAP ----
+    window.addEventListener("load", () => {
+      resetLevel(0);
+    });
+  </script>
 </body>
 </html>
