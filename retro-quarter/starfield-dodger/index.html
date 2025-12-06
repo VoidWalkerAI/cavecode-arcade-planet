@@ -2,428 +2,1044 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Retro Quarter — Starfield Dodger (ARC-RQ-002)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Starfield Dodger · ARC-RQ-002</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!--
+    BLOCK 1 — SHELL & BRAND (LOCKED)
+    CaveCode Arcade Planet · Retro-Quarter Line
+  -->
   <style>
     :root {
-      --bg: #020617;
-      --panel: #0b1120;
-      --border: #1f2937;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-
-      --ship: #38bdf8;
-      --ship-outline: #0f172a;
-      --asteroid-core: #9ca3af;
-      --asteroid-edge: #e5e7eb;
-      --star-dim: #111827;
-      --star-bright: #f9fafb;
+      --cc-bg: #020617;
+      --cc-panel: #02081b;
+      --cc-panel-soft: #0b1120;
+      --cc-border: #1f2937;
+      --cc-accent: #fb923c;
+      --cc-accent-soft: #fed7aa;
+      --cc-badge-bg: #0b1120;
+      --cc-text-main: #e5e7eb;
+      --cc-text-soft: #9ca3af;
+      --cc-danger: #f97373;
+      --cc-success: #4ade80;
+      --cc-warning: #facc15;
+      --cc-chip: #020617;
     }
 
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--cc-text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: radial-gradient(circle at top, #111827 0, #020617 60%);
-      color: var(--text-main);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      user-select: none;
+      padding: 1.25rem 0.75rem 2.75rem;
     }
 
     header {
-      margin-top: 0.75rem;
-      text-align: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.05rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    header .sub {
-      margin-top: 0.15rem;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-    }
-
-    #hud {
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-      color: var(--text-soft);
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    #game-shell {
-      margin-top: 0.6rem;
-      padding: 0.8rem 1rem 1rem;
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.9);
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, #020617, #030712, #020617);
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      padding: 0.9rem 1.5rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
+      gap: 0.2rem;
     }
 
-    canvas {
-      width: 320px;
-      height: 240px;
-      max-width: 100vw;
-      border-radius: 0.6rem;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at top, #020617 0, #020617 60%);
-      touch-action: manipulation;
+    @media (min-width: 640px) {
+      header {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+      }
     }
 
-    #controls-row {
+    .title-line {
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      font-weight: 700;
+      letter-spacing: 0.09em;
+    }
+
+    .subtitle-line {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--cc-text-soft);
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.15rem;
+    }
+
+    .subtitle-line span::after {
+      content: "·";
+      margin-left: 0.35rem;
+      opacity: 0.55;
+    }
+
+    .subtitle-line span:last-child::after {
+      content: "";
+      margin: 0;
+    }
+
+    main {
       width: 100%;
-      max-width: 320px;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-      gap: 0.5rem;
+      max-width: 960px;
+      margin-top: 1.25rem;
     }
 
-    #status {
-      flex: 1;
+    .panel {
+      background: radial-gradient(circle at top, #020617 0, #020617 35%, #020617 60%, #000 100%);
+      border-radius: 2rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
+      padding: 1.5rem 1.25rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
-    #startBtn {
-      padding: 0.25rem 0.8rem;
+    @media (min-width: 768px) {
+      .panel {
+        padding: 1.75rem 1.75rem 2rem;
+      }
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .chip {
+      padding: 0.35rem 0.75rem;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      background: radial-gradient(circle at top, rgba(56, 189, 248, 0.55), rgba(15, 23, 42, 1));
-      color: var(--text-main);
-      font-size: 0.8rem;
-      cursor: pointer;
+      border: 1px solid var(--cc-border);
+      background: var(--cc-badge-bg);
+      color: var(--cc-text-soft);
       white-space: nowrap;
     }
 
-    #startBtn:active {
-      transform: translateY(1px);
+    .chip--accent {
+      border-color: var(--cc-accent);
+      color: var(--cc-accent-soft);
     }
 
-    @media (max-width: 480px) {
-      canvas {
-        width: 280px;
-        height: 210px;
+    .chip--warning {
+      border-color: var(--cc-warning);
+      color: var(--cc-warning);
+    }
+
+    .chip--success {
+      border-color: var(--cc-success);
+      color: var(--cc-success);
+    }
+
+    .headline {
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 0.15rem;
+      color: var(--cc-text-soft);
+    }
+
+    .lead-copy {
+      font-size: 0.8rem;
+      line-height: 1.55;
+      color: var(--cc-text-main);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    @media (min-width: 640px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
+    }
+
+    .stat {
+      background: #020617;
+      border-radius: 0.9rem;
+      border: 1px solid var(--cc-border);
+      padding: 0.55rem 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--cc-text-soft);
+    }
+
+    .stat-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .stat-value--accent {
+      color: var(--cc-accent-soft);
+    }
+
+    .stat-value--danger {
+      color: var(--cc-danger);
+    }
+
+    .stat-value--success {
+      color: var(--cc-success);
+    }
+
+    .playfield-shell {
+      margin-top: 0.75rem;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000 100%);
+      border-radius: 1.5rem;
+      border: 1px solid var(--cc-border);
+      padding: 0.9rem;
+    }
+
+    .playfield-inner {
+      border-radius: 1.25rem;
+      border: 1px solid #020924;
+      background: radial-gradient(circle at 10% 0, #020617 0, #000 70%);
+      padding: 0.9rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 520px;
+      border-radius: 1.1rem;
+      background: radial-gradient(circle at top, #020617 0, #000 70%);
+      border: 1px solid #020617;
+      touch-action: none;
+    }
+
+    .controls-row {
+      margin-top: 0.95rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .controls-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    button {
+      border: 1px solid var(--cc-border);
+      border-radius: 999px;
+      background: #02081b;
+      color: var(--cc-text-main);
+      padding: 0.4rem 0.85rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.12s ease;
+    }
+
+    button:hover {
+      background: #020b2c;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #fb923c, #f97316);
+      border-color: #fdba74;
+      color: #111827;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #fdba74, #fb923c);
+    }
+
+    .btn-ghost {
+      background: transparent;
+    }
+
+    .footer-line {
+      margin-top: 0.85rem;
+      font-size: 0.7rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .footer-line span {
+      color: var(--cc-accent-soft);
+    }
+
+    /* Modal */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .modal-backdrop--open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(420px, 92vw);
+      background: radial-gradient(circle at top, #020617 0, #000 70%);
+      border-radius: 1.5rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.95);
+      padding: 1.2rem 1.1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .modal-title {
+      font-size: 0.9rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .modal-title--win {
+      color: var(--cc-success);
+    }
+
+    .modal-title--lose {
+      color: var(--cc-danger);
+    }
+
+    .modal-body {
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--cc-text-main);
+    }
+
+    .modal-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin-top: 0.3rem;
+    }
+
+    .modal-stat {
+      background: #020617;
+      border-radius: 0.9rem;
+      border: 1px solid var(--cc-border);
+      padding: 0.45rem 0.65rem;
+      font-size: 0.75rem;
+    }
+
+    .modal-stat span {
+      display: block;
+    }
+
+    .modal-stat .label {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--cc-text-soft);
+      font-size: 0.65rem;
+    }
+
+    .modal-stat .value {
+      font-weight: 600;
+      margin-top: 0.05rem;
+    }
+
+    .modal-actions {
+      margin-top: 0.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Retro Quarter — Starfield Dodger · ARC-RQ-002</h1>
-    <div class="sub">Glide through the falling stone and survive as long as you can.</div>
+    <div>
+      <div class="title-line">RETRO QUARTER — STARFIELD DODGER · ARC-RQ-002</div>
+      <div class="subtitle-line">
+        <span>CaveCode Arcade Planet</span>
+        <span>Retro-Quarter Line</span>
+        <span>Dodger · Endless Run</span>
+        <span>Single-File HTML Engine</span>
+      </div>
+    </div>
   </header>
 
-  <div id="hud">
-    <div>Score: <span id="scoreText">0</span></div>
-    <div>Best: <span id="bestText">0</span></div>
-  </div>
+  <main>
+    <section class="panel">
+      <div>
+        <div class="chip-row">
+          <div class="chip chip--accent">LEVEL TRACK</div>
+          <div class="chip">ASTEROID FIELD</div>
+          <div class="chip">NEAR-MISS CHAINS</div>
+          <div class="chip chip--warning">STARFIELD DODGER</div>
+          <div class="chip chip--success">CAVECODE V1 BLOCKS</div>
+        </div>
+        <div style="margin-top:0.7rem;">
+          <div class="headline">Tap / drag to steer. Thread the field.</div>
+          <p class="lead-copy">
+            Drift through an endless starfield. Slide the ship left and right to dodge incoming asteroids.
+            Skim close for <strong>near-miss bonuses</strong>, chain multipliers, and high-score runs.
+            One impact ends the level. Survive, level up, and chase the Void Edge run.
+          </p>
+        </div>
+      </div>
 
-  <div id="game-shell">
-    <canvas id="game" width="320" height="240"></canvas>
-    <div id="controls-row">
-      <div id="status">Tap Start Flight to begin.</div>
-      <button id="startBtn">Start Flight</button>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="stat-level">1</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Score</div>
+          <div class="stat-value stat-value--accent" id="stat-score">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Target</div>
+          <div class="stat-value" id="stat-target">400</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Run Status</div>
+          <div class="stat-value" id="stat-status">Ready</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Chain Multiplier</div>
+          <div class="stat-value" id="stat-chain">x1.0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Near Misses</div>
+          <div class="stat-value" id="stat-nearmiss">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Field Density</div>
+          <div class="stat-value" id="stat-density">Calm</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Best Level</div>
+          <div class="stat-value" id="stat-bestlevel">1</div>
+        </div>
+      </div>
+
+      <div class="playfield-shell">
+        <div class="playfield-inner">
+          <canvas id="game" width="360" height="540"></canvas>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div class="controls-group">
+          <button class="btn-ghost" id="btn-level-down">◀ Level</button>
+          <button class="btn-ghost" id="btn-level-up">Level ▶</button>
+        </div>
+        <div class="controls-group">
+          <button id="btn-restart">Restart Level</button>
+          <button class="btn-primary" id="btn-start">Launch Run</button>
+        </div>
+      </div>
+
+      <div class="footer-line">
+        Match clean dodges, ride the chain, and light up the grid.
+        <span>Forged in CaveCode Arcade Planet · SageWire Syndicate</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal" id="modal">
+      <div class="modal-title" id="modal-title">RUN REPORT</div>
+      <div class="modal-body" id="modal-body">
+        <!-- Filled by script -->
+      </div>
+      <div class="modal-stats">
+        <div class="modal-stat">
+          <span class="label">Score</span>
+          <span class="value" id="modal-score">0</span>
+        </div>
+        <div class="modal-stat">
+          <span class="label">Best Chain</span>
+          <span class="value" id="modal-bestchain">x1.0</span>
+        </div>
+        <div class="modal-stat">
+          <span class="label">Near Misses</span>
+          <span class="value" id="modal-nearmiss">0</span>
+        </div>
+        <div class="modal-stat">
+          <span class="label">Level</span>
+          <span class="value" id="modal-level">1</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="modal-continue">Next Level</button>
+        <button class="btn-primary" id="modal-restart">Replay Level</button>
+      </div>
     </div>
   </div>
 
+  <!--
+    BLOCK 4 — GAME LOGIC (EDITABLE WITH CARE)
+    Starfield Dodger – Level Track + Chains
+  -->
   <script>
-    // ============================================================
-    // 🎚️ TUNING (sync with starfield-dodger.cavecode)
-    // ============================================================
-    const TUNING = {
-      shipSpeed: 220,
-      baseFallSpeed: 80,
-      fallSpeedIncrease: 10,
-      spawnIntervalStart: 0.8,
-      spawnIntervalMin: 0.25,
-      spawnIntervalDecay: 0.04,
-      asteroidMinSize: 6,
-      asteroidMaxSize: 13
-    };
+    // LEVEL SETUP
+    const LEVELS = [
+      {
+        id: 1,
+        name: "Level 1 — Warm Drift",
+        target: 400,
+        spawnInterval: 1050,
+        baseSpeed: 65,
+        densityLabel: "Calm"
+      },
+      {
+        id: 2,
+        name: "Level 2 — Meteor Wake",
+        target: 950,
+        spawnInterval: 900,
+        baseSpeed: 78,
+        densityLabel: "Busy"
+      },
+      {
+        id: 3,
+        name: "Level 3 — Surge Corridor",
+        target: 1650,
+        spawnInterval: 780,
+        baseSpeed: 90,
+        densityLabel: "Dense"
+      },
+      {
+        id: 4,
+        name: "Level 4 — Starstorm Run",
+        target: 2500,
+        spawnInterval: 650,
+        baseSpeed: 108,
+        densityLabel: "Storm"
+      },
+      {
+        id: 5,
+        name: "Level 5 — Void Edge (Endless)",
+        target: null, // endless score chase
+        spawnInterval: 600,
+        baseSpeed: 115,
+        densityLabel: "Void Edge"
+      }
+    ];
 
-    // ============================================================
-    // CANVAS + ELEMENTS
-    // ============================================================
+    // DOM HOOKS
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
 
-    const scoreText = document.getElementById("scoreText");
-    const bestText = document.getElementById("bestText");
-    const statusEl = document.getElementById("status");
-    const startBtn = document.getElementById("startBtn");
+    const statLevel = document.getElementById("stat-level");
+    const statScore = document.getElementById("stat-score");
+    const statTarget = document.getElementById("stat-target");
+    const statStatus = document.getElementById("stat-status");
+    const statChain = document.getElementById("stat-chain");
+    const statNearMiss = document.getElementById("stat-nearmiss");
+    const statDensity = document.getElementById("stat-density");
+    const statBestLevel = document.getElementById("stat-bestlevel");
 
-    // ============================================================
-    // STATE
-    // ============================================================
+    const btnStart = document.getElementById("btn-start");
+    const btnRestart = document.getElementById("btn-restart");
+    const btnLevelDown = document.getElementById("btn-level-down");
+    const btnLevelUp = document.getElementById("btn-level-up");
+
+    const modalBackdrop = document.getElementById("modal-backdrop");
+    const modalTitle = document.getElementById("modal-title");
+    const modalBody = document.getElementById("modal-body");
+    const modalScore = document.getElementById("modal-score");
+    const modalBestChain = document.getElementById("modal-bestchain");
+    const modalNearMiss = document.getElementById("modal-nearmiss");
+    const modalLevel = document.getElementById("modal-level");
+    const modalContinue = document.getElementById("modal-continue");
+    const modalRestart = document.getElementById("modal-restart");
+
+    // GAME STATE
+    let currentLevelIndex = 0;
+    let running = false;
+    let lastTimestamp = 0;
+
     const ship = {
       x: canvas.width / 2,
-      y: canvas.height - 26,
-      w: 18,
-      h: 18
+      y: canvas.height - 70,
+      width: 26,
+      height: 34,
+      tilt: 0
     };
 
-    let asteroids = []; // {x,y,r}
-    let running = false;
-    let lastTime = 0;
-    let elapsed = 0;
-    let score = 0;
-    let bestScore = 0;
-
+    const asteroids = [];
     let spawnTimer = 0;
-    let currentSpawnInterval = TUNING.spawnIntervalStart;
-    let leftHeld = false;
-    let rightHeld = false;
 
-    // For touch-move hold
-    let touchMoveDir = 0; // -1 left, +1 right, 0 none
+    let score = 0;
+    let targetScore = LEVELS[0].target;
+    let chain = 1.0;
+    let chainCombo = 0;
+    let bestChain = 1.0;
+    let nearMissCount = 0;
+    let bestLevelReached = 1;
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
-    function resetGame() {
-      asteroids = [];
-      elapsed = 0;
-      score = 0;
-      spawnTimer = 0;
-      currentSpawnInterval = TUNING.spawnIntervalStart;
-      ship.x = canvas.width / 2;
-      statusEl.textContent = "Dodge the asteroids and stay alive.";
-      scoreText.textContent = "0";
-    }
+    const NEAR_MISS_RADIUS = 38;
+    const SHIP_COLLISION_RADIUS = 18;
 
-    function randomRange(min, max) {
-      return min + Math.random() * (max - min);
-    }
+    // INPUT
+    const keys = new Set();
 
-    function spawnAsteroid() {
-      const r = randomRange(TUNING.asteroidMinSize, TUNING.asteroidMaxSize);
-      const x = randomRange(r, canvas.width - r);
-      const y = -r * 2;
-      asteroids.push({ x, y, r });
-    }
-
-    function circleRectCollide(c, r) {
-      // Clamp circle center to rect bounds and check distance
-      const closestX = Math.max(r.x, Math.min(c.x, r.x + r.w));
-      const closestY = Math.max(r.y, Math.min(c.y, r.y + r.h));
-      const dx = c.x - closestX;
-      const dy = c.y - closestY;
-      return dx * dx + dy * dy <= c.r * c.r;
-    }
-
-    function gameOver() {
-      running = false;
-      if (score > bestScore) {
-        bestScore = score;
-        bestText.textContent = bestScore;
+    window.addEventListener("keydown", (e) => {
+      if (["ArrowLeft", "ArrowRight", "a", "d", "A", "D"].includes(e.key)) {
+        e.preventDefault();
+        keys.add(e.key.toLowerCase());
       }
-      statusEl.textContent = "Ship lost in the field. Tap Start to try again.";
+      if (e.key === " " && !running) {
+        startRun();
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      keys.delete(e.key.toLowerCase());
+    });
+
+    function pointerToCanvasX(ev) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      return (ev.clientX - rect.left) * scaleX;
     }
 
-    // ============================================================
-    // UPDATE
-    // ============================================================
-    function update(dt) {
-      // Movement input
-      let moveDir = 0;
-      if (leftHeld) moveDir -= 1;
-      if (rightHeld) moveDir += 1;
-      if (touchMoveDir !== 0) moveDir = touchMoveDir;
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    }
 
-      ship.x += moveDir * TUNING.shipSpeed * dt;
-      if (ship.x < ship.w / 2) ship.x = ship.w / 2;
-      if (ship.x > canvas.width - ship.w / 2) ship.x = canvas.width - ship.w / 2;
-
-      // Difficulty scaling
-      const fallSpeed = TUNING.baseFallSpeed + TUNING.fallSpeedIncrease * elapsed;
-
-      currentSpawnInterval -= TUNING.spawnIntervalDecay * dt;
-      if (currentSpawnInterval < TUNING.spawnIntervalMin) {
-        currentSpawnInterval = TUNING.spawnIntervalMin;
-      }
-
-      // Asteroids
-      spawnTimer += dt;
-      if (spawnTimer >= currentSpawnInterval) {
-        spawnAsteroid();
-        spawnTimer = 0;
-      }
-
-      asteroids.forEach(a => {
-        a.y += fallSpeed * dt;
+    ["pointerdown", "pointermove"].forEach((type) => {
+      canvas.addEventListener(type, (ev) => {
+        const x = pointerToCanvasX(ev);
+        ship.x = clamp(x, ship.width, canvas.width - ship.width);
       });
+    });
 
-      asteroids = asteroids.filter(a => a.y - a.r < canvas.height + 20);
+    // AUDIO (simple beeps)
+    let audioCtx = null;
 
-      // Collision
-      const shipRect = {
-        x: ship.x - ship.w / 2,
-        y: ship.y - ship.h / 2,
-        w: ship.w,
-        h: ship.h
-      };
+    function ensureAudio() {
+      if (!audioCtx) {
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+          audioCtx = null;
+        }
+      }
+    }
 
-      for (const a of asteroids) {
-        const c = { x: a.x, y: a.y, r: a.r };
-        if (circleRectCollide(c, shipRect)) {
-          gameOver();
+    function beep(freq, durationMs, type = "sine", gain = 0.1) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gainNode.gain.value = gain;
+      osc.connect(gainNode).connect(audioCtx.destination);
+      osc.start();
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.0001,
+        audioCtx.currentTime + durationMs / 1000
+      );
+      osc.stop(audioCtx.currentTime + durationMs / 1000 + 0.02);
+    }
+
+    function sfxNearMiss() {
+      beep(580, 80, "square", 0.06);
+    }
+
+    function sfxHit() {
+      beep(110, 280, "sawtooth", 0.12);
+    }
+
+    function sfxLevelUp() {
+      beep(420, 120, "triangle", 0.08);
+      setTimeout(() => beep(620, 120, "triangle", 0.08), 120);
+    }
+
+    // GAME LOOP
+    function startRun() {
+      ensureAudio();
+      running = true;
+      lastTimestamp = performance.now();
+      score = 0;
+      chain = 1.0;
+      chainCombo = 0;
+      nearMissCount = 0;
+      bestChain = 1.0;
+      asteroids.length = 0;
+      spawnTimer = 0;
+      statStatus.textContent = "In Play";
+      updateHUD();
+      requestAnimationFrame(loop);
+    }
+
+    function endRun(result) {
+      running = false;
+
+      if (LEVELS[currentLevelIndex].id > bestLevelReached) {
+        bestLevelReached = LEVELS[currentLevelIndex].id;
+      }
+
+      statBestLevel.textContent = bestLevelReached.toString();
+      statStatus.textContent = result === "win" ? "Level Clear" : "Impact";
+
+      // Modal fill
+      modalScore.textContent = Math.round(score).toString();
+      modalBestChain.textContent = "x" + bestChain.toFixed(1);
+      modalNearMiss.textContent = nearMissCount.toString();
+      modalLevel.textContent = LEVELS[currentLevelIndex].id.toString();
+
+      if (result === "win") {
+        modalTitle.textContent = "LEVEL CLEAR";
+        modalTitle.classList.remove("modal-title--lose");
+        modalTitle.classList.add("modal-title--win");
+        modalBody.textContent =
+          "You threaded the field and hit the target score for this sector. " +
+          "Advance to the next lane or replay for a cleaner chain.";
+      } else {
+        modalTitle.textContent = "IMPACT DETECTED";
+        modalTitle.classList.remove("modal-title--win");
+        modalTitle.classList.add("modal-title--lose");
+        modalBody.textContent =
+          "An asteroid clipped the hull and scattered the run. " +
+          "Replay the sector or drop back in and try again.";
+      }
+
+      const isLastLevel = currentLevelIndex === LEVELS.length - 1;
+      modalContinue.textContent = isLastLevel ? "Endless Again" : "Next Level";
+
+      modalBackdrop.classList.add("modal-backdrop--open");
+    }
+
+    function loop(timestamp) {
+      if (!running) return;
+      const dt = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      update(dt);
+      draw();
+
+      requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+      const level = LEVELS[currentLevelIndex];
+      const speedScale = 1 + currentLevelIndex * 0.12;
+
+      // Ship movement via keys
+      let moveDir = 0;
+      if (keys.has("arrowleft") || keys.has("a")) moveDir -= 1;
+      if (keys.has("arrowright") || keys.has("d")) moveDir += 1;
+
+      if (moveDir !== 0) {
+        ship.x += moveDir * 260 * dt;
+        ship.x = clamp(ship.x, ship.width, canvas.width - ship.width);
+        ship.tilt += moveDir * 6 * dt;
+      } else {
+        // ease tilt back toward 0
+        ship.tilt *= 1 - Math.min(1, dt * 8);
+      }
+      ship.tilt = clamp(ship.tilt, -0.4, 0.4);
+
+      // Spawn asteroids
+      spawnTimer += dt * 1000;
+      while (spawnTimer >= level.spawnInterval) {
+        spawnTimer -= level.spawnInterval;
+        spawnAsteroid(level, speedScale);
+      }
+
+      // Move asteroids & scoring
+      for (let i = asteroids.length - 1; i >= 0; i--) {
+        const a = asteroids[i];
+        a.y += a.speed * dt;
+
+        // Collision check
+        const shipCx = ship.x;
+        const shipCy = ship.y - ship.height / 3;
+        const dx = a.x - shipCx;
+        const dy = a.y - shipCy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (!a.passed && dist < SHIP_COLLISION_RADIUS + a.radius * 0.55) {
+          sfxHit();
+          endRun("lose");
           return;
+        }
+
+        // Near-miss & basic score when asteroid passes ship
+        if (!a.passed && a.y > ship.y + 6) {
+          a.passed = true;
+
+          if (dist < NEAR_MISS_RADIUS + a.radius && dist > SHIP_COLLISION_RADIUS) {
+            chainCombo += 1;
+            nearMissCount += 1;
+            chain = Math.min(3.0, 1 + chainCombo * 0.18);
+            bestChain = Math.max(bestChain, chain);
+            score += 35 * chain; // close skim bonus
+            sfxNearMiss();
+          } else {
+            chainCombo = Math.max(0, chainCombo - 1);
+            chain = 1 + chainCombo * 0.12;
+          }
+
+          // base pass score
+          score += 10 * chain;
+        }
+
+        // Remove asteroids that are far off screen
+        if (a.y - a.radius > canvas.height + 40) {
+          asteroids.splice(i, 1);
         }
       }
 
-      // Score
-      score = Math.floor(elapsed * 10); // tenths
-      scoreText.textContent = score;
+      // Passive score trickle
+      score += 6 * dt * chain;
+
+      // Win check (non-endless levels only)
+      if (level.target && score >= level.target) {
+        sfxLevelUp();
+        endRun("win");
+        return;
+      }
+
+      updateHUD();
     }
 
-    // ============================================================
-    // RENDER
-    // ============================================================
-    function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function spawnAsteroid(level, speedScale) {
+      const margin = 20;
+      const x = margin + Math.random() * (canvas.width - margin * 2);
+      const radius = 10 + Math.random() * 12;
+      const base = level.baseSpeed + Math.random() * 20;
+      const speed = base * speedScale;
 
-      // Starfield background
-      const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      g.addColorStop(0, "#020617");
-      g.addColorStop(1, "#020617");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Soft star dots
-      ctx.fillStyle = "#111827";
-      for (let i = 0; i < 35; i++) {
-        const x = (i * 37) % canvas.width;
-        const y = (i * 53) % canvas.height;
-        ctx.fillRect(x, y, 1, 1);
-      }
-
-      ctx.fillStyle = "#f9fafb";
-      for (let i = 0; i < 18; i++) {
-        const x = (i * 19 + 23) % canvas.width;
-        const y = (i * 29 + 41) % canvas.height;
-        ctx.fillRect(x, y, 1, 1);
-      }
-
-      // Asteroids
-      asteroids.forEach(a => {
-        const gradient = ctx.createRadialGradient(
-          a.x - a.r * 0.3, a.y - a.r * 0.3, a.r * 0.2,
-          a.x, a.y, a.r
-        );
-        gradient.addColorStop(0, "#f9fafb");
-        gradient.addColorStop(1, "#9ca3af");
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
-        ctx.fill();
+      asteroids.push({
+        x,
+        y: -radius - 10,
+        radius,
+        speed,
+        passed: false
       });
+    }
 
-      // Ship (simple triangle)
-      const sx = ship.x;
-      const sy = ship.y;
-      const w = ship.w;
-      const h = ship.h;
+    function updateHUD() {
+      const lvl = LEVELS[currentLevelIndex];
+      statLevel.textContent = lvl.id.toString();
+      statScore.textContent = Math.round(score).toString();
+      statTarget.textContent = lvl.target ? lvl.target.toString() : "∞";
+      statChain.textContent = "x" + chain.toFixed(1);
+      statNearMiss.textContent = nearMissCount.toString();
+      statDensity.textContent = lvl.densityLabel;
+    }
 
-      ctx.fillStyle = "#38bdf8";
-      ctx.strokeStyle = "#0f172a";
-      ctx.lineWidth = 2;
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2,
+        0,
+        20,
+        canvas.width / 2,
+        canvas.height,
+        canvas.height
+      );
+      gradient.addColorStop(0, "#020617");
+      gradient.addColorStop(1, "#000000");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
+    function drawShip() {
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+      ctx.rotate(ship.tilt);
+
+      // Big blue body (triangle)
       ctx.beginPath();
-      ctx.moveTo(sx, sy - h / 2);          // tip
-      ctx.lineTo(sx - w / 2, sy + h / 2);  // left
-      ctx.lineTo(sx + w / 2, sy + h / 2);  // right
+      ctx.moveTo(0, -ship.height / 2);
+      ctx.lineTo(-ship.width / 2, ship.height / 2);
+      ctx.lineTo(ship.width / 2, ship.height / 2);
       ctx.closePath();
+      const bodyGradient = ctx.createLinearGradient(
+        -ship.width / 2,
+        ship.height / 2,
+        ship.width / 2,
+        -ship.height / 2
+      );
+      bodyGradient.addColorStop(0, "#1d4ed8");
+      bodyGradient.addColorStop(1, "#38bdf8");
+      ctx.fillStyle = bodyGradient;
       ctx.fill();
+
+      // Thin outline
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(15,23,42,0.9)";
       ctx.stroke();
 
-      // Little thruster
+      // Orange thruster triangle at bottom
       ctx.beginPath();
-      ctx.moveTo(sx - w / 4, sy + h / 2);
-      ctx.lineTo(sx + w / 4, sy + h / 2);
-      ctx.lineTo(sx, sy + h / 2 + 5);
+      const flameHeight = 12;
+      ctx.moveTo(0, ship.height / 2 + flameHeight);
+      ctx.lineTo(-ship.width / 4, ship.height / 2 - 2);
+      ctx.lineTo(ship.width / 4, ship.height / 2 - 2);
       ctx.closePath();
-      ctx.fillStyle = "#fb923c";
+      const flameGradient = ctx.createLinearGradient(
+        0,
+        ship.height / 2 - 2,
+        0,
+        ship.height / 2 + flameHeight
+      );
+      flameGradient.addColorStop(0, "#fed7aa");
+      flameGradient.addColorStop(1, "#f97316");
+      ctx.fillStyle = flameGradient;
       ctx.fill();
+
+      ctx.restore();
     }
 
-    // ============================================================
-    // MAIN LOOP
-    // ============================================================
-    function loop(timestamp) {
-      if (!running) return;
-      if (!lastTime) lastTime = timestamp;
-      const dt = (timestamp - lastTime) / 1000;
-      lastTime = timestamp;
-      elapsed += dt;
-
-      update(dt);
-      render();
-
-      if (running) {
-        requestAnimationFrame(loop);
+    function drawAsteroids() {
+      for (const a of asteroids) {
+        const g = ctx.createRadialGradient(
+          a.x - a.radius * 0.3,
+          a.y - a.radius * 0.6,
+          a.radius * 0.2,
+          a.x,
+          a.y,
+          a.radius
+        );
+        g.addColorStop(0, "#e5e7eb");
+        g.addColorStop(0.4, "#9ca3af");
+        g.addColorStop(1, "#020617");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.radius, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
-    // ============================================================
-    // EVENTS
-    // ============================================================
-    startBtn.addEventListener("click", () => {
-      running = true;
-      lastTime = 0;
-      resetGame();
-      requestAnimationFrame(loop);
+    function drawHUDOverlay() {
+      // simple horizon lines
+      ctx.save();
+      ctx.globalAlpha = 0.22;
+      ctx.strokeStyle = "#1f2937";
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 6; i++) {
+        const y = 60 + i * 70;
+        ctx.beginPath();
+        ctx.moveTo(24, y);
+        ctx.lineTo(canvas.width - 24, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function draw() {
+      clearCanvas();
+      drawHUDOverlay();
+      drawAsteroids();
+      drawShip();
+    }
+
+    // LEVEL CONTROL
+    function setLevel(index) {
+      currentLevelIndex = clamp(index, 0, LEVELS.length - 1);
+      const lvl = LEVELS[currentLevelIndex];
+      targetScore = lvl.target;
+      score = 0;
+      chain = 1.0;
+      chainCombo = 0;
+      nearMissCount = 0;
+      bestChain = 1.0;
+      asteroids.length = 0;
+      spawnTimer = 0;
+      statStatus.textContent = "Ready";
+      statLevel.textContent = lvl.id.toString();
+      statTarget.textContent = lvl.target ? lvl.target.toString() : "∞";
+      statDensity.textContent = lvl.densityLabel;
+      draw();
+    }
+
+    // BUTTON WIRES
+    btnStart.addEventListener("click", () => {
+      if (!running) startRun();
     });
 
-    document.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") leftHeld = true;
-      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") rightHeld = true;
+    btnRestart.addEventListener("click", () => {
+      running = false;
+      setLevel(currentLevelIndex);
     });
 
-    document.addEventListener("keyup", e => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") leftHeld = false;
-      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") rightHeld = false;
+    btnLevelDown.addEventListener("click", () => {
+      if (running) return;
+      setLevel(currentLevelIndex - 1);
     });
 
-    canvas.addEventListener("touchstart", e => {
-      e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      const x = e.touches[0].clientX - rect.left;
-      touchMoveDir = x < rect.width / 2 ? -1 : 1;
-    }, { passive: false });
-
-    canvas.addEventListener("touchend", () => {
-      touchMoveDir = 0;
+    btnLevelUp.addEventListener("click", () => {
+      if (running) return;
+      setLevel(currentLevelIndex + 1);
     });
 
-    canvas.addEventListener("mousedown", e => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      touchMoveDir = x < rect.width / 2 ? -1 : 1;
+    modalRestart.addEventListener("click", () => {
+      modalBackdrop.classList.remove("modal-backdrop--open");
+      setLevel(currentLevelIndex);
+      startRun();
     });
 
-    window.addEventListener("mouseup", () => {
-      touchMoveDir = 0;
+    modalContinue.addEventListener("click", () => {
+      modalBackdrop.classList.remove("modal-backdrop--open");
+      const isLast = currentLevelIndex === LEVELS.length - 1;
+      if (!isLast) {
+        setLevel(currentLevelIndex + 1);
+      }
+      startRun();
     });
 
-    // Initial static render
-    render();
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) {
+        modalBackdrop.classList.remove("modal-backdrop--open");
+      }
+    });
+
+    // INITIAL DRAW
+    setLevel(0);
+    draw();
   </script>
 </body>
 </html>
