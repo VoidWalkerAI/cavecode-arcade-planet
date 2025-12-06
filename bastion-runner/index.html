@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cavern Run — Bastion Runner (ARC-CR-001)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+
+      --runner-body: #f97316;
+      --runner-outline: #0f172a;
+      --obstacle: #22c55e;
+      --ground: #111827;
+      --sky-top: #020617;
+      --sky-bottom: #0b1120;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+    }
+
+    header {
+      margin-top: 0.75rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    header .sub {
+      margin-top: 0.15rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    #hud {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    #game-shell {
+      margin-top: 0.6rem;
+      padding: 0.8rem 1rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    canvas {
+      width: 320px;
+      height: 240px;
+      max-width: 100vw;
+      border-radius: 0.6rem;
+      border: 1px solid var(--border);
+      background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+      touch-action: manipulation;
+    }
+
+    #controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 320px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      gap: 0.5rem;
+    }
+
+    #status {
+      flex: 1;
+    }
+
+    #startBtn {
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: radial-gradient(circle at top, rgba(251, 146, 60, 0.55), rgba(15, 23, 42, 1));
+      color: var(--text-main);
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #startBtn:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 480px) {
+      canvas {
+        width: 280px;
+        height: 210px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cavern Run — Bastion Runner · ARC-CR-001</h1>
+    <div class="sub">Run the cavern. Jump the hazards. Survive as long as you can.</div>
+  </header>
+
+  <div id="hud">
+    <div>Score: <span id="scoreText">0</span></div>
+    <div>Best: <span id="bestText">0</span></div>
+  </div>
+
+  <div id="game-shell">
+    <canvas id="game" width="320" height="240"></canvas>
+    <div id="controls-row">
+      <div id="status">Tap Start Run to begin.</div>
+      <button id="startBtn">Start Run</button>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING (sync with bastion-runner.cavecode)
+    // ============================================================
+    const TUNING = {
+      gravity: 1400,
+      jumpVelocity: -520,
+      groundY: 220,
+      baseSpeed: 180,
+      speedIncreaseRate: 0.15,
+      obstacleSpawnIntervalMin: 0.8,
+      obstacleSpawnIntervalMax: 1.6,
+      obstacleWidth: 26,
+      obstacleHeight: 32
+    };
+
+    // ============================================================
+    // CANVAS + CTX
+    // ============================================================
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const scoreText = document.getElementById("scoreText");
+    const bestText = document.getElementById("bestText");
+    const statusEl = document.getElementById("status");
+    const startBtn = document.getElementById("startBtn");
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let runner = {
+      x: 48,
+      y: TUNING.groundY,
+      w: 18,
+      h: 24,
+      vy: 0,
+      canJump: true
+    };
+
+    let obstacles = []; // { x, y, w, h }
+
+    let running = false;
+    let lastTime = 0;
+    let elapsed = 0;
+    let score = 0;
+    let bestScore = 0;
+
+    let spawnTimer = 0;
+    let currentSpawnInterval = 1.2; // seconds
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function resetGame() {
+      runner.x = 48;
+      runner.y = TUNING.groundY;
+      runner.vy = 0;
+      runner.canJump = true;
+      obstacles = [];
+      elapsed = 0;
+      score = 0;
+      scoreText.textContent = "0";
+      spawnTimer = 0;
+      currentSpawnInterval = 1.2;
+      statusEl.textContent = "Jump over hazards and stay alive.";
+    }
+
+    function jump() {
+      if (!running) return;
+      if (!runner.canJump) return;
+      runner.vy = TUNING.jumpVelocity;
+      runner.canJump = false;
+    }
+
+    function randomRange(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function scheduleNextSpawn() {
+      currentSpawnInterval = randomRange(
+        TUNING.obstacleSpawnIntervalMin,
+        TUNING.obstacleSpawnIntervalMax
+      );
+      spawnTimer = 0;
+    }
+
+    function spawnObstacle() {
+      const x = canvas.width + TUNING.obstacleWidth;
+      const y = TUNING.groundY - TUNING.obstacleHeight;
+      obstacles.push({
+        x,
+        y,
+        w: TUNING.obstacleWidth,
+        h: TUNING.obstacleHeight
+      });
+    }
+
+    function aabbIntersect(a, b) {
+      return !(
+        a.x + a.w < b.x ||
+        a.x > b.x + b.w ||
+        a.y + a.h < b.y ||
+        a.y > b.y + b.h
+      );
+    }
+
+    function gameOver() {
+      running = false;
+      if (score > bestScore) {
+        bestScore = score;
+        bestText.textContent = bestScore;
+      }
+      statusEl.textContent = "You fell in the cavern. Tap Start to try again.";
+    }
+
+    // ============================================================
+    // UPDATE
+    // ============================================================
+    function update(dt) {
+      // Speed scaling
+      const speed = TUNING.baseSpeed * (1 + elapsed * TUNING.speedIncreaseRate);
+
+      // Runner physics
+      runner.vy += TUNING.gravity * dt;
+      runner.y += runner.vy * dt;
+
+      // Ground collision
+      if (runner.y >= TUNING.groundY) {
+        runner.y = TUNING.groundY;
+        runner.vy = 0;
+        runner.canJump = true;
+      }
+
+      // Obstacles
+      obstacles.forEach(o => {
+        o.x -= speed * dt;
+      });
+
+      // Remove off-screen obstacles
+      obstacles = obstacles.filter(o => o.x + o.w > -10);
+
+      // Spawn
+      spawnTimer += dt;
+      if (spawnTimer >= currentSpawnInterval) {
+        spawnObstacle();
+        scheduleNextSpawn();
+      }
+
+      // Collision
+      const runnerBox = {
+        x: runner.x,
+        y: runner.y - runner.h,
+        w: runner.w,
+        h: runner.h
+      };
+
+      for (const o of obstacles) {
+        const obstacleBox = { x: o.x, y: o.y, w: o.w, h: o.h };
+        if (aabbIntersect(runnerBox, obstacleBox)) {
+          gameOver();
+          return;
+        }
+      }
+
+      // Score
+      score = Math.floor(elapsed * 10); // tenths of a second
+      scoreText.textContent = score;
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background cavern walls (simple gradient + silhouettes)
+      const gra = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gra.addColorStop(0, "#020617");
+      gra.addColorStop(1, "#020617");
+      ctx.fillStyle = gra;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Ceiling shapes
+      ctx.fillStyle = "#020617";
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(canvas.width * 0.2, 16);
+      ctx.lineTo(canvas.width * 0.4, 6);
+      ctx.lineTo(canvas.width * 0.65, 18);
+      ctx.lineTo(canvas.width * 0.9, 10);
+      ctx.lineTo(canvas.width, 18);
+      ctx.lineTo(canvas.width, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Ground
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, TUNING.groundY + 2, canvas.width, canvas.height - TUNING.groundY - 2);
+
+      ctx.fillStyle = "#111827";
+      ctx.fillRect(0, TUNING.groundY, canvas.width, 4);
+
+      // Obstacles
+      for (const o of obstacles) {
+        ctx.fillStyle = "#22c55e";
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+        ctx.fillStyle = "#15803d";
+        ctx.fillRect(o.x, o.y + o.h - 6, o.w, 6);
+      }
+
+      // Runner
+      const rx = runner.x;
+      const ry = runner.y - runner.h;
+
+      ctx.fillStyle = "var(--runner-body)";
+      ctx.fillStyle = "#f97316";
+      ctx.strokeStyle = "#020617";
+      ctx.lineWidth = 2;
+
+      // Body
+      ctx.beginPath();
+      ctx.roundRect(rx, ry + 6, runner.w, runner.h - 6, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      // Head
+      ctx.beginPath();
+      ctx.roundRect(rx - 2, ry - 4, runner.w + 4, 10, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      // Simple eye
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(rx + runner.w - 6, ry - 1, 3, 3);
+    }
+
+    // ============================================================
+    // MAIN LOOP
+    // ============================================================
+    function loop(timestamp) {
+      if (!running) return;
+      if (!lastTime) lastTime = timestamp;
+      const dt = (timestamp - lastTime) / 1000;
+      lastTime = timestamp;
+      elapsed += dt;
+
+      update(dt);
+      render();
+
+      if (running) {
+        requestAnimationFrame(loop);
+      }
+    }
+
+    // ============================================================
+    // EVENTS
+    // ============================================================
+    startBtn.addEventListener("click", () => {
+      running = true;
+      lastTime = 0;
+      resetGame();
+      requestAnimationFrame(loop);
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.code === "Space" || e.key === "w" || e.key === "W" || e.key === "ArrowUp") {
+        e.preventDefault();
+        jump();
+      }
+    });
+
+    canvas.addEventListener("mousedown", () => {
+      jump();
+    });
+
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+      jump();
+    }, { passive: false });
+
+    // Initial static render
+    render();
+  </script>
+</body>
+</html>
