@@ -1,0 +1,93 @@
+---
+
+## 2️⃣ `arcade/scarlet-crush/lane-stacker/lane-stacker.cavecode`
+
+```text
+CAVECODE SPEC — LANE STACKER (ARC-SC-001)
+Category: scarlet-crush
+Engine: Lane-based stacking puzzle
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Scarlet Crush — Lane Stacker
+Game ID: ARC-SC-001
+Category: scarlet-crush
+Genre: lane-stacker
+One-Liner: Drop colored blocks into lanes. Make triples to clear. Don't hit the top.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Turn-based loop:
+  - Show NEXT_BLOCK color.
+  - Wait for player to choose a lane.
+  - Drop NEXT_BLOCK into the chosen lane (lowest empty slot).
+  - Check that lane for contiguous runs of the same color.
+  - If a run of length >= matchLength exists:
+      - Clear those tiles.
+      - Apply gravity (blocks above fall down).
+      - Re-check for additional runs (simple cascades).
+  - Add score based on cleared tiles and combo.
+  - Generate a new NEXT_BLOCK and repeat.
+Game ends when any lane fills to the top row.
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop / Mobile:
+  - Tap / click lane header to drop NEXT_BLOCK into that lane.
+Invalid move:
+  - If lane is already full: ignore click, no drop happens.
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Each cleared tile: +10 points
+Combo bonus: +5 points per tile beyond matchLength in a single clear
+No levels or timers; difficulty emerges as board fills.
+Score persists until game over.
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+laneCount:    4
+laneHeight:   10
+tileTypes:    4           # number of distinct colors
+matchLength:  3           # minimum contiguous run length to clear
+clearScore:   10
+comboBonus:   5
+(PENCIL — safe to modify)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Scarlet Crush — Lane Stacker"
+subtitle: "Drop blocks into lanes. Make triples to clear."
+helpText: "Tap a lane header to drop the next block. Don't let the lanes reach the top."
+gameOverText: "Board Overflow — No more space!"
+(Globe — public text)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+- Add preview of upcoming 2–3 blocks
+- Add "garbage" tiles that cannot be cleared normally
+- Add time pressure or limited-move variants
+- Add per-lane multipliers based on height risk
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching hooks:
+  - 2D board represented as array-of-arrays (lanes).
+  - Clear & gravity logic contained in small, readable functions.
+  - Simple scoring, but can be extended with risk/reward mechanics.
+
+(END)
