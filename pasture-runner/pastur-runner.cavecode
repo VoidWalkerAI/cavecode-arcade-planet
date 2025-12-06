@@ -1,0 +1,94 @@
+CAVECODE SPEC — PASTURE RUNNER (ARC-001)
+Category: cavern-run
+Engine: Endless Runner
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Pasture Runner
+Game ID: ARC-001
+Category: cavern-run
+Genre: endless-runner
+One-Liner: Dodge rolling hay bales and survive as long as possible.
+(LOCKED — core identity)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Tick Rate: ~60 FPS
+Each tick:
+  - Move player toward selected lane.
+  - Move obstacles downward.
+  - Spawn new hay bales if timer elapsed.
+  - Check for collision.
+  - If collision → end run.
+  - If alive → increment score.
+(LOCKED — engine logic summary)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Inputs:
+  Keyboard:
+    ← or A: move left
+    → or D: move right
+  Mobile:
+    Tap left button
+    Tap right button
+Mechanic:
+  Player snaps to discrete lanes.
+(LOCKED — game mechanics)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Score gain: +0.015 per ms alive
+Best score stored for session
+No level progression; difficulty increases via spawn rate randomness.
+(LOCKED — scoring baseline)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+laneCount:         5
+playerSpeed:       420       # px/sec
+obstacleSpeed:     360       # px/sec
+spawnIntervalMin:  650       # ms
+spawnIntervalMax:  1300      # ms
+playerWidth:       52
+playerHeight:      52
+obstacleWidth:     50
+obstacleHeight:    50
+scoreRate:         0.015
+
+(PENCIL — safe to modify)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Pasture Runner"
+subtitle: "Dodge rolling hay bales and survive."
+startPrompt: "Tap Play to begin."
+gameOverTitle: "Run Over"
+victoryStyle: none
+(Globe — public text safe to display)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+Future modes:
+  - Rush Mode (higher bale density)
+  - Fence Mode (lane barriers)
+  - Night Mode (reduced visibility)
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Notes for teachers:
+  - Great starter game for lane-based logic.
+  - Let students modify laneCount or spawn rates.
+  - Good first example of responsive canvas scaling.
+
+(END)
