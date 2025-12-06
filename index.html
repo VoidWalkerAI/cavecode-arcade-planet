@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CaveCode Arcade Planet</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --accent: #f97316;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --chip: #111827;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.25rem 0.75rem 2.5rem;
+    }
+
+    header {
+      max-width: 960px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 1.25rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    header p {
+      margin: 0.4rem 0 0;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+
+    #grid {
+      max-width: 960px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.9rem;
+      margin-top: 0.75rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: 0.85rem;
+      border: 1px solid var(--border);
+      padding: 0.75rem 0.9rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.65);
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out,
+                  border-color 0.1s ease-out, background 0.1s ease-out;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.9);
+      border-color: rgba(249, 115, 22, 0.6);
+      background: #020617;
+    }
+
+    .card a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+    }
+
+    .card-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .card-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--accent);
+      opacity: 0.9;
+      white-space: nowrap;
+    }
+
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-top: 0.2rem;
+    }
+
+    .chip {
+      font-size: 0.7rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid #1f2937;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    footer {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      text-align: center;
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CaveCode · Arcade Planet</h1>
+    <p>Tap a cabinet to play. All games are single-file HTML engines forged with CaveCode.</p>
+  </header>
+
+  <section id="grid">
+
+    <!-- Haze-Maze -->
+    <article class="card">
+      <a href="haze-maze/basic-swap/">
+        <div class="card-title">
+          <span>Basic Swap Match-3</span>
+          <span class="card-tag">Haze-Maze · ARC-HM-001</span>
+        </div>
+        <div class="card-sub">
+          Swap neighboring tiles to line up 3+ of a kind and clear the board.
+        </div>
+        <div class="chips">
+          <span class="chip">Match-3</span>
+          <span class="chip">Puzzle</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Scarlet-Crush -->
+    <article class="card">
+      <a href="scarlet-crush/lane-stacker/">
+        <div class="card-title">
+          <span>Lane Stacker</span>
+          <span class="card-tag">Scarlet-Crush · ARC-SC-001</span>
+        </div>
+        <div class="card-sub">
+          Drop colored blocks into lanes and align rows to clear them before the stack overflows.
+        </div>
+        <div class="chips">
+          <span class="chip">Falling Blocks</span>
+          <span class="chip">Puzzle</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Retro-Quarter: Pixel Paddle -->
+    <article class="card">
+      <a href="retro-quarter/pixel-paddle/">
+        <div class="card-title">
+          <span>Pixel Paddle</span>
+          <span class="card-tag">Retro-Quarter · ARC-RQ-001</span>
+        </div>
+        <div class="card-sub">
+          Classic paddle-and-ball action. Keep the ball alive and clear the bricks.
+        </div>
+        <div class="chips">
+          <span class="chip">Arcade</span>
+          <span class="chip">Paddle</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Retro-Quarter: Starfield Dodger -->
+    <article class="card">
+      <a href="retro-quarter/starfield-dodger/">
+        <div class="card-title">
+          <span>Starfield Dodger</span>
+          <span class="card-tag">Retro-Quarter · ARC-RQ-002</span>
+        </div>
+        <div class="card-sub">
+          Slide your ship left and right to dodge falling asteroids in an endless starfield.
+        </div>
+        <div class="chips">
+          <span class="chip">Endless</span>
+          <span class="chip">Dodger</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Ember-Adventures -->
+    <article class="card">
+      <a href="ember-adventures/ember-trail/">
+        <div class="card-title">
+          <span>Ember Trail</span>
+          <span class="card-tag">Ember-Adventures · ARC-EA-001</span>
+        </div>
+        <div class="card-sub">
+          Tiny grid-based micro-RPG: move, explore, and survive a short ember-lit trek.
+        </div>
+        <div class="chips">
+          <span class="chip">Micro-RPG</span>
+          <span class="chip">Adventure</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Cavern-Run: Bastion Runner -->
+    <article class="card">
+      <a href="cavern-run/bastion-runner/">
+        <div class="card-title">
+          <span>Bastion Runner</span>
+          <span class="card-tag">Cavern-Run · ARC-CR-001</span>
+        </div>
+        <div class="card-sub">
+          Side-view endless runner. Jump over hazards as the cavern floor races by.
+        </div>
+        <div class="chips">
+          <span class="chip">Endless Runner</span>
+          <span class="chip">Side-View</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Cavern-Run: Ceiling Breaker -->
+    <article class="card">
+      <a href="cavern-run/ceiling-breaker/">
+        <div class="card-title">
+          <span>Ceiling Breaker</span>
+          <span class="card-tag">Cavern-Run · ARC-CR-002</span>
+        </div>
+        <div class="card-sub">
+          Vertical ascender. Leap from ledge to ledge as the darkness rises below.
+        </div>
+        <div class="chips">
+          <span class="chip">Ascender</span>
+          <span class="chip">Platformer</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Mind-Chambers: Echo Sequence -->
+    <article class="card">
+      <a href="mind-chambers/echo-sequence/">
+        <div class="card-title">
+          <span>Echo Sequence</span>
+          <span class="card-tag">Mind-Chambers · ARC-MC-001</span>
+        </div>
+        <div class="card-sub">
+          Watch a light sequence, then repeat it back. Each round adds one more beat.
+        </div>
+        <div class="chips">
+          <span class="chip">Memory</span>
+          <span class="chip">Pattern</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Mind-Chambers: Focus Relay -->
+    <article class="card">
+      <a href="mind-chambers/focus-relay/">
+        <div class="card-title">
+          <span>Focus Relay</span>
+          <span class="card-tag">Mind-Chambers · ARC-MC-002</span>
+        </div>
+        <div class="card-sub">
+          Numbers flash across a grid. Memorize the order and tap the nodes back in sequence.
+        </div>
+        <div class="chips">
+          <span class="chip">Memory</span>
+          <span class="chip">Focus</span>
+        </div>
+      </a>
+    </article>
+
+    <!-- Buckeye-Bash -->
+    <article class="card">
+      <a href="buckeye-bash/harvest-catch/">
+        <div class="card-title">
+          <span>Harvest Catch</span>
+          <span class="card-tag">Buckeye-Bash · ARC-BB-001</span>
+        </div>
+        <div class="card-sub">
+          Slide your basket to catch falling harvest icons and keep the streak alive.
+        </div>
+        <div class="chips">
+          <span class="chip">Arcade</span>
+          <span class="chip">Catch</span>
+        </div>
+      </a>
+    </article>
+
+  </section>
+
+  <footer>
+    Forge line v1 · CaveCode Arcade Planet · All games are single-file HTML engines.
+  </footer>
+</body>
+</html>
