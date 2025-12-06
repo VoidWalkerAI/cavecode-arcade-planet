@@ -1,0 +1,91 @@
+CAVECODE SPEC — PIXEL PADDLE (ARC-RQ-001)
+Category: retro-quarter
+Engine: Paddle + Ball Breakout
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Retro Quarter — Pixel Paddle
+Game ID: ARC-RQ-001
+Category: retro-quarter
+Genre: breakout-classic
+One-Liner: Move the paddle, keep the ball alive, smash all bricks.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Frame loop (~60 FPS):
+  - Update paddle based on input.
+  - Move ball using velocity vector.
+  - Detect collisions:
+        - walls → reflect horizontally/vertically
+        - paddle → adjust angle slightly based on hit position
+        - bricks → remove brick, add score
+  - If ball touches bottom → end round.
+  - If all bricks cleared → victory.
+
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop:
+  - ← Arrow / A = move left
+  - → Arrow / D = move right
+Mobile:
+  - Tap left side of screen = move left
+  - Tap right side = move right
+Optional toggle:
+  - Mouse movement controls paddle (not default)
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Each brick cleared: +10 points
+Round ends when ball is lost.
+No lives in base mode.
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+paddleWidth:     70
+paddleSpeed:     420
+ballSpeed:       300
+brickRows:       4
+brickCols:       8
+brickScore:      10
+ballAngleRandom: 0.12     # adds slight chaos to paddle hits
+(Editable)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Pixel Paddle"
+subtitle: "Break the bricks. Don’t lose the ball."
+gameOverText: "Ball Lost"
+victoryText: "All Bricks Cleared!"
+(Globe)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+- Multi-ball mode
+- Powerups (wider paddle, slow ball, etc.)
+- Levels with different brick patterns
+- Lives system (classic arcade)
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching:
+  - vector math
+  - canvas rendering
+  - collision with rectangles
+  - state machine (playing, game-over, victory)
+
+(END)
