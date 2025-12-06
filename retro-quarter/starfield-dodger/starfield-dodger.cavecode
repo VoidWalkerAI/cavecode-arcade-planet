@@ -1,0 +1,119 @@
+---
+
+## 2️⃣ `arcade/retro-quarter/starfield-dodger/starfield-dodger.cavecode`
+
+```text
+CAVECODE SPEC — STARFIELD DODGER (ARC-RQ-002)
+Category: retro-quarter
+Engine: top-down endless dodger
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Retro Quarter — Starfield Dodger
+Game ID: ARC-RQ-002
+Category: retro-quarter
+Genre: endless-dodger
+One-Liner: Slide a tiny ship through a falling field of asteroids and survive as long as you can.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Frame loop (~60 FPS):
+
+  - Read input (left/right) and update ship x-position.
+  - Clamp ship to the boundaries of the playfield.
+  - Spawn new asteroids when spawn timer crosses current interval:
+      - Choose random x within playfield.
+      - Choose random size within [asteroidMinSize, asteroidMaxSize].
+      - Push asteroid into array with starting y < 0.
+  - For each asteroid:
+      - Increase y by fallSpeed * dt.
+  - Remove asteroids that have moved off the bottom.
+  - Check collisions:
+      - If any asteroid overlaps the ship's hitbox → GAME OVER.
+  - Update difficulty:
+      - fallSpeed increases over time.
+      - spawn interval slowly decreases toward a minimum.
+  - Score:
+      - Increase score based on elapsed time.
+
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop:
+  - ArrowLeft / A: move ship left.
+  - ArrowRight / D: move ship right.
+
+Mobile:
+  - Touch/hold left half of the canvas: move ship left.
+  - Touch/hold right half: move ship right.
+
+No vertical control, no fire key in this ancestor.
+
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Score:
+  - score = floor(elapsedSeconds * 10)   # tenths of a second
+
+Best:
+  - Track best score for current session.
+
+Game ends when:
+  - Ship collides with any asteroid.
+
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+shipSpeed:           220     # px/sec
+baseFallSpeed:       80      # starting asteroid speed px/sec
+fallSpeedIncrease:   10      # added per second to fall speed
+spawnIntervalStart:  0.8     # seconds between spawns at start
+spawnIntervalMin:    0.25    # minimum spawn interval
+spawnIntervalDecay:  0.04    # per second, reduces toward min
+asteroidMinSize:     6       # radius in pixels
+asteroidMaxSize:     13      # radius in pixels
+
+(PENCIL — keep in sync with index.html script)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Starfield Dodger"
+subtitle: "Glide through the falling stone."
+startLabel: "Start Flight"
+statusIdle: "Tap Start Flight to begin."
+statusRunning: "Dodge the asteroids and stay alive."
+statusGameOver: "Ship lost in the field. Tap Start to try again."
+(Globe — public strings)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+Future Retro-Quarter variants:
+  - Add firing / lasers and destructible asteroids.
+  - Powerups: slow time, shield, triple-speed dash.
+  - Wave-based patterns instead of pure random.
+  - Rare “big” asteroids that split into smaller ones.
+
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching hooks:
+  - Single axis movement.
+  - Object array for asteroids.
+  - Difficulty curves via time-based logic.
+  - Pixel-perfect vs approximate circular collisions.
+
+(END)
