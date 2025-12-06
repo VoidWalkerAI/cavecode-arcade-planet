@@ -2,536 +2,623 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Haze Maze — Basic Swap (ARC-HM-001)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Haze Maze — Basic Swap · ARC-HM-001</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!--
+    🪨 BLOCK 1 — SHELL & BRAND (LOCKED)
+    CaveCode Arcade Planet · Haze-Maze Line
+  -->
   <style>
     :root {
-      --bg: #020617;
-      --panel: #0b1120;
-      --border: #1f2937;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-      --accent: #22c55e;
-      --accent-soft: #4ade80;
-      --danger: #f97373;
-
-      --tile-1: #f97316;
-      --tile-2: #22c55e;
-      --tile-3: #3b82f6;
-      --tile-4: #eab308;
-      --tile-5: #ec4899;
+      --cc-bg: #020617;
+      --cc-panel: #02081b;
+      --cc-panel-soft: #0b1120;
+      --cc-border: #1f2937;
+      --cc-accent: #fb923c;
+      --cc-text-main: #e5e7eb;
+      --cc-text-soft: #9ca3af;
+      --tile-radius: 0.45rem;
+      --tile-gap: 0.25rem;
     }
 
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
+      background:
+        radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--cc-text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
       display: flex;
       flex-direction: column;
-      background: radial-gradient(circle at top, #111827 0, #020617 55%);
-      color: var(--text-main);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    #game-shell {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0.75rem 1rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+      align-items: center;
+      padding: 1.25rem 0.75rem 2.5rem;
     }
 
     header {
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.75rem;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, #020617, #030712);
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      padding: 0.9rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.15rem;
+      gap: 0.2rem;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+    @media (min-width: 640px) {
+      header {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+      }
     }
 
-    header .sub {
+    .title-line {
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .title-line span.code {
+      color: var(--cc-accent);
+    }
+
+    .subtitle-line {
       font-size: 0.75rem;
-      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--cc-text-soft);
+      white-space: nowrap;
+    }
+
+    main {
+      width: 100%;
+      max-width: 960px;
+      margin-top: 1.5rem;
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, #020617, #020617 30%, #020617 60%);
+      border-radius: 1.25rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75);
+      padding: 1.1rem 1.1rem 1.75rem;
+    }
+
+    .panel-header {
       display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
       flex-wrap: wrap;
-    }
-
-    #top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       gap: 0.75rem;
-      font-size: 0.8rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.9rem;
     }
 
-    #score-panel {
+    .panel-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--cc-text-soft);
+    }
+
+    .badges {
       display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--cc-text-soft);
+    }
+
+    .badge {
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      padding: 0.18rem 0.6rem;
+      background: #020617;
+    }
+
+    .score-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .score-pills {
+      display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
     }
 
     .pill {
-      background: rgba(15, 23, 42, 0.9);
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      padding: 0.2rem 0.75rem;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .pill-label {
+      color: var(--cc-text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.65rem;
+    }
+
+    .pill-value {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: radial-gradient(circle at top left, #111827, #020617);
+      color: var(--cc-text-main);
+      padding: 0.4rem 0.95rem;
       font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out,
+        background 0.12s ease-out;
+      white-space: nowrap;
     }
 
-    #game-frame {
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+    .btn span.icon {
+      font-size: 0.8rem;
     }
 
-    #board-wrapper {
-      margin: 0 auto;
-      max-width: 420px;
-      aspect-ratio: 1 / 1;
-      background: radial-gradient(circle at top, #020617 0, #020617 65%);
-      border-radius: 0.75rem;
-      border: 1px solid rgba(15, 23, 42, 1);
-      padding: 0.4rem;
+    .btn:hover {
+      background: radial-gradient(circle at top left, #1f2937, #020617);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 🧱 BLOCK 2 — BOARD SIZING (LOCKED) */
+    #board-shell {
+      margin-top: 0.75rem;
       display: flex;
-      align-items: center;
       justify-content: center;
     }
 
     #board {
-      width: 100%;
-      height: 100%;
+      /* Mobile-first size: never tiny again */
+      width: min(90vw, 480px);
+      height: min(90vw, 480px);
+      background: radial-gradient(circle at top, #020617, #020617 40%, #020617);
+      border-radius: 1rem;
+      border: 1px solid #111827;
       display: grid;
-      gap: 4px;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: var(--tile-gap);
+      padding: 0.45rem;
       touch-action: manipulation;
     }
 
     .tile {
-      border-radius: 0.4rem;
+      border-radius: var(--tile-radius);
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(0.8rem, 2vw, 1.1rem);
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.6),
-                  0 4px 8px rgba(0, 0, 0, 0.45);
-      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, opacity 0.12s ease-out;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+      transition: transform 0.05s ease-out, box-shadow 0.05s ease-out,
+        opacity 0.1s ease-out, filter 0.1s ease-out;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .tile[data-v="1"] { background: var(--tile-1); }
-    .tile[data-v="2"] { background: var(--tile-2); }
-    .tile[data-v="3"] { background: var(--tile-3); }
-    .tile[data-v="4"] { background: var(--tile-4); }
-    .tile[data-v="5"] { background: var(--tile-5); }
+    .tile:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    }
 
     .tile.selected {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 0 0 2px #e5e7eb, 0 6px 10px rgba(0, 0, 0, 0.6);
+      outline: 2px solid #f97316;
+      box-shadow: 0 0 0 1px #f97316, 0 8px 18px rgba(0, 0, 0, 0.8);
+      transform: translateY(-1px);
     }
 
-    .tile.clearing {
-      opacity: 0.25;
-      transform: scale(0.9);
+    .tile.empty {
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: none;
+      border-color: transparent;
     }
 
-    #hint-text {
-      font-size: 0.8rem;
-      color: var(--text-soft);
+    /* 🖍️ BLOCK 3 — TUNING COLORS (HUMAN SAFE) */
+    .color-0 { background: #0ea5e9; color: #0b1120; } /* sky */
+    .color-1 { background: #22c55e; color: #022c22; } /* emerald */
+    .color-2 { background: #f97316; color: #111827; } /* orange */
+    .color-3 { background: #e11d48; color: #020617; } /* rose */
+    .color-4 { background: #a855f7; color: #020617; } /* purple */
+
+    .footer-text {
+      margin-top: 0.9rem;
+      font-size: 0.75rem;
+      color: var(--cc-text-soft);
       text-align: center;
-    }
-
-    #reset-btn {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      background: radial-gradient(circle at top, rgba(148, 163, 184, 0.1), rgba(15, 23, 42, 1));
-      color: var(--text-main);
-      cursor: pointer;
-    }
-
-    #reset-btn:active {
-      transform: translateY(1px);
-      filter: brightness(0.95);
-    }
-
-    @media (min-width: 768px) {
-      header h1 { font-size: 1.2rem; }
-      #hint-text { font-size: 0.85rem; }
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
-  <div id="game-shell">
-    <header>
-      <h1>Haze Maze — Basic Swap · ARC-HM-001</h1>
-      <div class="sub">
-        <span>CaveCode Arcade Planet · Haze-Maze Line</span>
-        <span>Tap two adjacent tiles to swap. Make a match of 3+ to clear.</span>
-      </div>
-    </header>
+  <header>
+    <div class="title-line">
+      HAZE MAZE — BASIC SWAP · <span class="code">ARC-HM-001</span>
+    </div>
+    <div class="subtitle-line">
+      CaveCode Arcade Planet · Haze-Maze Line
+    </div>
+  </header>
 
-    <main id="game-frame">
-      <div id="top-row">
-        <div id="score-panel">
-          <div class="pill" id="score-pill">Score: <span id="scoreVal">0</span></div>
-          <div class="pill" id="combo-pill">Last Clear: <span id="comboVal">0</span></div>
+  <main>
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          Tap two adjacent tiles to swap. Match 3+ of a kind to clear.
         </div>
-        <button id="reset-btn">↻ New Board</button>
+        <div class="badges">
+          <span class="badge">Match-3</span>
+          <span class="badge">8×8 Board</span>
+          <span class="badge">Single-File Engine</span>
+        </div>
       </div>
 
-      <div id="board-wrapper">
-        <div id="board"></div>
+      <div class="score-row">
+        <div class="score-pills">
+          <div class="pill">
+            <span class="pill-label">Score</span>
+            <span id="scoreDisplay" class="pill-value">0</span>
+          </div>
+          <div class="pill">
+            <span class="pill-label">Last Clear</span>
+            <span id="lastClearDisplay" class="pill-value">0</span>
+          </div>
+          <div class="pill">
+            <span class="pill-label">Moves</span>
+            <span id="movesDisplay" class="pill-value">0</span>
+          </div>
+        </div>
+        <div class="button-row">
+          <button id="newBoardBtn" class="btn">
+            <span class="icon">↻</span>
+            <span>New Board</span>
+          </button>
+        </div>
       </div>
 
-      <div id="hint-text">
-        Click or tap a tile, then an adjacent tile.  
-        If the swap makes a match, tiles clear and new ones fall.
+      <div id="board-shell">
+        <div id="board" aria-label="Haze Maze board"></div>
       </div>
-    </main>
-  </div>
 
+      <div class="footer-text">
+        Click or tap a tile, then an adjacent tile. If the swap makes a match,
+        tiles clear and new ones fall in. No match? The tiles swap back.
+      </div>
+    </section>
+
+    <div class="footer-text">
+      Forged in CaveCode Arcade Planet · SageWire Syndicate
+    </div>
+  </main>
+
+  <!--
+    🧠 BLOCK 4 — ENGINE LOGIC (LOCKED)
+    - 8×8 grid
+    - 5 tile types
+    - Match 3+ horizontal or vertical
+    - Cascades allowed
+  -->
   <script>
-    // ============================================================
-    // 🎚️ TUNING KNOBS (match the .cavecode spec)
-    // ============================================================
-    const TUNING = {
-      gridRows: 8,
-      gridCols: 8,
-      tileTypes: 5,   // values 1..5
-      clearScore: 10,
-      comboBonus: 5,
-      matchLength: 3
-    };
+    (function () {
+      "use strict";
 
-    // ============================================================
-    // 🔧 STATE
-    // ============================================================
-    const boardEl = document.getElementById("board");
-    const scoreValEl = document.getElementById("scoreVal");
-    const comboValEl = document.getElementById("comboVal");
-    const resetBtn = document.getElementById("reset-btn");
+      // 🧱 CONFIG (LOCKED)
+      const ROWS = 8;
+      const COLS = 8;
+      const TILE_TYPES = 5;
 
-    let grid = [];
-    let selected = null;
-    let score = 0;
+      // 🖍️ HUMAN EDIT ZONE — Difficulty knobs
+      const SCORE_PER_TILE = 10; // points per cleared tile
 
-    // ============================================================
-    // 🧠 BOARD LOGIC
-    // ============================================================
-    function createEmptyGrid() {
-      const g = [];
-      for (let r = 0; r < TUNING.gridRows; r++) {
-        g[r] = new Array(TUNING.gridCols).fill(0);
+      // STATE
+      let board = [];
+      let score = 0;
+      let lastClearCount = 0;
+      let moves = 0;
+      let firstPick = null;
+      let isAnimating = false;
+
+      const boardEl = document.getElementById("board");
+      const scoreEl = document.getElementById("scoreDisplay");
+      const lastClearEl = document.getElementById("lastClearDisplay");
+      const movesEl = document.getElementById("movesDisplay");
+      const newBoardBtn = document.getElementById("newBoardBtn");
+
+      function randTile() {
+        return Math.floor(Math.random() * TILE_TYPES);
       }
-      return g;
-    }
 
-    function randomTile() {
-      return Math.floor(Math.random() * TUNING.tileTypes) + 1;
-    }
-
-    function generateInitialGrid() {
-      grid = createEmptyGrid();
-      // Fill while avoiding starting matches
-      for (let r = 0; r < TUNING.gridRows; r++) {
-        for (let c = 0; c < TUNING.gridCols; c++) {
-          let val;
-          do {
-            val = randomTile();
-            grid[r][c] = val;
-          } while (createsMatchAt(r, c));
-        }
-      }
-    }
-
-    function inBounds(r, c) {
-      return r >= 0 && r < TUNING.gridRows && c >= 0 && c < TUNING.gridCols;
-    }
-
-    function createsMatchAt(r, c) {
-      const val = grid[r][c];
-      if (!val) return false;
-
-      // Horizontal check
-      let count = 1;
-      let cc = c - 1;
-      while (cc >= 0 && grid[r][cc] === val) { count++; cc--; }
-      cc = c + 1;
-      while (cc < TUNING.gridCols && grid[r][cc] === val) { count++; cc++; }
-      if (count >= TUNING.matchLength) return true;
-
-      // Vertical check
-      count = 1;
-      let rr = r - 1;
-      while (rr >= 0 && grid[rr][c] === val) { count++; rr--; }
-      rr = r + 1;
-      while (rr < TUNING.gridRows && grid[rr][c] === val) { count++; rr++; }
-      return count >= TUNING.matchLength;
-    }
-
-    function findMatches() {
-      const matches = [];
-      // Horizontal
-      for (let r = 0; r < TUNING.gridRows; r++) {
-        let runVal = grid[r][0];
-        let runStart = 0;
-        for (let c = 1; c <= TUNING.gridCols; c++) {
-          const val = c < TUNING.gridCols ? grid[r][c] : null;
-          if (val === runVal && val !== 0) continue;
-          const runLen = c - runStart;
-          if (runVal !== 0 && runLen >= TUNING.matchLength) {
-            for (let k = 0; k < runLen; k++) {
-              matches.push({ r, c: runStart + k });
-            }
+      function createBoard() {
+        board = [];
+        for (let r = 0; r < ROWS; r++) {
+          const row = [];
+          for (let c = 0; c < COLS; c++) {
+            row.push(randTile());
           }
-          runVal = val;
-          runStart = c;
+          board.push(row);
         }
       }
 
-      // Vertical
-      for (let c = 0; c < TUNING.gridCols; c++) {
-        let runVal = grid[0][c];
-        let runStart = 0;
-        for (let r = 1; r <= TUNING.gridRows; r++) {
-          const val = r < TUNING.gridRows ? grid[r][c] : null;
-          if (val === runVal && val !== 0) continue;
-          const runLen = r - runStart;
-          if (runVal !== 0 && runLen >= TUNING.matchLength) {
-            for (let k = 0; k < runLen; k++) {
-              matches.push({ r: runStart + k, c });
+      function updateMeters() {
+        scoreEl.textContent = score;
+        lastClearEl.textContent = lastClearCount;
+        movesEl.textContent = moves;
+      }
+
+      function renderBoard() {
+        boardEl.innerHTML = "";
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            const tileVal = board[r][c];
+            const tileEl = document.createElement("div");
+            tileEl.classList.add("tile");
+
+            if (tileVal === null) {
+              tileEl.classList.add("empty");
+            } else {
+              tileEl.classList.add("color-" + tileVal);
+              tileEl.textContent = ""; // can put symbols here if desired
             }
-          }
-          runVal = val;
-          runStart = r;
-        }
-      }
 
-      // Deduplicate
-      const keySet = new Set();
-      const unique = [];
-      for (const m of matches) {
-        const key = m.r + "," + m.c;
-        if (!keySet.has(key)) {
-          keySet.add(key);
-          unique.push(m);
-        }
-      }
-      return unique;
-    }
+            tileEl.dataset.row = r;
+            tileEl.dataset.col = c;
 
-    function applyMatches(matches) {
-      if (!matches.length) return 0;
-      // Score
-      const clearedCount = matches.length;
-      const comboBonus = clearedCount > TUNING.matchLength
-        ? (clearedCount - TUNING.matchLength) * TUNING.comboBonus
-        : 0;
-      const gained = clearedCount * TUNING.clearScore + comboBonus;
-      score += gained;
-      scoreValEl.textContent = score;
-      comboValEl.textContent = gained;
+            tileEl.addEventListener("click", onTileClick, { passive: true });
 
-      // Clear tiles
-      for (const m of matches) {
-        grid[m.r][m.c] = 0;
-      }
-
-      // Gravity: for each column, collapse down
-      for (let c = 0; c < TUNING.gridCols; c++) {
-        let writeRow = TUNING.gridRows - 1;
-        for (let r = TUNING.gridRows - 1; r >= 0; r--) {
-          if (grid[r][c] !== 0) {
-            grid[writeRow][c] = grid[r][c];
-            if (writeRow !== r) {
-              grid[r][c] = 0;
+            if (
+              firstPick &&
+              firstPick.row === r &&
+              firstPick.col === c
+            ) {
+              tileEl.classList.add("selected");
             }
-            writeRow--;
+
+            boardEl.appendChild(tileEl);
           }
         }
-        // Fill remaining rows at top
-        for (let r = writeRow; r >= 0; r--) {
-          grid[r][c] = randomTile();
+      }
+
+      function onTileClick(e) {
+        if (isAnimating) return;
+
+        const target = e.currentTarget;
+        const row = Number(target.dataset.row);
+        const col = Number(target.dataset.col);
+
+        if (!firstPick) {
+          firstPick = { row, col };
+          renderBoard();
+          return;
+        }
+
+        // If same tile tapped again: cancel selection
+        if (firstPick.row === row && firstPick.col === col) {
+          firstPick = null;
+          renderBoard();
+          return;
+        }
+
+        // Only allow orthogonal neighbors
+        const dr = Math.abs(firstPick.row - row);
+        const dc = Math.abs(firstPick.col - col);
+        if (dr + dc !== 1) {
+          firstPick = { row, col };
+          renderBoard();
+          return;
+        }
+
+        const secondPick = { row, col };
+        swapAndResolve(firstPick, secondPick);
+      }
+
+      function swapTiles(a, b) {
+        const tmp = board[a.row][a.col];
+        board[a.row][a.col] = board[b.row][b.col];
+        board[b.row][b.col] = tmp;
+      }
+
+      function findMatches() {
+        const toClear = new Set();
+
+        // horizontal
+        for (let r = 0; r < ROWS; r++) {
+          let runStart = 0;
+          for (let c = 1; c <= COLS; c++) {
+            const current = c < COLS ? board[r][c] : null;
+            const prev = board[r][c - 1];
+
+            if (current !== prev || current === null) {
+              const runEnd = c - 1;
+              const runLength = runEnd - runStart + 1;
+              if (prev !== null && runLength >= 3) {
+                for (let k = runStart; k <= runEnd; k++) {
+                  toClear.add(r + "," + k);
+                }
+              }
+              runStart = c;
+            }
+          }
+        }
+
+        // vertical
+        for (let c = 0; c < COLS; c++) {
+          let runStart = 0;
+          for (let r = 1; r <= ROWS; r++) {
+            const current = r < ROWS ? board[r][c] : null;
+            const prev = board[r - 1][c];
+
+            if (current !== prev || current === null) {
+              const runEnd = r - 1;
+              const runLength = runEnd - runStart + 1;
+              if (prev !== null && runLength >= 3) {
+                for (let k = runStart; k <= runEnd; k++) {
+                  toClear.add(k + "," + c);
+                }
+              }
+              runStart = r;
+            }
+          }
+        }
+
+        return toClear;
+      }
+
+      function clearMatches(matchSet) {
+        matchSet.forEach((key) => {
+          const [r, c] = key.split(",").map(Number);
+          board[r][c] = null;
+        });
+      }
+
+      function dropTiles() {
+        for (let c = 0; c < COLS; c++) {
+          let writeRow = ROWS - 1;
+          for (let r = ROWS - 1; r >= 0; r--) {
+            if (board[r][c] !== null) {
+              board[writeRow][c] = board[r][c];
+              if (writeRow !== r) {
+                board[r][c] = null;
+              }
+              writeRow--;
+            }
+          }
+          // fill remaining cells with new tiles
+          for (let r = writeRow; r >= 0; r--) {
+            board[r][c] = randTile();
+          }
         }
       }
 
-      return gained;
-    }
+      function resolveBoardCascade() {
+        isAnimating = true;
 
-    // ============================================================
-    // 🎨 RENDER / SELECTION
-    // ============================================================
-    function renderBoard() {
-      const rows = TUNING.gridRows;
-      const cols = TUNING.gridCols;
-      boardEl.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-      boardEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-      boardEl.innerHTML = "";
+        let totalClearedThisCascade = 0;
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const val = grid[r][c];
-          const tile = document.createElement("div");
-          tile.className = "tile";
-          tile.dataset.r = r;
-          tile.dataset.c = c;
-          tile.dataset.v = val;
-          boardEl.appendChild(tile);
+        function step() {
+          const matches = findMatches();
+          if (matches.size === 0) {
+            lastClearCount = totalClearedThisCascade;
+            score += totalClearedThisCascade * SCORE_PER_TILE;
+            updateMeters();
+            isAnimating = false;
+            firstPick = null;
+            renderBoard();
+            return;
+          }
+
+          totalClearedThisCascade += matches.size;
+          clearMatches(matches);
+          renderBoard();
+
+          setTimeout(() => {
+            dropTiles();
+            renderBoard();
+            setTimeout(step, 100);
+          }, 120);
+        }
+
+        step();
+      }
+
+      function swapAndResolve(a, b) {
+        isAnimating = true;
+        swapTiles(a, b);
+        renderBoard();
+
+        const matches = findMatches();
+        if (matches.size === 0) {
+          // no match → swap back
+          setTimeout(() => {
+            swapTiles(a, b);
+            firstPick = null;
+            isAnimating = false;
+            renderBoard();
+          }, 140);
+        } else {
+          moves++;
+          updateMeters();
+          setTimeout(() => {
+            resolveBoardCascade();
+          }, 120);
         }
       }
-    }
 
-    function clearSelectionVisuals() {
-      const tiles = boardEl.querySelectorAll(".tile.selected");
-      tiles.forEach(t => t.classList.remove("selected"));
-    }
+      function resetGame() {
+        score = 0;
+        lastClearCount = 0;
+        moves = 0;
+        firstPick = null;
+        createBoard();
+        updateMeters();
+        renderBoard();
+        // optional: pre-resolve starting matches if you want a "clean" board
+      }
 
-    function markMatchesVisual(matches) {
-      const set = new Set(matches.map(m => m.r + "," + m.c));
-      const tiles = boardEl.querySelectorAll(".tile");
-      tiles.forEach(t => {
-        const r = parseInt(t.dataset.r, 10);
-        const c = parseInt(t.dataset.c, 10);
-        if (set.has(r + "," + c)) {
-          t.classList.add("clearing");
-        }
+      newBoardBtn.addEventListener("click", () => {
+        if (isAnimating) return;
+        resetGame();
       });
-    }
 
-    // ============================================================
-    // 🎮 INPUT HANDLING
-    // ============================================================
-    function areAdjacent(a, b) {
-      if (!a || !b) return false;
-      const dr = Math.abs(a.r - b.r);
-      const dc = Math.abs(a.c - b.c);
-      return (dr + dc === 1);
-    }
-
-    function trySwap(a, b) {
-      // Swap values
-      const temp = grid[a.r][a.c];
-      grid[a.r][a.c] = grid[b.r][b.c];
-      grid[b.r][b.c] = temp;
-
-      const matches = findMatches();
-      if (matches.length === 0) {
-        // Swap back if no match
-        grid[b.r][b.c] = grid[a.r][a.c];
-        grid[a.r][a.c] = temp;
-        renderBoard();
-        return false;
-      }
-
-      // Valid move: show marked, then resolve
-      renderBoard();
-      markMatchesVisual(matches);
-      setTimeout(() => {
-        applyMatches(matches);
-        // Resolve cascades
-        resolveCascades();
-      }, 150);
-
-      return true;
-    }
-
-    function resolveCascades() {
-      const matches = findMatches();
-      if (!matches.length) {
-        renderBoard();
-        return;
-      }
-      renderBoard();
-      markMatchesVisual(matches);
-      setTimeout(() => {
-        applyMatches(matches);
-        resolveCascades();
-      }, 130);
-    }
-
-    function handleTileClick(e) {
-      const target = e.target.closest(".tile");
-      if (!target) return;
-
-      const r = parseInt(target.dataset.r, 10);
-      const c = parseInt(target.dataset.c, 10);
-      const clicked = { r, c };
-
-      if (!selected) {
-        selected = clicked;
-        clearSelectionVisuals();
-        target.classList.add("selected");
-        return;
-      }
-
-      // If clicked same tile, deselect
-      if (selected.r === clicked.r && selected.c === clicked.c) {
-        selected = null;
-        clearSelectionVisuals();
-        return;
-      }
-
-      const prevSelected = selected;
-      selected = null;
-      clearSelectionVisuals();
-
-      if (!areAdjacent(prevSelected, clicked)) {
-        // Not adjacent, treat this new tile as first select
-        selected = clicked;
-        target.classList.add("selected");
-        return;
-      }
-
-      // Adjacent: attempt swap
-      trySwap(prevSelected, clicked);
-    }
-
-    // Touch support: treat taps same as clicks (no drag logic yet)
-    boardEl.addEventListener("click", handleTileClick);
-    boardEl.addEventListener("touchstart", function (e) {
-      // Let the click handler handle logic, we just prevent fat double events
-      e.preventDefault();
-      const touch = e.changedTouches[0];
-      const el = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (el && el.classList.contains("tile")) {
-        el.click();
-      }
-    }, { passive: false });
-
-    // ============================================================
-    // 🚀 BOOTSTRAP
-    // ============================================================
-    function newGame() {
-      score = 0;
-      scoreValEl.textContent = score;
-      comboValEl.textContent = 0;
-      selected = null;
-      generateInitialGrid();
-      renderBoard();
-    }
-
-    resetBtn.addEventListener("click", newGame);
-
-    newGame();
+      // boot
+      resetGame();
+    })();
   </script>
 </body>
 </html>
