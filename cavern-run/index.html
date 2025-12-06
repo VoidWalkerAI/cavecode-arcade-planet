@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Cavern Run — Ceiling Breaker (ARC-CR-002)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<style>
+  :root {
+    --bg: #020617;
+    --border: #1f2937;
+    --text-main: #e5e7eb;
+    --text-soft: #9ca3af;
+    --platform: #4ade80;
+    --platform-crumble: #f87171;
+    --player: #facc15;
+  }
+
+  body {
+    margin: 0;
+    background: radial-gradient(circle at top, #111827 0, #020617 60%);
+    color: var(--text-main);
+    font-family: system-ui, sans-serif;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    padding: 0.5rem;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+
+  #hud {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    display: flex;
+    gap: 1rem;
+  }
+
+  canvas {
+    width: 320px;
+    height: 480px;
+    max-width: 100vw;
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    margin-top: 0.6rem;
+    touch-action: manipulation;
+  }
+
+  #startBtn {
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.8rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-main);
+    cursor: pointer;
+  }
+
+  #status {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cavern Run — Ceiling Breaker · ARC-CR-002</h1>
+</header>
+
+<div id="hud">
+  <div>Height: <span id="scoreText">0</span></div>
+  <div>Best: <span id="bestText">0</span></div>
+</div>
+
+<canvas id="game" width="320" height="480"></canvas>
+<button id="startBtn">Begin Ascent</button>
+<div id="status">Tap Begin Ascent to start.</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const scoreText = document.getElementById("scoreText");
+const bestText = document.getElementById("bestText");
+const startBtn = document.getElementById("startBtn");
+const statusEl = document.getElementById("status");
+
+// TUNING
+const T = {
+  gravity: 1400,
+  jumpVelocity: -600,
+  playerSpeed: 200,
+  scrollSpeed: 40,
+  scrollSpeedIncrease: 5,
+  platformSpacingMin: 60,
+  platformSpacingMax: 110,
+  platformWidthMin: 40,
+  platformWidthMax: 90,
+  crumbleChance: 0.25,
+  crumbleDelay: 0.35
+};
+
+// STATE
+let player;
+let platforms = [];
+let running = false;
+let lastTime = 0;
+let scrollOffset = 0;
+let heightClimbed = 0;
+let bestScore = 0;
+
+let leftHeld = false;
+let rightHeld = false;
+let jumpQueued = false;
+
+// INIT
+function resetGame() {
+  player = {
+    x: canvas.width / 2,
+    y: canvas.height - 40,
+    w: 20,
+    h: 20,
+    vy: 0,
+    grounded: false
+  };
+
+  platforms = [];
+  scrollOffset = 0;
+  heightClimbed = 0;
+
+  // Add starting platform
+  platforms.push({
+    x: canvas.width / 2 - 50,
+    y: canvas.height - 20,
+    w: 100,
+    crumble: false,
+    timer: 0
+  });
+
+  // Seed some platforms
+  let seedY = canvas.height - 80;
+  for (let i = 0; i < 6; i++) {
+    seedY -= 80;
+    platforms.push(genPlatform(seedY));
+  }
+}
+
+// PLATFORM GENERATION
+function genPlatform(y) {
+  const w = rand(T.platformWidthMin, T.platformWidthMax);
+  const x = rand(0, canvas.width - w);
+  const crumble = Math.random() < T.crumbleChance;
+  return { x, y, w, crumble, timer: 0 };
+}
+
+// UTILITY
+function rand(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+// INPUT
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft" || e.key === "a") leftHeld = true;
+  if (e.key === "ArrowRight" || e.key === "d") rightHeld = true;
+  if (e.key === " " || e.key === "ArrowUp" || e.key === "w") jumpQueued = true;
+});
+
+document.addEventListener("keyup", e => {
+  if (e.key === "ArrowLeft" || e.key === "a") leftHeld = false;
+  if (e.key === "ArrowRight" || e.key === "d") rightHeld = false;
+});
+
+// Mobile
+canvas.addEventListener("touchstart", e => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.touches[0].clientX - rect.left;
+  if (x < rect.width / 2) leftHeld = true;
+  else rightHeld = true;
+});
+canvas.addEventListener("touchend", () => {
+  leftHeld = false;
+  rightHeld = false;
+});
+
+// UPDATE
+function update(dt) {
+  // Rising camera
+  let speed = T.scrollSpeed + heightClimbed * 0.01 * T.scrollSpeedIncrease;
+  scrollOffset += speed * dt;
+  heightClimbed += speed * dt;
+  scoreText.textContent = Math.floor(heightClimbed);
+
+  // Player movement
+  if (leftHeld) player.x -= T.playerSpeed * dt;
+  if (rightHeld) player.x += T.playerSpeed * dt;
+
+  player.x = Math.max(0, Math.min(canvas.width - player.w, player.x));
+
+  // Gravity
+  player.vy += T.gravity * dt;
+  player.y += player.vy * dt;
+
+  player.grounded = false;
+
+  // Platform collisions
+  for (const p of platforms) {
+    const py = p.y + scrollOffset; // moved by scroll
+    if (
+      player.vy > 0 &&
+      player.x + player.w > p.x &&
+      player.x < p.x + p.w &&
+      player.y + player.h > py &&
+      player.y + player.h < py + 10
+    ) {
+      // Land
+      player.y = py - player.h;
+      player.vy = 0;
+      player.grounded = true;
+
+      // crumble?
+      if (p.crumble) p.timer += dt;
+      if (p.timer >= T.crumbleDelay) {
+        p.remove = true;
+      }
+    }
+  }
+
+  // Jump
+  if (jumpQueued && player.grounded) {
+    player.vy = T.jumpVelocity;
+  }
+  jumpQueued = false;
+
+  // Failure: fell below screen
+  if (player.y > canvas.height) {
+    endGame();
+    return;
+  }
+
+  // Generate new platforms above
+  let highest = Math.min(...platforms.map(p => p.y));
+  if (highest + scrollOffset > 0) {
+    const newY = highest - rand(T.platformSpacingMin, T.platformSpacingMax);
+    platforms.push(genPlatform(newY));
+  }
+
+  // Remove off-screen platforms
+  platforms = platforms.filter(p => {
+    const py = p.y + scrollOffset;
+    return py < canvas.height + 40 && !p.remove;
+  });
+}
+
+// RENDER
+function render() {
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Platforms
+  for (const p of platforms) {
+    const py = p.y + scrollOffset;
+    if (py > canvas.height || py < -40) continue;
+
+    ctx.fillStyle = p.crumble ? "#f87171" : "#4ade80";
+    ctx.fillRect(p.x, py, p.w, 10);
+  }
+
+  // Player
+  ctx.fillStyle = "#facc15";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+}
+
+// MAIN LOOP
+function loop(ts) {
+  if (!running) return;
+  if (!lastTime) lastTime = ts;
+  const dt = (ts - lastTime) / 1000;
+  lastTime = ts;
+
+  update(dt);
+  render();
+
+  requestAnimationFrame(loop);
+}
+
+// END GAME
+function endGame() {
+  running = false;
+  statusEl.textContent = "You fell to the dark.";
+
+  if (heightClimbed > bestScore) {
+    bestScore = Math.floor(heightClimbed);
+    bestText.textContent = bestScore;
+  }
+}
+
+// START
+startBtn.addEventListener("click", () => {
+  running = true;
+  lastTime = 0;
+  resetGame();
+  statusEl.textContent = "Climb before the darkness catches you.";
+  requestAnimationFrame(loop);
+});
+
+// Initial render
+resetGame();
+render();
+</script>
+
+</body>
+</html>
