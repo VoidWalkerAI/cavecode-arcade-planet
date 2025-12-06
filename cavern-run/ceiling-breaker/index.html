@@ -1195,6 +1195,264 @@
       const pfWidth = playfield.clientWidth;
       const scrollPx = level.scrollSpeed * dt;
 
+<script>
+    // ---- LEVEL CONFIG ----
+    const LEVELS = [
+      { name: "Warm Cracks", target: 1000, scrollSpeed: 55, platformSpawn: 900, crumbleMin: 1800, crumbleMax: 2400, debrisInterval: 1600 },
+      { name: "Falling Echo", target: 1400, scrollSpeed: 65, platformSpawn: 830, crumbleMin: 1600, crumbleMax: 2200, debrisInterval: 1400 },
+      { name: "Breakneck Lift", target: 1800, scrollSpeed: 75, platformSpawn: 780, crumbleMin: 1400, crumbleMax: 2000, debrisInterval: 1250 },
+      { name: "Cinder Storm", target: 2200, scrollSpeed: 87, platformSpawn: 720, crumbleMin: 1200, crumbleMax: 1800, debrisInterval: 1100 },
+      { name: "Fractured Summit", target: 2600, scrollSpeed: 98, platformSpawn: 660, crumbleMin: 1000, crumbleMax: 1500, debrisInterval: 950 }
+    ];
+
+    // ---- DOM HOOKS ----
+    const playfield = document.getElementById("playfield");
+    const runnerEl = document.getElementById("runner");
+    const dangerGlow = document.getElementById("dangerGlow");
+
+    const statLevel = document.getElementById("stat-level");
+    const statHeight = document.getElementById("stat-height");
+    const statTarget = document.getElementById("stat-target");
+    const statLives = document.getElementById("stat-lives");
+    const statBest = document.getElementById("stat-best");
+    const statChain = document.getElementById("stat-chain");
+
+    const jumpBtn = document.getElementById("jumpBtn");
+    const dashLeftBtn = document.getElementById("dashLeftBtn");
+    const dashRightBtn = document.getElementById("dashRightBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const nextLevelBtn = document.getElementById("nextLevelBtn");
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalPrimary = document.getElementById("modalPrimary");
+    const modalSecondary = document.getElementById("modalSecondary");
+
+    // ---- GAME STATE ----
+    let currentLevelIndex = 0;
+    let running = false;
+    let lastTime = null;
+
+    let height = 0;
+    let bestHeight = 0;
+    let lives = 3;
+    let chain = 1.0;
+    let cleanJumps = 0;
+
+    let scrollOffset = 0;
+
+    let runnerX = 0;
+    let runnerY = 0;
+    let runnerVX = 0;
+    let runnerVY = 0;
+    const runnerWidth = 26;
+    const runnerHeight = 30;
+
+    const GRAVITY = -0.00042;
+    const JUMP_VELOCITY = 0.23;
+    const DASH_STRENGTH = 0.23;
+    const MAX_FALL_SPEED = -0.5;
+
+    let isOnGround = false;
+    let dashCooldown = 0;
+
+    let platformTimer = 0;
+    let debrisTimer = 0;
+    let platformIdCounter = 0;
+    let debrisIdCounter = 0;
+    const platforms = new Map();
+    const debrisPieces = new Map();
+
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+          audioCtx = null;
+        }
+      }
+    }
+
+    function beep(freq, duration, gainVal = 0.06) {
+      if (!audioCtx) return;
+      const ctx = audioCtx;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.value = gainVal;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      osc.start(now);
+      osc.stop(now + duration);
+    }
+
+    function sfxJump() {
+      ensureAudio();
+      beep(620, 0.08, 0.05);
+    }
+
+    function sfxDash() {
+      ensureAudio();
+      beep(460, 0.07, 0.05);
+    }
+
+    function sfxHit() {
+      ensureAudio();
+      beep(220, 0.18, 0.08);
+    }
+
+    function sfxLevelClear() {
+      ensureAudio();
+      beep(680, 0.12, 0.06);
+      setTimeout(() => beep(880, 0.14, 0.06), 110);
+    }
+
+    // ---- INIT / RESET ----
+    function initRunnerPosition() {
+      const pfHeight = playfield.clientHeight;
+      const pfWidth = playfield.clientWidth;
+      runnerX = pfWidth * 0.5;
+      runnerY = pfHeight * 0.2;
+      runnerVX = 0;
+      runnerVY = 0;
+      isOnGround = false;
+      applyRunnerTransform();
+    }
+
+    function resetLevel(levelIndex) {
+      currentLevelIndex = levelIndex;
+      const level = LEVELS[levelIndex];
+      running = true;
+      lastTime = null;
+
+      height = 0;
+      chain = 1.0;
+      cleanJumps = 0;
+      scrollOffset = 0;
+      lives = 3;
+
+      platformTimer = 0;
+      debrisTimer = 0;
+      platforms.forEach(p => p.el.remove());
+      platforms.clear();
+      debrisPieces.forEach(d => d.el.remove());
+      debrisPieces.clear();
+
+      initRunnerPosition();
+      spawnInitialPlatforms();
+
+      statLevel.textContent = (levelIndex + 1).toString();
+      statHeight.textContent = "0 m";
+      statTarget.textContent = level.target + " m";
+      statLives.textContent = lives.toString();
+      statChain.textContent = "x" + chain.toFixed(1);
+
+      updateDangerGlow(0);
+      requestAnimationFrame(gameLoop);
+    }
+
+    function spawnInitialPlatforms() {
+      const pfHeight = playfield.clientHeight;
+      const pfWidth = playfield.clientWidth;
+      createPlatform(pfWidth * 0.5 - 60, pfHeight * 0.12, 120, "safe");
+      createPlatform(pfWidth * 0.2, pfHeight * 0.28, 80, "normal");
+      createPlatform(pfWidth * 0.65, pfHeight * 0.44, 90, "normal");
+      createPlatform(pfWidth * 0.35, pfHeight * 0.6, 90, "boost");
+    }
+
+    // ---- OBJECT SPAWN ----
+    function createPlatform(x, y, width, type) {
+      const el = document.createElement("div");
+      el.className = "platform";
+      if (type === "safe") el.classList.add("safe");
+      if (type === "boost") el.classList.add("boost");
+
+      el.style.left = x + "px";
+      el.style.bottom = y + "px";
+      el.style.width = width + "px";
+
+      playfield.appendChild(el);
+
+      const id = platformIdCounter++;
+      const level = LEVELS[currentLevelIndex];
+      const crumbleTime =
+        type === "safe"
+          ? null
+          : performance.now() +
+            (level.crumbleMin + Math.random() * (level.crumbleMax - level.crumbleMin));
+
+      platforms.set(id, {
+        id,
+        el,
+        x,
+        y,
+        width,
+        type,
+        crumbleTime,
+        crumbling: false
+      });
+    }
+
+    function spawnPlatformFromTop() {
+      const pfWidth = playfield.clientWidth;
+      const pfHeight = playfield.clientHeight;
+      const level = LEVELS[currentLevelIndex];
+
+      const width = 60 + Math.random() * 90;
+      const x = 10 + Math.random() * (pfWidth - width - 20);
+      const y = pfHeight + 30;
+
+      const r = Math.random();
+      let type = "normal";
+      if (r < 0.12) type = "safe";
+      else if (r < 0.24) type = "boost";
+
+      createPlatform(x, y, width, type);
+    }
+
+    function spawnDebris() {
+      const pfWidth = playfield.clientWidth;
+      const pfHeight = playfield.clientHeight;
+      const x = 10 + Math.random() * (pfWidth - 20);
+      const y = pfHeight + 16;
+
+      const el = document.createElement("div");
+      el.className = "debris";
+      el.style.left = x + "px";
+      el.style.bottom = y + "px";
+      playfield.appendChild(el);
+
+      const id = debrisIdCounter++;
+      debrisPieces.set(id, {
+        id,
+        el,
+        x,
+        y,
+        vy: -0.23 - Math.random() * 0.08
+      });
+    }
+
+    // ---- GAME LOOP ----
+    function gameLoop(timestamp) {
+      if (!running) return;
+      if (lastTime == null) lastTime = timestamp;
+      const deltaMs = timestamp - lastTime;
+      lastTime = timestamp;
+      const dt = deltaMs / 1000;
+
+      const level = LEVELS[currentLevelIndex];
+
+      // Scroll
+      scrollOffset += level.scrollSpeed * dt;
+      const pfHeight = playfield.clientHeight;
+      const pfWidth = playfield.clientWidth;
+      const scrollPx = level.scrollSpeed * dt;
+
       // Height climbed
       height += level.scrollSpeed * dt;
       statHeight.textContent = Math.floor(height) + " m";
