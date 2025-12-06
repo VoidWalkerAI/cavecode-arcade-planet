@@ -1,430 +1,839 @@
-w<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Cavern Run — Bastion Runner (ARC-CR-001)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bastion Runner · ARC-CR-001</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
+  <!--
+    BLOCK 1 — SHELL & BRAND (LOCKED)
+    CaveCode Arcade Planet · Cavern-Run Line
+  -->
   <style>
     :root {
-      --bg: #020617;
-      --panel: #0b1120;
-      --border: #1f2937;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-
-      --runner-body: #f97316;
-      --runner-outline: #0f172a;
-      --obstacle: #22c55e;
+      --cc-bg: #020617;
+      --cc-panel: #02081b;
+      --cc-panel-soft: #0b1120;
+      --cc-border: #1f2937;
+      --cc-accent: #fb923c;
+      --cc-accent-soft: #fed7aa;
+      --cc-text-main: #e5e7eb;
+      --cc-text-soft: #9ca3af;
+      --cc-badge-bg: #0b1120;
+      --runner: #22c55e;
+      --hazard: #ef4444;
+      --coin: #22d3ee;
       --ground: #111827;
-      --sky-top: #020617;
-      --sky-bottom: #0b1120;
     }
 
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
+      background: radial-gradient(circle at top, #111827 0, #020617 55%);
+      color: var(--cc-text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: radial-gradient(circle at top, #111827 0, #020617 60%);
-      color: var(--text-main);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      user-select: none;
+      padding: 1.25rem 0.75rem 2.5rem;
     }
 
     header {
-      margin-top: 0.75rem;
-      text-align: center;
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, #020617, #030712);
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      padding: 0.9rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 1.05rem;
+    @media (min-width: 640px) {
+      header {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+    }
+
+    .title-line {
+      font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+      font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
-    header .sub {
+    .title-line span {
+      color: var(--cc-accent-soft);
+    }
+
+    .subtitle-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
       margin-top: 0.15rem;
-      font-size: 0.8rem;
-      color: var(--text-soft);
     }
 
-    #hud {
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-      color: var(--text-soft);
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    #game-shell {
-      margin-top: 0.6rem;
-      padding: 0.8rem 1rem 1rem;
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.9);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    canvas {
-      width: 320px;
-      height: 240px;
-      max-width: 100vw;
-      border-radius: 0.6rem;
-      border: 1px solid var(--border);
-      background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
-      touch-action: manipulation;
-    }
-
-    #controls-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      max-width: 320px;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-      gap: 0.5rem;
-    }
-
-    #status {
-      flex: 1;
-    }
-
-    #startBtn {
-      padding: 0.25rem 0.8rem;
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.16rem 0.5rem;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      background: radial-gradient(circle at top, rgba(251, 146, 60, 0.55), rgba(15, 23, 42, 1));
-      color: var(--text-main);
-      font-size: 0.8rem;
-      cursor: pointer;
+      border: 1px solid var(--cc-border);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--cc-text-soft);
       white-space: nowrap;
     }
 
-    #startBtn:active {
-      transform: translateY(1px);
+    .badge.chip-strong {
+      border-color: var(--cc-accent);
+      color: var(--cc-accent-soft);
+      background: radial-gradient(circle at top left, rgba(251, 146, 60, 0.35), rgba(15, 23, 42, 0.9));
     }
 
-    @media (max-width: 480px) {
-      canvas {
-        width: 280px;
-        height: 210px;
+    main {
+      width: 100%;
+      max-width: 960px;
+      margin-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), #020617);
+      border-radius: 1.25rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+      padding: 1rem 1.15rem 1.1rem;
+    }
+
+    .panel-header-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--cc-text-soft);
+    }
+
+    .panel-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .panel-tags .badge {
+      font-size: 0.68rem;
+    }
+
+    .panel-body p {
+      margin: 0.25rem 0 0.4rem;
+      font-size: 0.86rem;
+      color: var(--cc-text-soft);
+      line-height: 1.4;
+    }
+
+    .stat-grid {
+      margin-top: 0.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 720px) {
+      .stat-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
       }
+    }
+
+    .stat-chip {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 0.75rem;
+      border: 1px solid var(--cc-border);
+      padding: 0.4rem 0.55rem;
+      font-size: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cc-text-soft);
+    }
+
+    .stat-value {
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .stat-value.accent {
+      color: var(--cc-accent-soft);
+    }
+
+    .playfield-wrap {
+      margin-top: 0.7rem;
+      border-radius: 1rem;
+      border: 1px solid var(--cc-border);
+      background: radial-gradient(circle at top, #020617, #000000 70%);
+      padding: 0.75rem;
+    }
+
+    #playfield {
+      position: relative;
+      margin: 0 auto;
+      width: min(640px, 100%);
+      height: min(260px, 55vw);
+      max-height: 280px;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000000 90%);
+      border-radius: 0.9rem;
+      overflow: hidden;
+      border: 1px solid #020617;
+    }
+
+    #ground {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 26%;
+      background: linear-gradient(to top, #020617 0, #020617 45%, #02061700 100%);
+      box-shadow: inset 0 12px 20px rgba(0,0,0,0.75);
+    }
+
+    #runner {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: radial-gradient(circle at top left, #bbf7d0, var(--runner));
+      border-radius: 0.35rem;
+      box-shadow: 0 0 14px rgba(34, 197, 94, 0.8);
+      left: 14%;
+      bottom: 26%;
+    }
+
+    .hazard {
+      position: absolute;
+      bottom: 26%;
+      width: 26px;
+      height: 26px;
+      border-radius: 0.3rem;
+      background: radial-gradient(circle at top, #fecaca, var(--hazard));
+      box-shadow: 0 0 12px rgba(248, 113, 113, 0.8);
+    }
+
+    .coin {
+      position: absolute;
+      bottom: 26%;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top, #cffafe, var(--coin));
+      box-shadow: 0 0 10px rgba(45, 212, 191, 0.9);
+    }
+
+    .controls-row {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      justify-content: center;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      background: #020617;
+      color: var(--cc-text-main);
+      font-size: 0.82rem;
+      padding: 0.45rem 1.1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cc-accent), #f97316);
+      border-color: #fb923c;
+      color: #111827;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(248, 113, 113, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .hint {
+      margin-top: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+    }
+
+    footer {
+      margin-top: 1.4rem;
+      font-size: 0.78rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+    }
+
+    footer span {
+      color: var(--cc-accent-soft);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .modal {
+      background: radial-gradient(circle at top, #020617, #020617 40%, #000 95%);
+      border-radius: 1rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+      padding: 1.2rem 1.4rem 1rem;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .modal p {
+      margin: 0.2rem 0 0.8rem;
+      font-size: 0.85rem;
+      color: var(--cc-text-soft);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Cavern Run — Bastion Runner · ARC-CR-001</h1>
-    <div class="sub">Run the cavern. Jump the hazards. Survive as long as you can.</div>
+    <div class="title-stack">
+      <div class="title-line">
+        CAVERN RUN — <span>BASTION RUNNER</span> · ARC-CR-001
+      </div>
+      <div class="subtitle-line">
+        <span class="badge">CaveCode Arcade Planet</span>
+        <span class="badge">Cavern-Run Line</span>
+        <span class="badge chip-strong">Endless Runner Engine</span>
+      </div>
+    </div>
   </header>
 
-  <div id="hud">
-    <div>Score: <span id="scoreText">0</span></div>
-    <div>Best: <span id="bestText">0</span></div>
-  </div>
+  <main>
+    <section class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title">Track Overview</div>
+        <div class="panel-tags">
+          <span class="badge">Level Track</span>
+          <span class="badge">Side-View Runner</span>
+          <span class="badge">Hazard Jumps</span>
+          <span class="badge">Score Multipliers</span>
+          <span class="badge">Sound &amp; Pop</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p>
+          Guide your runner through a torchlit cavern. The pace rises with each level:
+          hazards spawn faster, jumps come tighter, and chain multipliers reward clean runs.
+        </p>
+        <p>
+          Reach the distance target before you run out of lives. Clear levels in a row to
+          push your best run deeper into the tunnels.
+        </p>
+      </div>
 
-  <div id="game-shell">
-    <canvas id="game" width="320" height="240"></canvas>
-    <div id="controls-row">
-      <div id="status">Tap Start Run to begin.</div>
-      <button id="startBtn">Start Run</button>
+      <div class="stat-grid">
+        <div class="stat-chip">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="stat-level">1</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value" id="stat-distance">0 m</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Target</div>
+          <div class="stat-value" id="stat-target">400 m</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Lives</div>
+          <div class="stat-value" id="stat-lives">3</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Best Run</div>
+          <div class="stat-value" id="stat-best">0 m</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">Jumps</div>
+          <div class="stat-value" id="stat-jumps">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="playfield-wrap">
+        <div id="playfield">
+          <div id="ground"></div>
+          <div id="runner"></div>
+          <!-- Hazards & coins get injected here -->
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <button class="btn btn-primary" id="jumpBtn">Jump</button>
+        <button class="btn" id="restartBtn">Restart Run</button>
+        <button class="btn" id="nextLevelBtn">Next Level</button>
+      </div>
+
+      <p class="hint">
+        Tap / click inside the cavern or press <strong>Space</strong>, <strong>Up</strong>, or <strong>W</strong> to jump.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    Match clean jumps, ride the chain, and push deeper into the tunnels.
+    Forged in <span>CaveCode Arcade Planet</span> · <span>SageWire Syndicate</span>.
+  </footer>
+
+  <!-- Win / lose modal -->
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <div class="modal" id="modal">
+      <h2 id="modalTitle">Level Clear</h2>
+      <p id="modalBody">You reached the target distance.</p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="modalPrimary">Next Level</button>
+        <button class="btn" id="modalSecondary">Restart</button>
+      </div>
     </div>
   </div>
 
+  <!--
+    BLOCK 4 — GAME LOGIC (EDITABLE)
+    Bastion Runner · Level track + polish pass
+  -->
   <script>
-    // ============================================================
-    // 🎚️ TUNING (sync with bastion-runner.cavecode)
-    // ============================================================
-    const TUNING = {
-      gravity: 1400,
-      jumpVelocity: -520,
-      groundY: 220,
-      baseSpeed: 180,
-      speedIncreaseRate: 0.15,
-      obstacleSpawnIntervalMin: 0.8,
-      obstacleSpawnIntervalMax: 1.6,
-      obstacleWidth: 26,
-      obstacleHeight: 32
-    };
+    // ---- DOM hooks ----
+    const playfield = document.getElementById("playfield");
+    const runnerEl = document.getElementById("runner");
 
-    // ============================================================
-    // CANVAS + CTX
-    // ============================================================
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
+    const statLevel = document.getElementById("stat-level");
+    const statDistance = document.getElementById("stat-distance");
+    const statTarget = document.getElementById("stat-target");
+    const statLives = document.getElementById("stat-lives");
+    const statBest = document.getElementById("stat-best");
+    const statJumps = document.getElementById("stat-jumps");
 
-    const scoreText = document.getElementById("scoreText");
-    const bestText = document.getElementById("bestText");
-    const statusEl = document.getElementById("status");
-    const startBtn = document.getElementById("startBtn");
+    const jumpBtn = document.getElementById("jumpBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const nextLevelBtn = document.getElementById("nextLevelBtn");
 
-    // ============================================================
-    // STATE
-    // ============================================================
-    let runner = {
-      x: 48,
-      y: TUNING.groundY,
-      w: 18,
-      h: 24,
-      vy: 0,
-      canJump: true
-    };
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalPrimary = document.getElementById("modalPrimary");
+    const modalSecondary = document.getElementById("modalSecondary");
 
-    let obstacles = []; // { x, y, w, h }
+    // ---- Level track ----
+    const LEVELS = [
+      { name: "Warm-Up Cavern", target: 400, speed: 3.1, spawnInterval: 1100, coinChance: 0.25 },
+      { name: "Low Ceiling Run", target: 650, speed: 3.7, spawnInterval: 950, coinChance: 0.3 },
+      { name: "Shardfall Tunnel", target: 900, speed: 4.3, spawnInterval: 830, coinChance: 0.35 },
+      { name: "Breaker Gallery", target: 1200, speed: 4.9, spawnInterval: 720, coinChance: 0.4 },
+      { name: "Deep Bastion", target: 1600, speed: 5.4, spawnInterval: 620, coinChance: 0.45 }
+    ];
 
+    let currentLevelIndex = 0;
+    let distance = 0;
+    let bestDistance = 0;
+    let lives = 3;
+    let jumps = 0;
+    let chainMultiplier = 1;
+
+    // Runner physics
+    const GROUND_Y = 0; // in "ground space" we keep bottom aligned; we only care about jump height
+    let velocityY = 0;
+    let posY = 0;
+    let isOnGround = true;
+
+    const GRAVITY = -0.0048;        // tuned in "distance space"
+    const JUMP_VELOCITY = 0.075;    // stronger jump = higher
+    const MAX_JUMP_HEIGHT_PX = 80;  // clamp visual
+
+    // Game state
+    let lastTime = null;
     let running = false;
-    let lastTime = 0;
-    let elapsed = 0;
-    let score = 0;
-    let bestScore = 0;
-
     let spawnTimer = 0;
-    let currentSpawnInterval = 1.2; // seconds
+    let hazardIdCounter = 0;
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
-    function resetGame() {
-      runner.x = 48;
-      runner.y = TUNING.groundY;
-      runner.vy = 0;
-      runner.canJump = true;
-      obstacles = [];
-      elapsed = 0;
-      score = 0;
-      scoreText.textContent = "0";
-      spawnTimer = 0;
-      currentSpawnInterval = 1.2;
-      statusEl.textContent = "Jump over hazards and stay alive.";
+    const hazards = new Map(); // id -> { el, x, isCoin, taken }
+
+    let audioCtx = null;
+
+    function ensureAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
     }
 
-    function jump() {
+    function playTone(freq, duration, volume) {
+      try {
+        ensureAudioCtx();
+        const ctx = audioCtx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.value = volume ?? 0.04;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+        osc.start(now);
+        osc.stop(now + (duration ?? 0.12));
+      } catch (e) {
+        // ignore if audio fails
+      }
+    }
+
+    function playJumpSound() {
+      playTone(520, 0.09, 0.05);
+    }
+
+    function playHitSound() {
+      playTone(240, 0.16, 0.07);
+    }
+
+    function playLevelClearSound() {
+      playTone(650, 0.14, 0.06);
+      setTimeout(() => playTone(820, 0.14, 0.06), 120);
+    }
+
+    // ---- Helpers ----
+
+    function resetLevel(levelIndex) {
+      currentLevelIndex = levelIndex;
+      distance = 0;
+      chainMultiplier = 1;
+      jumps = 0;
+      lives = 3;
+
+      statLevel.textContent = (levelIndex + 1).toString();
+      statDistance.textContent = "0 m";
+      statTarget.textContent = LEVELS[levelIndex].target + " m";
+      statLives.textContent = lives.toString();
+      statJumps.textContent = "0";
+
+      // clear hazards
+      hazards.forEach(obj => obj.el.remove());
+      hazards.clear();
+
+      // reset runner position
+      posY = GROUND_Y;
+      velocityY = 0;
+      isOnGround = true;
+      applyRunnerPosition();
+
+      running = true;
+      lastTime = null;
+      spawnTimer = 0;
+      updateStatusButtonStates();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateStatusButtonStates() {
+      nextLevelBtn.disabled = !running;
+    }
+
+    function applyRunnerPosition() {
+      const h = playfield.clientHeight;
+      const groundHeight = h * 0.26;
+      const baseBottom = groundHeight; // where bottom of runner sits when posY = 0
+      // Translate posY to pixels above ground, clamped
+      const jumpPixels = Math.min(MAX_JUMP_HEIGHT_PX, posY * 1800);
+      const bottomPx = baseBottom + jumpPixels;
+      runnerEl.style.bottom = bottomPx + "px";
+    }
+
+    function spawnHazard() {
+      const cfg = LEVELS[currentLevelIndex];
+      const isCoin = Math.random() < cfg.coinChance;
+      const id = hazardIdCounter++;
+      const el = document.createElement("div");
+      el.className = isCoin ? "coin" : "hazard";
+
+      const pfWidth = playfield.clientWidth;
+      const pfHeight = playfield.clientHeight;
+      const groundHeight = pfHeight * 0.26;
+
+      const minBottom = groundHeight;
+      const maxBottom = groundHeight + 64;
+      const bottom = minBottom + Math.random() * (maxBottom - minBottom);
+
+      el.style.right = "-40px";
+      el.style.bottom = bottom + "px";
+
+      playfield.appendChild(el);
+
+      hazards.set(id, {
+        el,
+        x: pfWidth + 40,
+        bottom,
+        isCoin,
+        taken: false
+      });
+    }
+
+    function gameLoop(timestamp) {
       if (!running) return;
-      if (!runner.canJump) return;
-      runner.vy = TUNING.jumpVelocity;
-      runner.canJump = false;
-    }
+      if (lastTime == null) lastTime = timestamp;
+      const delta = timestamp - lastTime;
+      lastTime = timestamp;
 
-    function randomRange(min, max) {
-      return min + Math.random() * (max - min);
-    }
+      const cfg = LEVELS[currentLevelIndex];
 
-    function scheduleNextSpawn() {
-      currentSpawnInterval = randomRange(
-        TUNING.obstacleSpawnIntervalMin,
-        TUNING.obstacleSpawnIntervalMax
-      );
-      spawnTimer = 0;
-    }
+      // Distance & spawn timing in ms
+      distance += cfg.speed * (delta / 16.67);
+      statDistance.textContent = Math.floor(distance) + " m";
 
-    function spawnObstacle() {
-      const x = canvas.width + TUNING.obstacleWidth;
-      const y = TUNING.groundY - TUNING.obstacleHeight;
-      obstacles.push({
-        x,
-        y,
-        w: TUNING.obstacleWidth,
-        h: TUNING.obstacleHeight
-      });
-    }
-
-    function aabbIntersect(a, b) {
-      return !(
-        a.x + a.w < b.x ||
-        a.x > b.x + b.w ||
-        a.y + a.h < b.y ||
-        a.y > b.y + b.h
-      );
-    }
-
-    function gameOver() {
-      running = false;
-      if (score > bestScore) {
-        bestScore = score;
-        bestText.textContent = bestScore;
-      }
-      statusEl.textContent = "You fell in the cavern. Tap Start to try again.";
-    }
-
-    // ============================================================
-    // UPDATE
-    // ============================================================
-    function update(dt) {
-      // Speed scaling
-      const speed = TUNING.baseSpeed * (1 + elapsed * TUNING.speedIncreaseRate);
-
-      // Runner physics
-      runner.vy += TUNING.gravity * dt;
-      runner.y += runner.vy * dt;
-
-      // Ground collision
-      if (runner.y >= TUNING.groundY) {
-        runner.y = TUNING.groundY;
-        runner.vy = 0;
-        runner.canJump = true;
+      spawnTimer += delta;
+      if (spawnTimer >= cfg.spawnInterval) {
+        spawnTimer = 0;
+        spawnHazard();
       }
 
-      // Obstacles
-      obstacles.forEach(o => {
-        o.x -= speed * dt;
-      });
+      // Physics
+      velocityY += GRAVITY * delta;
+      if (isOnGround && velocityY < 0) velocityY = 0;
+      posY += velocityY * delta;
 
-      // Remove off-screen obstacles
-      obstacles = obstacles.filter(o => o.x + o.w > -10);
-
-      // Spawn
-      spawnTimer += dt;
-      if (spawnTimer >= currentSpawnInterval) {
-        spawnObstacle();
-        scheduleNextSpawn();
+      if (posY <= GROUND_Y) {
+        posY = GROUND_Y;
+        velocityY = 0;
+        isOnGround = true;
+      } else {
+        isOnGround = false;
       }
+      applyRunnerPosition();
 
-      // Collision
-      const runnerBox = {
-        x: runner.x,
-        y: runner.y - runner.h,
-        w: runner.w,
-        h: runner.h
-      };
+      // Hazards update
+      const pfWidth = playfield.clientWidth;
+      const runnerRect = runnerEl.getBoundingClientRect();
 
-      for (const o of obstacles) {
-        const obstacleBox = { x: o.x, y: o.y, w: o.w, h: o.h };
-        if (aabbIntersect(runnerBox, obstacleBox)) {
-          gameOver();
+      hazards.forEach((obj, id) => {
+        obj.x -= cfg.speed * 3.2 * (delta / 16.67);
+        obj.el.style.left = obj.x + "px";
+
+        if (obj.x < -60) {
+          obj.el.remove();
+          hazards.delete(id);
           return;
         }
+
+        const rect = obj.el.getBoundingClientRect();
+
+        // Collision
+        const overlap =
+          rect.left < runnerRect.right - 4 &&
+          rect.right > runnerRect.left + 4 &&
+          rect.top < runnerRect.bottom - 6 &&
+          rect.bottom > runnerRect.top + 6;
+
+        if (overlap && !obj.taken) {
+          obj.taken = true;
+
+          if (obj.isCoin) {
+            // coin: score boost & chain bump
+            chainMultiplier = Math.min(3.5, chainMultiplier + 0.2);
+            distance += 40 * chainMultiplier;
+            statDistance.textContent = Math.floor(distance) + " m";
+            playTone(720, 0.09, 0.06);
+            obj.el.style.opacity = "0";
+            obj.el.style.transform = "scale(1.4)";
+            setTimeout(() => {
+              obj.el.remove();
+              hazards.delete(id);
+            }, 120);
+          } else {
+            // hazard: lose life
+            handleHit(obj);
+          }
+        }
+      });
+
+      // Level clear?
+      if (distance >= cfg.target && running) {
+        handleLevelClear();
+        return;
       }
 
-      // Score
-      score = Math.floor(elapsed * 10); // tenths of a second
-      scoreText.textContent = score;
+      requestAnimationFrame(gameLoop);
     }
 
-    // ============================================================
-    // RENDER
-    // ============================================================
-    function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function handleHit(obj) {
+      lives -= 1;
+      statLives.textContent = lives.toString();
+      chainMultiplier = 1;
+      playHitSound();
 
-      // Background cavern walls (simple gradient + silhouettes)
-      const gra = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gra.addColorStop(0, "#020617");
-      gra.addColorStop(1, "#020617");
-      ctx.fillStyle = gra;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // flash runner
+      runnerEl.style.filter = "brightness(1.6)";
+      setTimeout(() => {
+        runnerEl.style.filter = "none";
+      }, 120);
 
-      // Ceiling shapes
-      ctx.fillStyle = "#020617";
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(canvas.width * 0.2, 16);
-      ctx.lineTo(canvas.width * 0.4, 6);
-      ctx.lineTo(canvas.width * 0.65, 18);
-      ctx.lineTo(canvas.width * 0.9, 10);
-      ctx.lineTo(canvas.width, 18);
-      ctx.lineTo(canvas.width, 0);
-      ctx.closePath();
-      ctx.fill();
-
-      // Ground
-      ctx.fillStyle = "#020617";
-      ctx.fillRect(0, TUNING.groundY + 2, canvas.width, canvas.height - TUNING.groundY - 2);
-
-      ctx.fillStyle = "#111827";
-      ctx.fillRect(0, TUNING.groundY, canvas.width, 4);
-
-      // Obstacles
-      for (const o of obstacles) {
-        ctx.fillStyle = "#22c55e";
-        ctx.fillRect(o.x, o.y, o.w, o.h);
-        ctx.fillStyle = "#15803d";
-        ctx.fillRect(o.x, o.y + o.h - 6, o.w, 6);
+      if (obj && obj.el) {
+        obj.el.style.opacity = "0";
+        setTimeout(() => {
+          obj.el.remove();
+        }, 100);
       }
 
-      // Runner
-      const rx = runner.x;
-      const ry = runner.y - runner.h;
-
-      ctx.fillStyle = "var(--runner-body)";
-      ctx.fillStyle = "#f97316";
-      ctx.strokeStyle = "#020617";
-      ctx.lineWidth = 2;
-
-      // Body
-      ctx.beginPath();
-      ctx.roundRect(rx, ry + 6, runner.w, runner.h - 6, 4);
-      ctx.fill();
-      ctx.stroke();
-
-      // Head
-      ctx.beginPath();
-      ctx.roundRect(rx - 2, ry - 4, runner.w + 4, 10, 3);
-      ctx.fill();
-      ctx.stroke();
-
-      // Simple eye
-      ctx.fillStyle = "#020617";
-      ctx.fillRect(rx + runner.w - 6, ry - 1, 3, 3);
+      if (lives <= 0) {
+        running = false;
+        bestDistance = Math.max(bestDistance, Math.floor(distance));
+        statBest.textContent = bestDistance + " m";
+        showModal(
+          "Run Lost",
+          "You ran " + Math.floor(distance) + " m into the cavern. Try the level again.",
+          "Restart Level",
+          "Back to Start",
+          () => resetLevel(currentLevelIndex),
+          () => resetLevel(0)
+        );
+      }
     }
 
-    // ============================================================
-    // MAIN LOOP
-    // ============================================================
-    function loop(timestamp) {
+    function handleLevelClear() {
+      running = false;
+      bestDistance = Math.max(bestDistance, Math.floor(distance));
+      statBest.textContent = bestDistance + " m";
+      playLevelClearSound();
+
+      const lastLevel = currentLevelIndex === LEVELS.length - 1;
+      const title = lastLevel ? "Deep Bastion Clear" : "Level Clear";
+      const body = lastLevel
+        ? "You’ve cleared every Bastion Runner level. Loop back to Level 1 and chase a deeper best run."
+        : "You reached the target distance for this level. Step deeper into the tunnels?";
+
+      showModal(
+        title,
+        body,
+        lastLevel ? "Loop to Level 1" : "Next Level",
+        "Replay Level",
+        () => {
+          const nextIndex = lastLevel ? 0 : currentLevelIndex + 1;
+          resetLevel(nextIndex);
+        },
+        () => resetLevel(currentLevelIndex)
+      );
+    }
+
+    function showModal(title, body, primaryText, secondaryText, onPrimary, onSecondary) {
+      modalTitle.textContent = title;
+      modalBody.textContent = body;
+      modalPrimary.textContent = primaryText;
+      modalSecondary.textContent = secondaryText;
+
+      const primaryHandler = () => {
+        hideModal();
+        onPrimary && onPrimary();
+      };
+      const secondaryHandler = () => {
+        hideModal();
+        onSecondary && onSecondary();
+      };
+
+      modalPrimary.onclick = primaryHandler;
+      modalSecondary.onclick = secondaryHandler;
+      modalBackdrop.classList.remove("hidden");
+    }
+
+    function hideModal() {
+      modalBackdrop.classList.add("hidden");
+    }
+
+    // ---- Controls ----
+
+    function triggerJump() {
       if (!running) return;
-      if (!lastTime) lastTime = timestamp;
-      const dt = (timestamp - lastTime) / 1000;
-      lastTime = timestamp;
-      elapsed += dt;
-
-      update(dt);
-      render();
-
-      if (running) {
-        requestAnimationFrame(loop);
-      }
+      if (!isOnGround) return;
+      velocityY = JUMP_VELOCITY;
+      jumps += 1;
+      statJumps.textContent = jumps.toString();
+      playJumpSound();
     }
 
-    // ============================================================
-    // EVENTS
-    // ============================================================
-    startBtn.addEventListener("click", () => {
-      running = true;
-      lastTime = 0;
-      resetGame();
-      requestAnimationFrame(loop);
+    playfield.addEventListener("click", triggerJump);
+    jumpBtn.addEventListener("click", triggerJump);
+
+    restartBtn.addEventListener("click", () => {
+      hideModal();
+      resetLevel(currentLevelIndex);
     });
 
-    document.addEventListener("keydown", e => {
-      if (e.code === "Space" || e.key === "w" || e.key === "W" || e.key === "ArrowUp") {
-        e.preventDefault();
-        jump();
+    nextLevelBtn.addEventListener("click", () => {
+      const nextIndex = (currentLevelIndex + 1) % LEVELS.length;
+      hideModal();
+      resetLevel(nextIndex);
+    });
+
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) {
+        hideModal();
       }
     });
 
-    canvas.addEventListener("mousedown", () => {
-      jump();
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
+        e.preventDefault();
+        triggerJump();
+      }
     });
 
-    canvas.addEventListener("touchstart", e => {
-      e.preventDefault();
-      jump();
-    }, { passive: false });
-
-    // Initial static render
-    render();
+    // ---- Bootstrap ----
+    resetLevel(0);
   </script>
 </body>
-</html>
+  </html>
