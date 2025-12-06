@@ -1,0 +1,114 @@
+---
+
+## 2️⃣ `arcade/cavern-run/bastion-runner/bastion-runner.cavecode`
+
+```text
+CAVECODE SPEC — BASTION RUNNER (ARC-CR-001)
+Category: cavern-run
+Engine: Endless side-view runner
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Cavern Run — Bastion Runner
+Game ID: ARC-CR-001
+Category: cavern-run
+Genre: endless-runner
+One-Liner: Sprint through the cavern and jump over hazards as the speed slowly climbs.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Frame loop (~60 FPS):
+
+  - Apply gravity to the runner's vertical velocity.
+  - Update runner position (y).
+  - Clamp runner to the ground; if runner lands, mark as "canJump = true".
+  - Move all obstacles left by (currentSpeed * dt).
+  - Spawn new obstacles when spawn timer expires:
+        - Choose width within a small range.
+        - Place at right edge with fixed height.
+  - Remove obstacles that move off the left edge.
+  - Check collisions between runner hitbox and each obstacle:
+        - On collision → GAME OVER.
+  - Increase world speed slowly over time.
+  - Update score based on elapsed run time.
+
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop:
+  - Space / W / ArrowUp: trigger a jump if runner is on the ground.
+
+Mobile:
+  - Tap / click inside the game canvas: trigger jump if on ground.
+
+No double-jump in this ancestor.  Input while in the air is ignored.
+
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Score = floor(elapsedRunTimeInSeconds * 10)  # tenths of a second
+
+Optionally display:
+  - "Best" score for this session.
+
+Game ends when:
+  - Runner collides with any obstacle.
+
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+gravity:                    1400        # pixels/sec^2
+jumpVelocity:               -520        # initial jump velocity (negative is upward)
+groundY:                    220         # y-position of ground line inside the canvas
+baseSpeed:                  180         # world scroll speed (pixels/sec)
+speedIncreaseRate:          0.15        # speed grows by this factor per second (approx)
+obstacleSpawnIntervalMin:   0.8         # seconds
+obstacleSpawnIntervalMax:   1.6         # seconds
+obstacleWidth:              26
+obstacleHeight:             32
+
+(PENCIL — keep in sync with index.html script)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Bastion Runner"
+subtitle: "Run the cavern. Jump the hazards."
+startLabel: "Start Run"
+statusIdle: "Tap Start Run to begin."
+statusRunning: "Jump over hazards and stay alive."
+statusGameOver: "You fell in the cavern. Tap Start to try again."
+(Globe — public strings)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+Future Cavern-Run variants:
+  - Double jumps
+  - Sliding under low ceilings
+  - Collectible shards for extra score
+  - Multiple parallax background layers
+  - Different obstacle patterns (pairs, pits)
+
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching hooks:
+  - Simple physics loop (velocity + gravity).
+  - Axis-aligned bounding box collision.
+  - Randomized spawn intervals.
+  - Progressive difficulty via speedIncreaseRate.
+
+(END)
