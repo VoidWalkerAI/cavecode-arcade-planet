@@ -1,0 +1,110 @@
+CAVECODE SPEC — CEILING BREAKER (ARC-CR-002)
+Category: cavern-run
+Engine: vertical ascender endless runner
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Cavern Run — Ceiling Breaker
+Game ID: ARC-CR-002
+Category: cavern-run
+Genre: endless-ascender
+One-Liner: Leap from ledge to ledge as the darkness rises below you.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Frame loop:
+
+  - Apply gravity to climber.
+  - Update climber horizontal movement based on input.
+  - Clamp climber within playfield.
+  - Climber jumps when input triggered and grounded.
+  - Platforms scroll downward (camera rising effect).
+  - Generate new platforms above when needed.
+  - Destroy platforms below bottom of screen.
+  - Detect collisions for landing:
+        - If landing on “crumble” platforms → mark them to break after delay.
+  - Check fail condition:
+        - If climber drops below screen bottom → GAME OVER.
+  - Score = total vertical ascent.
+
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop:
+  - ArrowLeft / A: move left
+  - ArrowRight / D: move right
+  - Space / ArrowUp / W: jump
+
+Mobile:
+  - Tap left: move left
+  - Tap right: move right
+  - Swipe up: jump
+
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Score:
+  - score = floor(totalHeightClimbed)
+
+Difficulty curve:
+  - scrollSpeed increases over time
+  - crumbleChance increases slightly
+  - platform spacing increases slightly
+
+Game ends when:
+  - Climber falls below bottom of viewport.
+
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+gravity:                1400
+jumpVelocity:           -600
+playerSpeed:            200
+scrollSpeed:            40
+scrollSpeedIncrease:    5
+platformSpacingMin:     60
+platformSpacingMax:     110
+platformWidthMin:       40
+platformWidthMax:       90
+crumbleChance:          0.25   # 25%
+crumbleDelay:           0.35   # seconds before platform disappears
+
+(PENCIL)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Ceiling Breaker"
+subtitle: "Climb before the darkness catches you."
+startLabel: "Begin Ascent"
+statusIdle: "Tap Begin Ascent to start."
+statusGameOver: "You fell to the dark."
+(Globe)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+- Moving platforms
+- Spiked ceilings
+- Lantern pickups that slow the darkness
+- Double jump upgrade
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching:
+  - Rising camera simulation via downward scrolling.
+  - Procedural generation.
+  - Platform collision physics.
+
+(END)
