@@ -521,47 +521,47 @@
     // --- Level data ---------------------------------------------------------
 
     const LEVELS = [
-      {
-        name: "Warm-Up Wall",
-        rows: 3,
-        cols: 9,
-        lives: 3,
-        speed: 3.4,
-        specialChance: 0,
-      },
-      {
-        name: "Staggered Grid",
-        rows: 4,
-        cols: 9,
-        lives: 3,
-        speed: 3.7,
-        specialChance: 0.06,
-      },
-      {
-        name: "Twin Rows",
-        rows: 5,
-        cols: 9,
-        lives: 3,
-        speed: 4.0,
-        specialChance: 0.09,
-      },
-      {
-        name: "Beamforge",
-        rows: 5,
-        cols: 10,
-        lives: 3,
-        speed: 4.4,
-        specialChance: 0.13,
-      },
-      {
-        name: "Bomb Run",
-        rows: 6,
-        cols: 10,
-        lives: 3,
-        speed: 4.8,
-        specialChance: 0.18,
-      },
-    ];
+  {
+    name: "Warm-Up Wall",
+    rows: 3,
+    cols: 9,
+    lives: 3,
+    speed: 2.6,
+    specialChance: 0,
+  },
+  {
+    name: "Staggered Grid",
+    rows: 4,
+    cols: 9,
+    lives: 3,
+    speed: 2.9,
+    specialChance: 0.06,
+  },
+  {
+    name: "Twin Rows",
+    rows: 5,
+    cols: 9,
+    lives: 3,
+    speed: 3.2,
+    specialChance: 0.09,
+  },
+  {
+    name: "Beamforge",
+    rows: 5,
+    cols: 10,
+    lives: 3,
+    speed: 3.5,
+    specialChance: 0.13,
+  },
+  {
+    name: "Bomb Run",
+    rows: 6,
+    cols: 10,
+    lives: 3,
+    speed: 3.8,
+    specialChance: 0.18,
+  },
+];
 
     const SPECIAL_TYPES = {
       NORMAL: "normal",
@@ -585,7 +585,7 @@
       height: 10,
       x: WIDTH / 2 - 40,
       y: HEIGHT - 40,
-      speed: 6.0,
+      speed: 8.0,
       movingLeft: false,
       movingRight: false,
     };
@@ -674,11 +674,11 @@
     // --- Level control ------------------------------------------------------
 
     function speedLabel(speed) {
-      if (speed < 3.6) return "Slow";
-      if (speed < 4.1) return "Normal";
-      if (speed < 4.6) return "Fast";
-      return "Wild";
-    }
+  if (speed < 2.8) return "Slow";
+  if (speed < 3.2) return "Normal";
+  if (speed < 3.6) return "Fast";
+  return "Wild";
+}
 
     function startLevel(index) {
       currentLevelIndex = index;
@@ -937,7 +937,7 @@
         const levelSpeed = LEVELS[currentLevelIndex].speed;
         ball.vx = hitPos * levelSpeed * 1.05;
         ball.vy = -Math.abs(levelSpeed + Math.abs(hitPos) * 0.6);
-        ball.speedBoost = clamp(ball.speedBoost + 0.02, 0, 0.45);
+        ball.speedBoost = clamp(ball.speedBoost + 0.02, 0, 0.25);
         chainCount = 0; // paddle resets combo window
         sounds.paddle();
       }
@@ -1016,7 +1016,7 @@
         }
 
         if (totalBricksRemoved > 0) {
-          ball.speedBoost = clamp(ball.speedBoost + totalBricksRemoved * 0.01, 0, 0.5);
+          ball.speedBoost = clamp(ball.speedBoost + totalBricksRemoved * 0.01, 0, 0.3);
         }
 
         if (bricksRemaining <= 0 && !modalLocked) {
@@ -1110,19 +1110,19 @@
       }
 
       // paddle
-      ctx.save();
-      const grd = ctx.createLinearGradient(
-        paddle.x,
-        paddle.y,
-        paddle.x + paddle.width,
-        paddle.y
-      );
-      grd.addColorStop(0, "#0f172a");
-      grd.addColorStop(1, "#1d283a");
-      ctx.fillStyle = grd;
-      ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-      ctx.restore();
-
+ctx.save();
+const grd = ctx.createLinearGradient(
+  paddle.x,
+  paddle.y,
+  paddle.x + paddle.width,
+  paddle.y
+);
+grd.addColorStop(0, "#e5e7eb");  // light edge
+grd.addColorStop(1, "#9ca3af");  // mid-gray
+ctx.fillStyle = grd;
+ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+ctx.restore();
+      
       // ball
       ctx.save();
       const ballGrad = ctx.createRadialGradient(
