@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mind Chambers — Focus Relay (ARC-MC-002)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1120;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+
+      --node-idle: #1f2937;
+      --node-hover: #334155;
+      --node-reveal: #38bdf8;
+      --node-correct: #22c55e;
+      --node-wrong: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+    }
+
+    header {
+      margin-top: 0.75rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    header .sub {
+      margin-top: 0.15rem;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    #hud {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    #shell {
+      margin-top: 0.75rem;
+      padding: 0.9rem 1rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.96);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.7rem;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.6rem;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    .node {
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 999px;
+      background: var(--node-idle);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.12s ease-out, transform 0.08s ease-out;
+    }
+
+    .node-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .node:hover {
+      background: var(--node-hover);
+    }
+
+    .node.reveal {
+      background: var(--node-reveal);
+    }
+
+    .node.correct {
+      background: var(--node-correct);
+    }
+
+    .node.wrong {
+      background: var(--node-wrong);
+    }
+
+    #controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 260px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      gap: 0.5rem;
+    }
+
+    #status {
+      flex: 1;
+      min-height: 1.1rem;
+    }
+
+    #startBtn {
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: radial-gradient(circle at top, rgba(56, 189, 248, 0.5), rgba(15, 23, 42, 1));
+      color: var(--text-main);
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #startBtn:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 480px) {
+      #shell {
+        margin-inline: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mind Chambers — Focus Relay · ARC-MC-002</h1>
+    <div class="sub">Remember the order. Tap it back.</div>
+  </header>
+
+  <div id="hud">
+    <div>Rounds: <span id="scoreText">0</span></div>
+    <div>Best: <span id="bestText">0</span></div>
+  </div>
+
+  <div id="shell">
+    <div id="grid"></div>
+    <div id="controls-row">
+      <div id="status">Tap Start Round to begin.</div>
+      <button id="startBtn">Start Round</button>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // 🎚️ TUNING (sync with focus-relay.cavecode)
+    // ============================================================
+    const TUNING = {
+      gridSize: 3,
+      startPatternLength: 3,
+      patternIncrement: 1,
+      revealTimeMs: 1600,
+      minRevealTimeMs: 700,
+      revealTimeDecayMs: 100
+    };
+
+    // ============================================================
+    // ELEMENTS
+    // ============================================================
+    const gridEl = document.getElementById("grid");
+    const statusEl = document.getElementById("status");
+    const startBtn = document.getElementById("startBtn");
+    const scoreText = document.getElementById("scoreText");
+    const bestText = document.getElementById("bestText");
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    const STATE = {
+      IDLE: "idle",
+      REVEAL: "reveal",
+      INPUT: "input",
+      GAME_OVER: "game_over"
+    };
+
+    let currentState = STATE.IDLE;
+
+    let nodes = []; // {el, index}
+    let pattern = []; // array of node indices
+    let expectedIndex = 1;
+    let patternLength = TUNING.startPatternLength;
+    let revealTimeMs = TUNING.revealTimeMs;
+
+    let roundsCompleted = 0;
+    let bestRounds = 0;
+    let revealTimeoutId = null;
+
+    // ============================================================
+    // SETUP GRID
+    // ============================================================
+    function buildGrid() {
+      gridEl.innerHTML = "";
+      nodes = [];
+      const total = TUNING.gridSize * TUNING.gridSize;
+      for (let i = 0; i < total; i++) {
+        const node = document.createElement("button");
+        node.className = "node";
+        node.type = "button";
+        node.dataset.index = String(i);
+
+        const inner = document.createElement("div");
+        inner.className = "node-inner";
+        inner.textContent = "";
+        node.appendChild(inner);
+
+        node.addEventListener("click", () => onNodeClick(i));
+
+        gridEl.appendChild(node);
+        nodes.push({ el: node, inner });
+      }
+
+      gridEl.style.gridTemplateColumns = `repeat(${TUNING.gridSize}, 1fr)`;
+    }
+
+    // ============================================================
+    // PATTERN GENERATION
+    // ============================================================
+    function generatePattern() {
+      pattern = [];
+      const indices = Array.from({ length: nodes.length }, (_, i) => i);
+
+      // Fisher–Yates shuffle and take first patternLength
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      pattern = indices.slice(0, patternLength);
+    }
+
+    // ============================================================
+    // STATE HELPERS
+    // ============================================================
+    function setState(newState) {
+      currentState = newState;
+    }
+
+    function clearNodeStyles() {
+      nodes.forEach(n => {
+        n.el.classList.remove("reveal", "correct", "wrong");
+        n.inner.textContent = "";
+      });
+    }
+
+    // ============================================================
+    // ROUND FLOW
+    // ============================================================
+    function startRun() {
+      roundsCompleted = 0;
+      scoreText.textContent = "0";
+      patternLength = TUNING.startPatternLength;
+      revealTimeMs = TUNING.revealTimeMs;
+      startRound();
+    }
+
+    function startRound() {
+      if (revealTimeoutId) {
+        clearTimeout(revealTimeoutId);
+        revealTimeoutId = null;
+      }
+      clearNodeStyles();
+      expectedIndex = 1;
+      generatePattern();
+      revealPattern();
+    }
+
+    function revealPattern() {
+      setState(STATE.REVEAL);
+      statusEl.textContent = "Memorize the numbers...";
+
+      // Show numbers
+      pattern.forEach((nodeIndex, i) => {
+        const n = nodes[nodeIndex];
+        n.el.classList.add("reveal");
+        n.inner.textContent = String(i + 1);
+      });
+
+      revealTimeoutId = setTimeout(() => {
+        // Hide numbers and go to input
+        clearNodeStyles();
+        setState(STATE.INPUT);
+        statusEl.textContent = "Tap the nodes in order.";
+      }, revealTimeMs);
+    }
+
+    function handleCorrectClick(nodeIndex) {
+      const n = nodes[nodeIndex];
+      n.el.classList.add("correct");
+
+      expectedIndex++;
+      if (expectedIndex > patternLength) {
+        // Round success
+        roundsCompleted++;
+        scoreText.textContent = String(roundsCompleted);
+        if (roundsCompleted > bestRounds) {
+          bestRounds = roundsCompleted;
+          bestText.textContent = String(bestRounds);
+        }
+
+        setState(STATE.IDLE);
+        statusEl.textContent = "Nice. Get ready for the next pattern.";
+
+        // Next round adjustments
+        patternLength += TUNING.patternIncrement;
+        revealTimeMs = Math.max(
+          TUNING.minRevealTimeMs,
+          revealTimeMs - TUNING.revealTimeDecayMs
+        );
+
+        // Small delay before next round
+        setTimeout(() => {
+          if (currentState !== STATE.GAME_OVER) {
+            startRound();
+          }
+        }, 700);
+      }
+    }
+
+    function handleWrongClick(nodeIndex) {
+      const n = nodes[nodeIndex];
+      n.el.classList.add("wrong");
+      setState(STATE.GAME_OVER);
+      statusEl.textContent = "Sequence broken. Tap Start to try again.";
+    }
+
+    // ============================================================
+    // INPUT HANDLER
+    // ============================================================
+    function onNodeClick(nodeIndex) {
+      if (currentState !== STATE.INPUT) return;
+
+      const expectedNodeIndex = pattern[expectedIndex - 1];
+      if (nodeIndex === expectedNodeIndex) {
+        handleCorrectClick(nodeIndex);
+      } else {
+        handleWrongClick(nodeIndex);
+      }
+    }
+
+    // ============================================================
+    // BUTTON
+    // ============================================================
+    startBtn.addEventListener("click", () => {
+      setState(STATE.IDLE);
+      statusEl.textContent = "Memorize the numbers...";
+      startRun();
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    buildGrid();
+  </script>
+</body>
+</html>
