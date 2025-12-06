@@ -2,493 +2,1142 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Scarlet Crush — Lane Stacker (ARC-SC-001)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scarlet Crush — Lane Stacker · ARC-SC-001</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!--
+    BLOCK 1 — SHELL & BRAND (LOCKED)
+    CaveCode Arcade Planet · Scarlet-Crush Line
+  -->
 
   <style>
     :root {
-      --bg: #020617;
-      --panel: #0b1120;
-      --border: #1f2937;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-      --accent: #f97316;
-      --accent-soft: #fed7aa;
-      --danger: #f97373;
+      --cc-bg: #020617;
+      --cc-panel: #02081b;
+      --cc-panel-soft: #0b1120;
+      --cc-border: #1f2937;
+      --cc-accent: #fb7185;
+      --cc-accent-soft: #fda4af;
+      --cc-text-main: #e5e7eb;
+      --cc-text-soft: #9ca3af;
 
-      --tile-1: #f97316;
-      --tile-2: #22c55e;
-      --tile-3: #3b82f6;
-      --tile-4: #eab308;
+      --tile-size: min(7vw, 2.6rem);
+      --tile-radius: 0.45rem;
+      --tile-gap: 0.22rem;
     }
 
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      color: var(--cc-text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
       display: flex;
       flex-direction: column;
-      background: radial-gradient(circle at top, #111827 0, #020617 55%);
-      color: var(--text-main);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    #game-shell {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0.75rem 1rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+      align-items: center;
+      padding: 1.25rem 0.75rem 2.5rem;
     }
 
     header {
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.75rem;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, #020617, #031525);
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+      padding: 0.9rem 1.5rem;
       display: flex;
       flex-direction: column;
       gap: 0.15rem;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      letter-spacing: 0.05em;
+    @media (min-width: 640px) {
+      header {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+    }
+
+    .title-line {
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .title-line span.code {
+      color: var(--cc-accent-soft);
+    }
+
+    .subtitle-line {
+      font-size: 0.8rem;
       text-transform: uppercase;
-    }
-
-    header .sub {
-      font-size: 0.75rem;
-      color: var(--text-soft);
+      letter-spacing: 0.14em;
+      color: var(--cc-text-soft);
       display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
       flex-wrap: wrap;
+      gap: 0.45rem;
     }
 
-    #top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 0.8rem;
-    }
-
-    #score-panel {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      background: rgba(15, 23, 42, 0.9);
+    .subtitle-pill {
+      padding: 0.1rem 0.6rem;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      padding: 0.2rem 0.75rem;
+      border: 1px solid #111827;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+    }
+
+    main {
+      width: 100%;
+      max-width: 960px;
+      margin-top: 1.15rem;
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, #020617, #020320 55%);
+      border-radius: 1.4rem;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.95);
+      padding: 1.3rem 1.1rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    @media (min-width: 720px) {
+      .panel {
+        padding: 1.5rem 1.6rem 1.9rem;
+      }
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .tag {
+      padding: 0.12rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid #111827;
+      background: linear-gradient(135deg, #020617, #02081b);
+      color: var(--cc-text-soft);
+    }
+
+    .tag.highlight {
+      border-color: var(--cc-accent-soft);
+      color: var(--cc-accent-soft);
+    }
+
+    .level-blurb {
+      font-size: 0.85rem;
+      color: var(--cc-text-soft);
+      line-height: 1.35;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.55rem;
+      font-size: 0.78rem;
+    }
+
+    @media (min-width: 720px) {
+      .stats-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+    }
+
+    .stat-card {
+      border-radius: 0.9rem;
+      border: 1px solid #101827;
+      background: radial-gradient(circle at top, #020617, #02071a 70%);
+      padding: 0.35rem 0.55rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.16rem;
+    }
+
+    .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.64rem;
+      color: var(--cc-text-soft);
+    }
+
+    .stat-value {
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+
+    .board-shell {
+      margin-top: 0.2rem;
+      border-radius: 1.2rem;
+      border: 1px solid #111827;
+      background: radial-gradient(circle at top, #020617, #02081b 60%);
+      padding: 0.9rem 0.8rem 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .board-header-line {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .board-title {
       font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--cc-text-soft);
+    }
+
+    .board-subtitle {
+      font-size: 0.76rem;
+      color: var(--cc-text-soft);
+    }
+
+    .board-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--cc-text-soft);
+    }
+
+    .preview-pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-    }
-
-    #next-pill span.color-chip {
-      width: 14px;
-      height: 14px;
+      gap: 0.35rem;
+      padding: 0.16rem 0.6rem;
       border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.9);
+      border: 1px solid #101827;
+      background: #020617;
     }
 
-    #reset-btn {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      background: radial-gradient(circle at top, rgba(148, 163, 184, 0.1), rgba(15, 23, 42, 1));
-      color: var(--text-main);
-      cursor: pointer;
+    .preview-label {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.6rem;
     }
 
-    #reset-btn:active {
-      transform: translateY(1px);
-      filter: brightness(0.95);
-    }
-
-    #game-frame {
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
-      padding: 0.75rem;
+    .preview-cell {
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 0.45rem;
+      background: #020617;
+      border: 1px dashed #1f2937;
       display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    #board-wrapper {
-      margin: 0 auto;
-      max-width: 420px;
-      aspect-ratio: 4 / 10;
-      border-radius: 0.75rem;
-      border: 1px solid rgba(15, 23, 42, 1);
-      background: radial-gradient(circle at top, #020617 0, #020617 65%);
-      padding: 0.4rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    #lane-headers {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.35rem;
-    }
-
-    .lane-header {
-      border-radius: 0.5rem;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      text-align: center;
-      font-size: 0.78rem;
-      padding: 0.25rem 0;
-      color: var(--text-soft);
-      cursor: pointer;
-      background: rgba(15, 23, 42, 0.95);
-      user-select: none;
-    }
-
-    .lane-header:active {
-      transform: translateY(1px);
-      filter: brightness(0.96);
-    }
-
-    #board {
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.35rem;
-    }
-
-    .lane {
-      display: grid;
-      grid-template-rows: repeat(10, 1fr);
-      gap: 0.15rem;
-      align-items: end;
-    }
-
-    .cell {
-      border-radius: 0.35rem;
-      background: rgba(15, 23, 42, 0.8);
-      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.8);
-      position: relative;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
     }
 
-    .tile {
+    .tile.preview-tile {
       width: 100%;
       height: 100%;
-      border-radius: 0.28rem;
-      box-shadow:
-        0 0 0 1px rgba(15, 23, 42, 0.7),
-        0 3px 6px rgba(0, 0, 0, 0.55);
-      transition: transform 0.1s ease-out, opacity 0.12s ease-out;
+      border-radius: inherit;
     }
 
-    .tile[data-v="1"] { background: var(--tile-1); }
-    .tile[data-v="2"] { background: var(--tile-2); }
-    .tile[data-v="3"] { background: var(--tile-3); }
-    .tile[data-v="4"] { background: var(--tile-4); }
+    .board {
+      margin-top: 0.1rem;
+      display: grid;
+      justify-content: center;
+      grid-template-columns: repeat(7, var(--tile-size));
+      grid-auto-rows: var(--tile-size);
+      gap: var(--tile-gap);
+      padding: 0.6rem 0.2rem 0.4rem;
+      border-radius: 1rem;
+      background: radial-gradient(circle at top, #020617, #02081b 70%);
+      border: 1px solid #0f172a;
+      box-shadow: inset 0 0 20px rgba(15, 23, 42, 0.8);
+    }
+
+    .tile {
+      width: var(--tile-size);
+      height: var(--tile-size);
+      border-radius: var(--tile-radius);
+      background: #020617;
+      border: 1px solid #020617;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.8);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.14s ease-out, box-shadow 0.14s ease-out,
+        border-color 0.14s ease-out;
+    }
+
+    .tile.empty {
+      border-color: #020617;
+      box-shadow: inset 0 0 0 1px #020617;
+      opacity: 0.16;
+    }
+
+    .tile.color-0 {
+      background: #fb7185;
+    }
+    .tile.color-1 {
+      background: #22c55e;
+    }
+    .tile.color-2 {
+      background: #3b82f6;
+    }
+    .tile.color-3 {
+      background: #facc15;
+      color: #1f2937;
+    }
+    .tile.color-4 {
+      background: #a855f7;
+    }
+
+    .tile.type-row::after,
+    .tile.type-bomb::after {
+      content: "";
+      position: absolute;
+      inset: 18%;
+      border-radius: inherit;
+      border: 2px solid rgba(15, 23, 42, 0.5);
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5);
+    }
+
+    .tile.type-row::before {
+      content: "";
+      position: absolute;
+      left: 17%;
+      right: 17%;
+      top: 50%;
+      height: 2px;
+      transform: translateY(-50%);
+      background: rgba(15, 23, 42, 0.7);
+      box-shadow: 0 -4px 0 rgba(15, 23, 42, 0.6),
+        0 4px 0 rgba(15, 23, 42, 0.6);
+    }
+
+    .tile.type-bomb::before {
+      content: "";
+      position: absolute;
+      inset: 30%;
+      border-radius: inherit;
+      border: 2px solid rgba(15, 23, 42, 0.9);
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.6);
+    }
 
     .tile.clearing {
-      opacity: 0.15;
-      transform: scale(0.85);
+      animation: tilePop 0.18s ease-out forwards;
     }
 
-    #hint-text {
-      font-size: 0.8rem;
-      color: var(--text-soft);
+    @keyframes tilePop {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.9);
+      }
+      60% {
+        transform: scale(1.1);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.7);
+      }
+      100% {
+        transform: scale(0.1);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      }
+    }
+
+    .lane-row {
+      margin-top: 0.4rem;
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .lane-btn {
+      min-width: 2.1rem;
+      padding: 0.26rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #111827;
+      background: radial-gradient(circle at top, #020617, #071427 70%);
+      color: var(--cc-text-main);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.85);
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out,
+        border-color 0.1s ease-out, background 0.1s ease-out;
+    }
+
+    .lane-btn:hover {
+      border-color: var(--cc-accent-soft);
+      background: radial-gradient(circle at top, #020617, #0b1120 70%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.95);
+    }
+
+    .lane-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.8);
+    }
+
+    .board-footer {
+      font-size: 0.75rem;
+      color: var(--cc-text-soft);
+      margin-top: 0.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .board-footer strong {
+      color: var(--cc-accent-soft);
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: space-between;
+      margin-top: 0.3rem;
+    }
+
+    .btn-secondary,
+    .btn-primary {
+      border-radius: 999px;
+      padding: 0.36rem 0.9rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      border: 1px solid #111827;
+      background: radial-gradient(circle at top, #020617, #071427 70%);
+      color: var(--cc-text-main);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.9);
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out,
+        border-color 0.1s ease-out, background 0.1s ease-out;
+    }
+
+    .btn-secondary:hover,
+    .btn-primary:hover {
+      border-color: var(--cc-accent-soft);
+      background: radial-gradient(circle at top, #020617, #0b1120 75%);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.95);
+    }
+
+    .btn-secondary:active,
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.9);
+    }
+
+    .btn-primary {
+      border-color: var(--cc-accent);
+      background: radial-gradient(circle at top, #fb7185, #be123c 90%);
+      color: #0b1120;
+    }
+
+    .btn-primary:hover {
+      background: radial-gradient(circle at top, #f97373, #9f1239 90%);
+    }
+
+    .footer-line {
+      margin-top: 1rem;
+      font-size: 0.72rem;
       text-align: center;
+      color: var(--cc-text-soft);
     }
 
-    #game-over-banner {
+    .footer-line span {
+      color: var(--cc-accent-soft);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+    }
+
+    .modal-hidden {
       display: none;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--danger);
     }
 
-    @media (min-width: 768px) {
-      header h1 { font-size: 1.2rem; }
-      #hint-text { font-size: 0.85rem; }
+    .modal-box {
+      width: min(420px, 92vw);
+      border-radius: 1.4rem;
+      border: 1px solid var(--cc-border);
+      background: radial-gradient(circle at top, #020617, #02081b 65%);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+      padding: 1.2rem 1.15rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .modal-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .modal-body {
+      font-size: 0.86rem;
+      color: var(--cc-text-soft);
+      line-height: 1.4;
+    }
+
+    .modal-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.2rem;
     }
   </style>
 </head>
 <body>
-  <div id="game-shell">
-    <header>
-      <h1>Scarlet Crush — Lane Stacker · ARC-SC-001</h1>
-      <div class="sub">
-        <span>CaveCode Arcade Planet · Scarlet-Crush Line</span>
-        <span>Tap a lane header to drop the next block.</span>
-      </div>
-    </header>
+  <header>
+    <div class="title-line">
+      SCARLET CRUSH — LANE STACKER · <span class="code">ARC-SC-001</span>
+    </div>
+    <div class="subtitle-line">
+      <span class="subtitle-pill">CaveCode Arcade Planet</span>
+      <span class="subtitle-pill">Scarlet-Crush Line</span>
+      <span class="subtitle-pill">Falling Blocks · Lane Puzzle</span>
+      <span class="subtitle-pill">Single-File Engine</span>
+    </div>
+  </header>
 
-    <main id="game-frame">
-      <div id="top-row">
-        <div id="score-panel">
-          <div class="pill">Score: <span id="scoreVal">0</span></div>
-          <div class="pill">Last Clear: <span id="lastClearVal">0</span></div>
-          <div class="pill" id="next-pill">
-            Next:
-            <span class="color-chip" id="nextColorChip"></span>
+  <main>
+    <section class="panel">
+      <div class="tag-row">
+        <span class="tag highlight">Level Track</span>
+        <span class="tag">Lane Stacking</span>
+        <span class="tag">Row Clears</span>
+        <span class="tag">Score Multipliers</span>
+        <span class="tag">Special Gems</span>
+        <span class="tag">Sound & Pop</span>
+      </div>
+
+      <p class="level-blurb" id="level-blurb">
+        Drop colored blocks into the seven lanes. Fill full-color rows to clear
+        them and keep the stack from overflowing.
+      </p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="stat-level">1</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Score</div>
+          <div class="stat-value" id="stat-score">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Target</div>
+          <div class="stat-value" id="stat-target">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Drops Left</div>
+          <div class="stat-value" id="stat-moves">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Rows Cleared</div>
+          <div class="stat-value" id="stat-rows">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Best Chain</div>
+          <div class="stat-value" id="stat-chain">0</div>
+        </div>
+      </div>
+
+      <div class="board-shell">
+        <div class="board-header-line">
+          <div class="board-title">Tap a lane to drop the next block.</div>
+          <div class="board-subtitle">
+            Make solid-color rows before the stack hits the top.
           </div>
         </div>
-        <button id="reset-btn">↻ New Game</button>
+
+        <div class="board-meta-row">
+          <div class="preview-pill">
+            <span class="preview-label">Next Block</span>
+            <div class="preview-cell">
+              <div id="preview-tile" class="tile preview-tile empty"></div>
+            </div>
+          </div>
+          <div class="preview-pill">
+            <span class="preview-label">Chain</span>
+            <div class="preview-cell">
+              <span id="preview-chain" style="font-size: 0.78rem;">x1.0</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="board" class="board" aria-label="Lane stack board"></div>
+
+        <div class="lane-row" id="lane-row"></div>
+
+        <div class="controls-row">
+          <button class="btn-secondary" id="btn-restart">
+            Restart Level
+          </button>
+          <button class="btn-primary" id="btn-next">
+            Next Level
+          </button>
+        </div>
+
+        <div class="board-footer">
+          <div>
+            Match full rows of a single color to clear them. Clearing multiple
+            rows in one cascade builds a <strong>chain multiplier</strong>.
+          </div>
+          <div>
+            Special gems:
+            <strong>Row</strong> (striped) clears its row. 
+            <strong>Bomb</strong> (boxed) blasts a 3×3 chunk.
+          </div>
+        </div>
       </div>
 
-      <div id="board-wrapper">
-        <div id="lane-headers"></div>
-        <div id="board"></div>
+      <div class="footer-line">
+        Forged in CaveCode Arcade Planet · <span>SageWire Syndicate</span>
       </div>
+    </section>
+  </main>
 
-      <div id="hint-text">
-        Stack blocks in 4 lanes. Make a run of 3+ same-colored blocks in a lane to clear them.
-        Don't let a lane reach the top.
+  <div id="result-modal" class="modal-backdrop modal-hidden">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title">Line Cleared</div>
+      <div class="modal-body" id="modal-body">
+        You reached the target score before the stack overflowed.
       </div>
-
-      <div id="game-over-banner">
-        Board Overflow — No more space! Press "New Game" to reset.
+      <div class="modal-buttons">
+        <button class="btn-secondary" id="modal-restart">Restart</button>
+        <button class="btn-primary" id="modal-next">Next Level</button>
       </div>
-    </main>
+    </div>
   </div>
 
   <script>
-    // ============================================================
-    // 🎚️ TUNING KNOBS (reflecting lane-stacker.cavecode)
-    // ============================================================
-    const TUNING = {
-      laneCount:   4,
-      laneHeight:  10,
-      tileTypes:   4,
-      matchLength: 3,
-      clearScore:  10,
-      comboBonus:  5
+    /*
+      BLOCK 2 — TUNING KNOBS (EDITABLE)
+      Rows, columns, level track, scoring, and special-spawn odds.
+    */
+
+    const ROWS = 12;
+    const COLS = 7;
+
+    const COLORS = [0, 1, 2, 3, 4]; // mapped in CSS as color-0..4
+
+    const LEVELS = [
+      {
+        id: 1,
+        name: "Warm-Up Stack",
+        target: 900,
+        moves: 18,
+        colors: 4,
+      },
+      {
+        id: 2,
+        name: "Scarlet Lines",
+        target: 2200,
+        moves: 22,
+        colors: 5,
+      },
+      {
+        id: 3,
+        name: "Overflow Brink",
+        target: 4200,
+        moves: 26,
+        colors: 5,
+      },
+    ];
+
+    const TILE_TYPES = {
+      NORMAL: "normal",
+      ROW: "row",
+      BOMB: "bomb",
     };
 
-    // ============================================================
-    // 🔧 STATE
-    // ============================================================
-    const laneHeadersEl = document.getElementById("lane-headers");
+    const SPECIAL_ODDS = {
+      ROW: 0.08, // 8% chance
+      BOMB: 0.04, // 4% chance
+    };
+
+    const BASE_POINTS_PER_TILE = 45;
+    const CHAIN_STEP = 0.35; // x1.0, x1.35, x1.7, ...
+
+    /*
+      BLOCK 3 — LAYOUT WIRING
+      Grabs DOM nodes, draws board grid & lane buttons.
+    */
+
     const boardEl = document.getElementById("board");
-    const scoreValEl = document.getElementById("scoreVal");
-    const lastClearValEl = document.getElementById("lastClearVal");
-    const nextColorChipEl = document.getElementById("nextColorChip");
-    const resetBtn = document.getElementById("reset-btn");
-    const gameOverBannerEl = document.getElementById("game-over-banner");
+    const laneRowEl = document.getElementById("lane-row");
 
-    let lanes = [];        // lanes[c] = array of tile values (bottom at index 0)
+    const levelBlurbEl = document.getElementById("level-blurb");
+    const statLevelEl = document.getElementById("stat-level");
+    const statScoreEl = document.getElementById("stat-score");
+    const statTargetEl = document.getElementById("stat-target");
+    const statMovesEl = document.getElementById("stat-moves");
+    const statRowsEl = document.getElementById("stat-rows");
+    const statChainEl = document.getElementById("stat-chain");
+
+    const previewTileEl = document.getElementById("preview-tile");
+    const previewChainEl = document.getElementById("preview-chain");
+
+    const btnRestartEl = document.getElementById("btn-restart");
+    const btnNextEl = document.getElementById("btn-next");
+
+    const modalEl = document.getElementById("result-modal");
+    const modalTitleEl = document.getElementById("modal-title");
+    const modalBodyEl = document.getElementById("modal-body");
+    const modalRestartEl = document.getElementById("modal-restart");
+    const modalNextEl = document.getElementById("modal-next");
+
+    // Build lane buttons
+    for (let c = 0; c < COLS; c++) {
+      const btn = document.createElement("button");
+      btn.className = "lane-btn";
+      btn.textContent = c + 1;
+      btn.addEventListener("click", () => handleLaneClick(c));
+      laneRowEl.appendChild(btn);
+    }
+
+    /*
+      BLOCK 4 — GAME ENGINE
+      Board state, drop logic, row clears, specials, scoring, sound, modals.
+    */
+
+    let board = [];
+    let currentLevelIndex = 0;
     let score = 0;
+    let movesLeft = 0;
+    let rowsCleared = 0;
+    let bestChain = 0;
+    let specialsSeen = 0;
+    let currentTile = null;
     let gameOver = false;
-    let nextTile = 1;
 
-    // ============================================================
-    // 🧠 HELPERS
-    // ============================================================
-    function randomTile() {
-      return Math.floor(Math.random() * TUNING.tileTypes) + 1;
+    function makeEmptyBoard() {
+      board = Array.from({ length: ROWS }, () =>
+        Array.from({ length: COLS }, () => null)
+      );
     }
 
-    function initLanes() {
-      lanes = [];
-      for (let c = 0; c < TUNING.laneCount; c++) {
-        lanes[c] = []; // empty column, bottom-up
-      }
+    function randomInt(maxExclusive) {
+      return Math.floor(Math.random() * maxExclusive);
     }
 
-    function laneIsFull(columnIndex) {
-      return lanes[columnIndex].length >= TUNING.laneHeight;
-    }
+    function spawnTileSpec(level) {
+      const colorPool = COLORS.slice(0, level.colors);
+      const color = colorPool[randomInt(colorPool.length)];
 
-    function anyLaneOverflow() {
-      return lanes.some(col => col.length > TUNING.laneHeight);
-    }
-
-    // ============================================================
-    // 🎮 GAME FLOW
-    // ============================================================
-    function newGame() {
-      score = 0;
-      gameOver = false;
-      lastClearValEl.textContent = 0;
-      scoreValEl.textContent = score;
-      gameOverBannerEl.style.display = "none";
-
-      initLanes();
-      nextTile = randomTile();
-      updateNextColorChip();
-      render();
-    }
-
-    function updateNextColorChip() {
-      nextColorChipEl.style.backgroundColor = getTileColor(nextTile);
-    }
-
-    function dropTileIntoLane(columnIndex) {
-      if (gameOver) return;
-      if (laneIsFull(columnIndex)) {
-        return; // ignore invalid move
+      const roll = Math.random();
+      let type = TILE_TYPES.NORMAL;
+      if (roll < SPECIAL_ODDS.BOMB) {
+        type = TILE_TYPES.BOMB;
+      } else if (roll < SPECIAL_ODDS.BOMB + SPECIAL_ODDS.ROW) {
+        type = TILE_TYPES.ROW;
       }
 
-      // drop tile at "top" position of this lane
-      lanes[columnIndex].push(nextTile);
-      nextTile = randomTile();
-      updateNextColorChip();
-
-      // After placement: check for matches in that lane
-      const cleared = resolveMatchesInLane(columnIndex);
-      if (cleared > 0) {
-        lastClearValEl.textContent = cleared;
-        score += cleared;
-        scoreValEl.textContent = score;
-      } else {
-        lastClearValEl.textContent = 0;
+      if (type !== TILE_TYPES.NORMAL) {
+        specialsSeen++;
       }
 
-      if (anyLaneOverflow()) {
-        gameOver = true;
-        gameOverBannerEl.style.display = "block";
-      }
-
-      render();
+      return { color, type };
     }
 
-    function resolveMatchesInLane(columnIndex) {
-      let totalPoints = 0;
-      let keepChecking = true;
-
-      while (keepChecking) {
-        const lane = lanes[columnIndex];
-        if (lane.length === 0) break;
-
-        const runs = [];
-        let runVal = lane[0];
-        let runStart = 0;
-
-        for (let i = 1; i <= lane.length; i++) {
-          const val = i < lane.length ? lane[i] : null;
-          if (val === runVal) continue;
-          const runLen = i - runStart;
-          if (runVal != null && runLen >= TUNING.matchLength) {
-            runs.push({ start: runStart, len: runLen, val: runVal });
-          }
-          runVal = val;
-          runStart = i;
-        }
-
-        if (!runs.length) {
-          keepChecking = false;
-          break;
-        }
-
-        // Clear runs, scoring
-        let clearedThisRound = 0;
-        const toClear = new Set();
-        for (const r of runs) {
-          for (let i = r.start; i < r.start + r.len; i++) {
-            toClear.add(i);
-          }
-          const extra = Math.max(0, r.len - TUNING.matchLength);
-          const baseScore = r.len * TUNING.clearScore;
-          const comboScore = extra * TUNING.comboBonus;
-          clearedThisRound += baseScore + comboScore;
-        }
-
-        totalPoints += clearedThisRound;
-
-        // Build new lane omitting cleared indices
-        const newLane = [];
-        for (let i = 0; i < lane.length; i++) {
-          if (!toClear.has(i)) {
-            newLane.push(lane[i]);
-          }
-        }
-        lanes[columnIndex] = newLane;
-      }
-
-      return totalPoints;
+    function setStatus(text) {
+      levelBlurbEl.textContent = text;
     }
 
-    // ============================================================
-    // 🎨 RENDER
-    // ============================================================
-    function getTileColor(val) {
-      switch (val) {
-        case 1: return getComputedStyle(document.documentElement).getPropertyValue("--tile-1");
-        case 2: return getComputedStyle(document.documentElement).getPropertyValue("--tile-2");
-        case 3: return getComputedStyle(document.documentElement).getPropertyValue("--tile-3");
-        case 4: return getComputedStyle(document.documentElement).getPropertyValue("--tile-4");
-        default: return "#666";
-      }
+    function updateStats() {
+      const lvl = LEVELS[currentLevelIndex];
+      statLevelEl.textContent = lvl.id;
+      statScoreEl.textContent = score.toString();
+      statTargetEl.textContent = lvl.target.toString();
+      statMovesEl.textContent = movesLeft.toString();
+      statRowsEl.textContent = rowsCleared.toString();
+      statChainEl.textContent = bestChain.toString();
     }
 
-    function render() {
-      // Headers
-      laneHeadersEl.innerHTML = "";
-      for (let c = 0; c < TUNING.laneCount; c++) {
-        const hdr = document.createElement("div");
-        hdr.className = "lane-header";
-        hdr.textContent = "Lane " + (c + 1);
-        hdr.dataset.col = c;
-        if (laneIsFull(c)) {
-          hdr.style.opacity = "0.4";
-        }
-        hdr.addEventListener("click", () => dropTileIntoLane(c));
-        hdr.addEventListener("touchstart", e => {
-          e.preventDefault();
-          dropTileIntoLane(c);
-        }, { passive: false });
-        laneHeadersEl.appendChild(hdr);
-      }
-
-      // Board
+    function renderBoard(highlightSet) {
       boardEl.innerHTML = "";
-      // Create lane containers
-      for (let c = 0; c < TUNING.laneCount; c++) {
-        const laneDiv = document.createElement("div");
-        laneDiv.className = "lane";
-        laneDiv.dataset.col = c;
+      const highlight =
+        highlightSet || new Set(); /* keys are "r:c" strings */
 
-        const lane = lanes[c];
-        // Build from top row (height-1) down to 0
-        for (let row = TUNING.laneHeight - 1; row >= 0; row--) {
-          const cell = document.createElement("div");
-          cell.className = "cell";
-          const tileVal = lane[row]; // undefined if no tile
-
-          if (tileVal != null) {
-            const tile = document.createElement("div");
-            tile.className = "tile";
-            tile.dataset.v = tileVal;
-            tile.style.backgroundColor = getTileColor(tileVal);
-            cell.appendChild(tile);
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = board[r][c];
+          const div = document.createElement("div");
+          div.className = "tile";
+          if (!cell) {
+            div.classList.add("empty");
+          } else {
+            div.classList.add("color-" + cell.color);
+            if (cell.type !== TILE_TYPES.NORMAL) {
+              div.classList.add("type-" + cell.type);
+            }
+            const key = r + ":" + c;
+            if (highlight.has(key)) {
+              div.classList.add("clearing");
+            }
           }
-
-          laneDiv.appendChild(cell);
+          boardEl.appendChild(div);
         }
-
-        boardEl.appendChild(laneDiv);
       }
     }
 
-    // ============================================================
-    // 🚀 BOOTSTRAP
-    // ============================================================
-    resetBtn.addEventListener("click", newGame);
+    function updatePreview() {
+      if (!currentTile) {
+        previewTileEl.className = "tile preview-tile empty";
+        return;
+      }
+      previewTileEl.className = "tile preview-tile color-" + currentTile.color;
+      if (currentTile.type !== TILE_TYPES.NORMAL) {
+        previewTileEl.classList.add("type-" + currentTile.type);
+      }
+    }
 
-    newGame();
+    function updateChainPreview(multiplier) {
+      previewChainEl.textContent = "x" + multiplier.toFixed(1);
+    }
+
+    function findDropRow(col) {
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (!board[r][col]) {
+          return r;
+        }
+      }
+      return -1; // full column
+    }
+
+    function handleLaneClick(col) {
+      if (gameOver || !currentTile) {
+        return;
+      }
+
+      const row = findDropRow(col);
+      if (row === -1) {
+        Sound.fail();
+        endLevel(
+          false,
+          "That lane is full. The stack overflowed on that drop."
+        );
+        return;
+      }
+
+      const levelCfg = LEVELS[currentLevelIndex];
+
+      board[row][col] = {
+        color: currentTile.color,
+        type: currentTile.type,
+      };
+      movesLeft--;
+      Sound.drop();
+
+      resolveAfterDrop(levelCfg);
+    }
+
+    function resolveAfterDrop(levelCfg) {
+      let chain = 0;
+
+      function loop() {
+        const rowsToClear = findUniformRows();
+        if (rowsToClear.length === 0) {
+          if (chain > 0) {
+            bestChain = Math.max(bestChain, chain);
+          }
+          updateStats();
+          updateChainPreview(1.0);
+          checkEndConditions(levelCfg);
+          if (!gameOver) {
+            currentTile = spawnTileSpec(levelCfg);
+            updatePreview();
+            renderBoard();
+          }
+          return;
+        }
+
+        chain++;
+        const chainMultiplier = 1 + (chain - 1) * CHAIN_STEP;
+        updateChainPreview(chainMultiplier);
+
+        const clearSet = computeClearSet(rowsToClear);
+        rowsCleared += rowsToClear.length;
+
+        renderBoard(clearSet);
+        Sound.match();
+
+        setTimeout(() => {
+          applyClearSet(clearSet);
+          collapseBoard();
+
+          const tilesCleared = clearSet.size;
+          const delta = Math.round(
+            tilesCleared * BASE_POINTS_PER_TILE * chainMultiplier
+          );
+          score += delta;
+
+          renderBoard();
+          updateStats();
+
+          // Continue chaining
+          setTimeout(loop, 60);
+        }, 180);
+      }
+
+      loop();
+    }
+
+    function findUniformRows() {
+      const rowsList = [];
+      for (let r = 0; r < ROWS; r++) {
+        let firstColor = null;
+        let allSame = true;
+        for (let c = 0; c < COLS; c++) {
+          const cell = board[r][c];
+          if (!cell) {
+            allSame = false;
+            break;
+          }
+          if (firstColor === null) {
+            firstColor = cell.color;
+          } else if (cell.color !== firstColor) {
+            allSame = false;
+            break;
+          }
+        }
+        if (allSame && firstColor !== null) {
+          rowsList.push(r);
+        }
+      }
+      return rowsList;
+    }
+
+    function computeClearSet(rows) {
+      const set = new Set();
+
+      function add(r, c) {
+        if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+        if (board[r][c]) {
+          set.add(r + ":" + c);
+        }
+      }
+
+      rows.forEach((r) => {
+        for (let c = 0; c < COLS; c++) {
+          const cell = board[r][c];
+          if (!cell) continue;
+          add(r, c);
+
+          if (cell.type === TILE_TYPES.BOMB) {
+            for (let dr = -1; dr <= 1; dr++) {
+              for (let dc = -1; dc <= 1; dc++) {
+                add(r + dr, c + dc);
+              }
+            }
+          } else if (cell.type === TILE_TYPES.ROW) {
+            for (let cc = 0; cc < COLS; cc++) {
+              add(r, cc);
+            }
+          }
+        }
+      });
+
+      return set;
+    }
+
+    function applyClearSet(set) {
+      set.forEach((key) => {
+        const [r, c] = key.split(":").map(Number);
+        board[r][c] = null;
+      });
+    }
+
+    function collapseBoard() {
+      for (let c = 0; c < COLS; c++) {
+        let writeRow = ROWS - 1;
+        for (let r = ROWS - 1; r >= 0; r--) {
+          const cell = board[r][c];
+          if (cell) {
+            if (writeRow !== r) {
+              board[writeRow][c] = cell;
+              board[r][c] = null;
+            }
+            writeRow--;
+          }
+        }
+      }
+    }
+
+    function checkEndConditions(levelCfg) {
+      if (score >= levelCfg.target) {
+        Sound.levelUp();
+        endLevel(
+          true,
+          `You reached ${score} points. Target was ${levelCfg.target}.`
+        );
+        return;
+      }
+
+      if (movesLeft <= 0) {
+        Sound.fail();
+        endLevel(
+          false,
+          `You ran out of drops with ${score}/${levelCfg.target} points.`
+        );
+      }
+    }
+
+    function endLevel(win, message) {
+      gameOver = true;
+      showModal(win, message);
+    }
+
+    function showModal(win, message) {
+      modalTitleEl.textContent = win ? "Line Cleared" : "Stack Overflow";
+      modalBodyEl.textContent = message;
+      modalNextEl.style.display = win ? "inline-flex" : "none";
+      modalEl.classList.remove("modal-hidden");
+    }
+
+    function hideModal() {
+      modalEl.classList.add("modal-hidden");
+    }
+
+    btnRestartEl.addEventListener("click", () => {
+      startLevel(currentLevelIndex);
+    });
+
+    btnNextEl.addEventListener("click", () => {
+      const next =
+        currentLevelIndex + 1 < LEVELS.length ? currentLevelIndex + 1 : 0;
+      startLevel(next);
+    });
+
+    modalRestartEl.addEventListener("click", () => {
+      hideModal();
+      startLevel(currentLevelIndex);
+    });
+
+    modalNextEl.addEventListener("click", () => {
+      hideModal();
+      const next =
+        currentLevelIndex + 1 < LEVELS.length ? currentLevelIndex + 1 : 0;
+      startLevel(next);
+    });
+
+    modalEl.addEventListener("click", (evt) => {
+      if (evt.target === modalEl) {
+        hideModal();
+      }
+    });
+
+    /*
+      Tiny synth beeps for feedback. No external audio assets.
+    */
+    const Sound = (() => {
+      let ctx = null;
+
+      function getCtx() {
+        if (!ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          ctx = new AC();
+        }
+        return ctx;
+      }
+
+      function blip(freq, duration, gainPeak) {
+        const ac = getCtx();
+        if (!ac) return;
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        const now = ac.currentTime;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(gainPeak, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          now + (duration || 0.1)
+        );
+        osc.start(now);
+        osc.stop(now + (duration || 0.1) + 0.04);
+      }
+
+      return {
+        drop() {
+          blip(220, 0.07, 0.22);
+        },
+        match() {
+          blip(520, 0.09, 0.28);
+        },
+        fail() {
+          blip(130, 0.28, 0.3);
+        },
+        levelUp() {
+          blip(660, 0.09, 0.24);
+          setTimeout(() => blip(880, 0.14, 0.26), 120);
+        },
+      };
+    })();
+
+    /*
+      BLOCK 5 — BOOTSTRAP
+      Start on Level 1, seed the first tile.
+    */
+
+    function startLevel(index) {
+      currentLevelIndex = index;
+      const cfg = LEVELS[index];
+
+      makeEmptyBoard();
+      score = 0;
+      movesLeft = cfg.moves;
+      rowsCleared = 0;
+      bestChain = 0;
+      specialsSeen = 0;
+      gameOver = false;
+
+      setStatus(
+        `Level ${cfg.id} — ${cfg.name}. Reach ${cfg.target} points in ${cfg.moves} drops.`
+      );
+
+      currentTile = spawnTileSpec(cfg);
+      updatePreview();
+      updateChainPreview(1.0);
+      updateStats();
+      renderBoard();
+    }
+
+    // kick things off
+    startLevel(0);
   </script>
 </body>
 </html>
