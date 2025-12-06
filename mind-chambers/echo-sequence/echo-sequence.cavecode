@@ -1,0 +1,119 @@
+---
+
+## 2️⃣ `arcade/mind-chambers/echo-sequence/echo-sequence.cavecode`
+
+```text
+CAVECODE SPEC — ECHO SEQUENCE (ARC-MC-001)
+Category: mind-chambers
+Engine: Pattern memory / Simon-style
+Version: 1.0
+
+============================================================
+🪨 BLOCK 1 — IDENTITY
+------------------------------------------------------------
+Title: Mind Chambers — Echo Sequence
+Game ID: ARC-MC-001
+Category: mind-chambers
+Genre: pattern-memory
+One-Liner: Watch the pads flash, then echo the sequence back by tapping them in order.
+(LOCKED)
+
+============================================================
+🎮 BLOCK 2 — CORE LOOP SUMMARY
+------------------------------------------------------------
+Loop (round-based):
+
+  - State: IDLE
+      - Wait for player to press Start.
+      - Initialize stats: level = 1, score = 0.
+      - Generate a new random sequence of pad indices of length startLength.
+
+  - State: SHOWING
+      - Disable player input.
+      - For each step in sequence:
+          - Flash the corresponding pad.
+          - Wait flashDurationMs.
+          - Pause stepDelayMs before the next step.
+      - After final step, move to INPUT state.
+
+  - State: INPUT
+      - Enable player input.
+      - Track current input index (0..sequence.length-1).
+      - On each tap:
+          - Flash tapped pad briefly.
+          - If tapped pad != expected pad → FAIL.
+          - Else if last pad in sequence and correct:
+              - SUCCESS: level++, extend sequence by one random pad, return to SHOWING.
+          - Else:
+              - input index++ and wait for next tap.
+
+  - State: FAIL
+      - Show failure message, keep best level.
+      - Wait for Start to reset.
+
+(LOCKED)
+
+============================================================
+🕹️ BLOCK 3 — INPUT / CONTROLS
+------------------------------------------------------------
+Desktop & Mobile:
+  - Click / tap Start to begin a run.
+  - Click / tap pads only when state is INPUT ("Your turn").
+Pads ignore input during SHOWING or IDLE.
+
+(LOCKED)
+
+============================================================
+📈 BLOCK 4 — SCORING / PROGRESSION
+------------------------------------------------------------
+Level:
+  - level = sequence length
+  - bestLevel = max level reached this session
+
+Score (simple version):
+  - score = (level reached - 1)
+(LOCKED)
+
+============================================================
+🎚️ BLOCK 5 — TUNING KNOBS (HUMAN EDIT ZONE)
+------------------------------------------------------------
+padCount:         4
+startLength:      1
+flashDurationMs:  550
+stepDelayMs:      250
+inputFlashMs:     200
+maxLevel:         32      # soft cap for demos (not enforced strictly)
+(PENCIL — safe to modify; keep in sync with script)
+
+============================================================
+🌐 BLOCK 6 — PLAYER-FACING TEXT
+------------------------------------------------------------
+title: "Echo Sequence"
+subtitle: "Watch. Remember. Echo."
+startLabel: "Start"
+statusIdle: "Press Start to begin."
+statusShowing: "Watch the sequence…"
+statusInput: "Your turn. Tap the pads in order."
+statusFail: "Wrong pad. Tap Start to try again."
+(Globe — public strings)
+
+============================================================
+🧩 BLOCK 7 — OPTIONAL EXPANSIONS
+------------------------------------------------------------
+Possible future variations:
+  - Speed-up over time
+  - Multiple difficulty modes (more pads, faster flashes)
+  - "Endless" mode with leaderboard
+  - Sound tones per pad for audio-focused players
+
+(OPEN)
+
+============================================================
+📝 BLOCK 10 — HUMAN NOTES
+------------------------------------------------------------
+Teaching hooks:
+  - Clear state machine (IDLE, SHOWING, INPUT, FAIL).
+  - Timers vs. user input and how they interact.
+  - Array-based sequences and random pads.
+
+(END)
