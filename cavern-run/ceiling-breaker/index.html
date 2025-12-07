@@ -462,7 +462,7 @@
       </div>
 
       <p class="hint">
-        Tap or click inside the cavern (or press <strong>Space / ↑ / W</strong>) to jump.  
+        Tap or click inside the cavern (or press <strong>Space / ↑ / W</strong>) to jump.
         Use <strong>A / D</strong> keys or the Dash buttons while in mid-air to burst sideways.
       </p>
     </section>
@@ -489,15 +489,14 @@
     BLOCK 4 — GAME LOGIC (EDITABLE)
     Ceiling Breaker · Collapsing Escape · 5-Level Track
   -->
-
   <script>
     // ---- LEVEL CONFIG ----
     const LEVELS = [
-      { name: "Warm Cracks", target: 1000, scrollSpeed: 55, platformSpawn: 900, crumbleMin: 1800, crumbleMax: 2400, debrisInterval: 1600 },
-      { name: "Falling Echo", target: 1400, scrollSpeed: 65, platformSpawn: 830, crumbleMin: 1600, crumbleMax: 2200, debrisInterval: 1400 },
-      { name: "Breakneck Lift", target: 1800, scrollSpeed: 75, platformSpawn: 780, crumbleMin: 1400, crumbleMax: 2000, debrisInterval: 1250 },
-      { name: "Cinder Storm", target: 2200, scrollSpeed: 87, platformSpawn: 720, crumbleMin: 1200, crumbleMax: 1800, debrisInterval: 1100 },
-      { name: "Fractured Summit", target: 2600, scrollSpeed: 98, platformSpawn: 660, crumbleMin: 1000, crumbleMax: 1500, debrisInterval: 950 }
+      { name: "Warm Cracks",     target: 1000, scrollSpeed: 45, platformSpawn: 900, crumbleMin: 1800, crumbleMax: 2400, debrisInterval: 1600 },
+      { name: "Falling Echo",    target: 1400, scrollSpeed: 55, platformSpawn: 830, crumbleMin: 1600, crumbleMax: 2200, debrisInterval: 1400 },
+      { name: "Breakneck Lift",  target: 1800, scrollSpeed: 65, platformSpawn: 780, crumbleMin: 1400, crumbleMax: 2000, debrisInterval: 1250 },
+      { name: "Cinder Storm",    target: 2200, scrollSpeed: 78, platformSpawn: 720, crumbleMin: 1200, crumbleMax: 1800, debrisInterval: 1100 },
+      { name: "Fractured Summit",target: 2600, scrollSpeed: 88, platformSpawn: 660, crumbleMin: 1000, crumbleMax: 1500, debrisInterval: 950 }
     ];
 
     // ---- DOM HOOKS ----
@@ -546,7 +545,7 @@
 
     const GRAVITY = -0.00042;
     const JUMP_VELOCITY = 0.23;
-    const DASH_STRENGTH = 0.23;
+    const DASH_STRENGTH = 0.35;  // buffed sideways push
     const MAX_FALL_SPEED = -0.5;
 
     let isOnGround = false;
@@ -655,9 +654,9 @@
       const pfHeight = playfield.clientHeight;
       const pfWidth = playfield.clientWidth;
       createPlatform(pfWidth * 0.5 - 60, pfHeight * 0.12, 120, "safe");
-      createPlatform(pfWidth * 0.2, pfHeight * 0.28, 80, "normal");
-      createPlatform(pfWidth * 0.65, pfHeight * 0.44, 90, "normal");
-      createPlatform(pfWidth * 0.35, pfHeight * 0.6, 90, "boost");
+      createPlatform(pfWidth * 0.2,  pfHeight * 0.28, 80,  "normal");
+      createPlatform(pfWidth * 0.65, pfHeight * 0.44, 90,  "normal");
+      createPlatform(pfWidth * 0.35, pfHeight * 0.6,  90,  "boost");
     }
 
     // ---- OBJECT SPAWN ----
@@ -745,6 +744,7 @@
       // Scroll
       scrollOffset += level.scrollSpeed * dt;
       const pfHeight = playfield.clientHeight;
+      const pfWidth = playfield.clientWidth;
       const scrollPx = level.scrollSpeed * dt;
 
       // Height climbed
@@ -768,10 +768,9 @@
 
       runnerY += runnerVY * deltaMs + scrollPx;
       runnerX += runnerVX * deltaMs;
-      runnerVX *= 0.88;
+      runnerVX *= 0.9; // a little slide but not ice
 
       const margin = 10;
-      const pfWidth = playfield.clientWidth;
       runnerX = Math.max(
         margin + runnerWidth / 2,
         Math.min(pfWidth - margin - runnerWidth / 2, runnerX)
@@ -844,10 +843,7 @@
         handleDeath("You fell behind the collapse. Try again.");
         return;
       }
-      if (runnerY > pfHeight * 0.9) {
-        handleDeath("The collapse zone overtook you. Try again.");
-        return;
-      }
+      // NOTE: no more top-of-screen instant kill. The glow + debris carry the threat.
 
       // Win condition
       if (height >= level.target) {
