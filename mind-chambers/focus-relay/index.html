@@ -279,6 +279,25 @@
       });
     }
 
+    // NEW: reveal the full correct pattern after a mistake
+    function showCorrectPattern() {
+      // Don't touch the wrong node's color; just clear others then repaint pattern
+      nodes.forEach(n => {
+        if (!n.el.classList.contains("wrong")) {
+          n.el.classList.remove("reveal", "correct");
+          n.inner.textContent = "";
+        }
+      });
+
+      pattern.forEach((nodeIndex, i) => {
+        const n = nodes[nodeIndex];
+        if (!n.el.classList.contains("wrong")) {
+          n.el.classList.add("reveal");
+          n.inner.textContent = String(i + 1);
+        }
+      });
+    }
+
     // ============================================================
     // ROUND FLOW
     // ============================================================
@@ -358,6 +377,9 @@
       n.el.classList.add("wrong");
       setState(STATE.GAME_OVER);
       statusEl.textContent = "Sequence broken. Tap Start to try again.";
+
+      // NEW: re-reveal the full correct path with numbers
+      showCorrectPattern();
     }
 
     // ============================================================
