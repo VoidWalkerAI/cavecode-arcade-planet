@@ -324,7 +324,7 @@
         align-items: flex-start;
       }
 
-      header-top .tagline {
+      header-top .tagline = {
         text-align: left;
       }
 
@@ -396,9 +396,9 @@
             <div class="hud-note">Current window</div>
           </div>
           <div class="hud-cell">
-            <div class="hud-label">Grid Size</div>
-            <div class="hud-value" id="hudGridSize">3×3</div>
-            <div class="hud-note">Mind-node layout</div>
+            <div class="hud-label">Tier</div>
+            <div class="hud-value" id="hudTier">1</div>
+            <div class="hud-note">1–5 difficulty band</div>
           </div>
           <div class="hud-cell">
             <div class="hud-label">Run State</div>
@@ -441,6 +441,7 @@
           <li><strong>Best Run</strong> — your longest streak so far.</li>
           <li><strong>Pattern Length</strong> — how many nodes are currently in the sequence.</li>
           <li><strong>Reveal Time</strong> — how long the numbers stay visible at the start.</li>
+          <li><strong>Tier</strong> — 1 (easiest) through 5 (hardest) based on pattern length.</li>
         </ul>
         <p>
           Tap <strong>Start Round</strong> to reset and push for a deeper run.
@@ -477,7 +478,7 @@
     const hudBest = document.getElementById("hudBest");
     const hudPattern = document.getElementById("hudPattern");
     const hudReveal = document.getElementById("hudReveal");
-    const hudGridSize = document.getElementById("hudGridSize");
+    const hudTier = document.getElementById("hudTier");
     const hudState = document.getElementById("hudState");
 
     // ============================================================
@@ -502,8 +503,89 @@
     let bestRounds = 0;
     let revealTimeoutId = null;
 
+    // Audio
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq, durationMs = 160, type = "sine", gain = 0.18) {
+      if (!audioCtx) return;
+      const ctx = audioCtx;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      g.gain.value = gain;
+      osc.connect(g);
+      g.connect(ctx.destination);
+      const now = ctx.currentTime;
+      osc.start(now);
+      osc.stop(now + durationMs / 1000);
+      g.gain.exponentialRampToValueAtTime(0.001, now + durationMs / 1000);
+    }
+
+    function playRevealChime() {
+      playTone(660, 140, "sine", 0.2);
+    }
+
+    function playCorrectBlip() {
+      playTone(880, 120, "triangle", 0.2);
+    }
+
+    function playFailSting() {
+      playTone(240, 260, "sawtooth", 0.23);
+      setTimeout(() => playTone(160, 220, "sawtooth", 0.2), 120);
+    }
+
     // ============================================================
-    // SETUP GRID
+    // HELPERS
+    // ============================================================
+    function patternToTier(len) {
+      if (len <= 4) return 1;
+      if (len <= 6) return 2;
+      if (len <= 8) return 3;
+      if (len <= 10) return 4;
+      return 5;
+    }
+
+    function updateTier() {
+      hudTier.textContent = String(patternToTier(patternLength));
+    }
+
+    function setState(newState) {
+      currentState = newState;
+      hudState.textContent = newState;
+    }
+
+    function clearNodeStyles(full = true) {
+      nodes.forEach(n => {
+        if (full || !n.el.classList.contains("wrong")) {
+          n.el.classList.remove("reveal", "correct");
+          if (full) {
+            n.el.classList.remove("wrong");
+          }
+          n.inner.textContent = "";
+        }
+      });
+    }
+
+    function showCorrectPattern() {
+      clearNodeStyles(false);
+      pattern.forEach((nodeIndex, i) => {
+        const n = nodes[nodeIndex];
+        if (!n.el.classList.contains("wrong")) {
+          n.el.classList.add("reveal");
+          n.inner.textContent = String(i + 1);
+        }
+      });
+    }
+
+    // ============================================================
+    // GRID + PATTERN
     // ============================================================
     function buildGrid() {
       gridEl.innerHTML = "";
@@ -528,54 +610,17 @@
       }
 
       gridEl.style.gridTemplateColumns = `repeat(${TUNING.gridSize}, 1fr)`;
-      hudGridSize.textContent = `${TUNING.gridSize}×${TUNING.gridSize}`;
     }
 
-    // ============================================================
-    // PATTERN GENERATION
-    // ============================================================
     function generatePattern() {
       pattern = [];
       const indices = Array.from({ length: nodes.length }, (_, i) => i);
 
-      // Fisher–Yates shuffle and take first patternLength
       for (let i = indices.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [indices[i], indices[j]] = [indices[j], indices[i]];
       }
       pattern = indices.slice(0, patternLength);
-    }
-
-    // ============================================================
-    // STATE HELPERS
-    // ============================================================
-    function setState(newState) {
-      currentState = newState;
-      hudState.textContent = newState;
-    }
-
-    function clearNodeStyles(full = true) {
-      nodes.forEach(n => {
-        if (full || !n.el.classList.contains("wrong")) {
-          n.el.classList.remove("reveal", "correct");
-          if (full) {
-            n.el.classList.remove("wrong");
-          }
-          n.inner.textContent = "";
-        }
-      });
-    }
-
-    // Show the full correct pattern after a mistake
-    function showCorrectPattern() {
-      clearNodeStyles(false);
-      pattern.forEach((nodeIndex, i) => {
-        const n = nodes[nodeIndex];
-        if (!n.el.classList.contains("wrong")) {
-          n.el.classList.add("reveal");
-          n.inner.textContent = String(i + 1);
-        }
-      });
     }
 
     // ============================================================
@@ -590,6 +635,7 @@
 
       hudPattern.textContent = String(patternLength);
       hudReveal.textContent = (revealTimeMs / 1000).toFixed(1) + "s";
+      updateTier();
 
       startRound();
     }
@@ -603,12 +649,14 @@
       expectedIndex = 1;
       generatePattern();
       hudPattern.textContent = String(patternLength);
+      updateTier();
       revealPattern();
     }
 
     function revealPattern() {
       setState(STATE.REVEAL);
       statusEl.textContent = "Memorize the numbers...";
+      playRevealChime();
 
       pattern.forEach((nodeIndex, i) => {
         const n = nodes[nodeIndex];
@@ -628,10 +676,10 @@
     function handleCorrectClick(nodeIndex) {
       const n = nodes[nodeIndex];
       n.el.classList.add("correct");
+      playCorrectBlip();
 
       expectedIndex++;
       if (expectedIndex > patternLength) {
-        // Round success
         roundsCompleted++;
         hudRound.textContent = String(roundsCompleted);
         if (roundsCompleted > bestRounds) {
@@ -642,7 +690,6 @@
         setState(STATE.IDLE);
         statusEl.textContent = "Nice. New pattern loading…";
 
-        // Next round adjustments
         patternLength += TUNING.patternIncrement;
         revealTimeMs = Math.max(
           TUNING.minRevealTimeMs,
@@ -660,15 +707,15 @@
     function handleWrongClick(nodeIndex) {
       const n = nodes[nodeIndex];
       n.el.classList.add("wrong");
+      playFailSting();
       setState(STATE.GAME_OVER);
       statusEl.textContent = "Sequence broken. Tap Start Round to try again.";
 
-      // Re-reveal the full correct path with numbers
       showCorrectPattern();
     }
 
     // ============================================================
-    // INPUT HANDLER
+    // INPUT
     // ============================================================
     function onNodeClick(nodeIndex) {
       if (currentState !== STATE.INPUT) return;
@@ -685,6 +732,7 @@
     // BUTTON
     // ============================================================
     startBtn.addEventListener("click", () => {
+      ensureAudio();
       setState(STATE.IDLE);
       statusEl.textContent = "Memorize the numbers...";
       startRun();
@@ -699,6 +747,7 @@
     hudRound.textContent = "0";
     hudPattern.textContent = String(TUNING.startPatternLength);
     hudReveal.textContent = (TUNING.revealTimeMs / 1000).toFixed(1) + "s";
+    updateTier();
   </script>
 </body>
 </html>
