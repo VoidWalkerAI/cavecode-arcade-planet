@@ -105,7 +105,11 @@
       box-shadow:
         0 0 0 1px rgba(15, 23, 42, 0.9),
         0 10px 18px rgba(0, 0, 0, 0.7);
-      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, filter 0.08s ease-out, opacity 0.15s ease-out;
+      transition:
+        transform 0.08s ease-out,
+        box-shadow 0.08s ease-out,
+        filter 0.08s ease-out,
+        opacity 0.15s ease-out;
     }
 
     .pad[data-id="0"] { background: var(--pad-0); }
@@ -151,6 +155,7 @@
       gap: 0.75rem;
       width: 100%;
       max-width: 320px;
+      flex-wrap: wrap;
     }
 
     #level-panel {
@@ -158,6 +163,7 @@
       gap: 0.35rem;
       font-size: 0.8rem;
       color: var(--text-soft);
+      flex-wrap: wrap;
     }
 
     .pill {
@@ -169,6 +175,7 @@
       display: inline-flex;
       gap: 0.35rem;
       align-items: center;
+      white-space: nowrap;
     }
 
     #start-btn {
@@ -242,6 +249,7 @@
           <div id="level-panel">
             <span class="pill">Level: <span id="levelVal">0</span></span>
             <span class="pill">Best: <span id="bestVal">0</span></span>
+            <span class="pill">Tier: <span id="tierVal">1</span>/5</span>
           </div>
           <button id="start-btn">Start</button>
         </div>
@@ -270,11 +278,99 @@
     const TUNING = {
       padCount: 4,
       startLength: 1,
-      flashDurationMs: 550,
-      stepDelayMs: 250,
+      flashDurationMs: 550,  // base speed for Tier 1
+      stepDelayMs: 250,      // base delay for Tier 1
       inputFlashMs: 200,
-      maxLevel: 32 // soft cap; not enforced hard
+      maxLevel: 32           // soft cap; not enforced hard
     };
+
+    // Difficulty tiers (for the 5-level feel)
+    // Level 1–4 => Tier 1, 5–8 => Tier 2, 9–12 => Tier 3, 13–16 => Tier 4, 17+ => Tier 5
+    const TIER_THRESHOLDS = [4, 8, 12, 16];
+    const TIER_SPEED_SCALE = [1.0, 0.9, 0.8, 0.7, 0.6];
+
+    // ============================================================
+    // SIMPLE AUDIO ENGINE (Web Audio, no external assets)
+    // ============================================================
+    const AudioEngine = (() => {
+      let ctx = null;
+      const PAD_FREQ = [392, 329.63, 261.63, 523.25]; // four pleasant tones
+
+      function getCtx() {
+        if (!ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          ctx = new AC();
+        }
+        if (ctx.state === "suspended") {
+          ctx.resume();
+        }
+        return ctx;
+      }
+
+      function beep(frequency, duration = 0.18, type = "sine", gainValue = 0.25) {
+        const audioCtx = getCtx();
+        if (!audioCtx) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.value = frequency;
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        gain.gain.setValueAtTime(gainValue, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      function padTone(idx) {
+        const freq = PAD_FREQ[idx % PAD_FREQ.length];
+        beep(freq);
+      }
+
+      function success() {
+        const audioCtx = getCtx();
+        if (!audioCtx) return;
+
+        const base = audioCtx.currentTime;
+        const freqs = [440, 520, 600];
+        freqs.forEach((f, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.frequency.value = f;
+          osc.type = "sine";
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          const t = base + i * 0.08;
+          gain.gain.setValueAtTime(0.22, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+
+          osc.start(t);
+          osc.stop(t + 0.22);
+        });
+      }
+
+      function fail() {
+        beep(180, 0.45, "sawtooth", 0.35);
+      }
+
+      function resumeOnGesture() {
+        const audioCtx = getCtx();
+        if (!audioCtx) return;
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+      }
+
+      return { padTone, success, fail, resumeOnGesture };
+    })();
 
     // ============================================================
     // STATE
@@ -283,6 +379,7 @@
     const statusTextEl = document.getElementById("status-text");
     const levelValEl = document.getElementById("levelVal");
     const bestValEl = document.getElementById("bestVal");
+    const tierValEl = document.getElementById("tierVal");
     const startBtn = document.getElementById("start-btn");
 
     let sequence = [];
@@ -295,6 +392,29 @@
     // ============================================================
     // HELPERS
     // ============================================================
+    function computeTier(currentLevel) {
+      if (currentLevel <= 0) return 1;
+      if (currentLevel <= TIER_THRESHOLDS[0]) return 1;
+      if (currentLevel <= TIER_THRESHOLDS[1]) return 2;
+      if (currentLevel <= TIER_THRESHOLDS[2]) return 3;
+      if (currentLevel <= TIER_THRESHOLDS[3]) return 4;
+      return 5;
+    }
+
+    function refreshTierDisplay() {
+      const tier = computeTier(level);
+      tierValEl.textContent = tier;
+    }
+
+    function effectiveSpeeds() {
+      const tier = computeTier(level);
+      const scale = TIER_SPEED_SCALE[tier - 1] || 1;
+      return {
+        flash: TUNING.flashDurationMs * scale,
+        step: TUNING.stepDelayMs * scale
+      };
+    }
+
     function setState(newState) {
       state = newState;
       if (state === "IDLE") {
@@ -331,17 +451,20 @@
       inputIndex = 0;
       level = 0;
       levelValEl.textContent = level;
+      refreshTierDisplay();
     }
 
     // ============================================================
     // GAME FLOW
     // ============================================================
     function startRun() {
+      AudioEngine.resumeOnGesture();
       resetTimers();
       clearSequence();
       extendSequence(TUNING.startLength);
       level = sequence.length;
       levelValEl.textContent = level;
+      refreshTierDisplay();
       setState("SHOWING");
       showSequence();
     }
@@ -359,10 +482,14 @@
 
       pads.forEach(p => p.classList.remove("active"));
 
+      const speeds = effectiveSpeeds();
+      const flashMs = speeds.flash;
+      const stepMs = speeds.step;
+
       let totalDelay = 300; // small initial delay
-      sequence.forEach((padIndex, i) => {
+      sequence.forEach((padIndex) => {
         const onTime = totalDelay;
-        const offTime = totalDelay + TUNING.flashDurationMs;
+        const offTime = totalDelay + flashMs;
 
         // turn on
         showTimeouts.push(setTimeout(() => {
@@ -374,7 +501,7 @@
           flashPadOff(padIndex);
         }, offTime));
 
-        totalDelay = offTime + TUNING.stepDelayMs;
+        totalDelay = offTime + stepMs;
       });
 
       // After full sequence: enter INPUT state
@@ -386,6 +513,7 @@
     function flashPadOn(idx) {
       const pad = pads[idx];
       pad.classList.add("active");
+      AudioEngine.padTone(idx);
     }
 
     function flashPadOff(idx) {
@@ -396,6 +524,7 @@
     function flashPadInput(idx) {
       const pad = pads[idx];
       pad.classList.add("active");
+      AudioEngine.padTone(idx);
       setTimeout(() => pad.classList.remove("active"), TUNING.inputFlashMs);
     }
 
@@ -409,6 +538,7 @@
         // Fail
         bestLevel = Math.max(bestLevel, level);
         bestValEl.textContent = bestLevel;
+        AudioEngine.fail();
         setState("FAIL");
         return;
       }
@@ -418,11 +548,13 @@
         // Round success
         bestLevel = Math.max(bestLevel, level);
         bestValEl.textContent = bestLevel;
+        AudioEngine.success();
 
         // Extend sequence
         sequence.push(randomPadIndex());
         level = sequence.length;
         levelValEl.textContent = level;
+        refreshTierDisplay();
 
         setState("SHOWING");
         resetTimers();
@@ -438,6 +570,7 @@
         const idx = parseInt(pad.dataset.id, 10);
         handlePadInput(idx);
       });
+
       pad.addEventListener("touchstart", e => {
         e.preventDefault();
         const idx = parseInt(pad.dataset.id, 10);
@@ -454,6 +587,7 @@
     // INITIAL
     // ============================================================
     setState("IDLE");
+    refreshTierDisplay();
   </script>
 </body>
 </html>
