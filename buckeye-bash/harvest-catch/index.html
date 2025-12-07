@@ -5,6 +5,21 @@
   <title>Buckeye Bash — Harvest Catch (ARC-BB-001)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
+  <!--
+    🪨 BLOCK 1 — IDENTITY [LOCKED]
+    TITLE: Buckeye Bash — Harvest Catch
+    CODE: ARC-BB-001
+    LINE: Buckeye Bash — Seasonal / Theme Variants
+    PURPOSE: Lane-based catch/dodge mini-game for CaveCode Arcade Planet.
+    VERSION: 1.1 (CaveCode shell + 5-level track + SFX)
+    AUDIENCE: Players (mobile-first) + engine readers (AI/human).
+
+    Notes:
+    - Single-file HTML engine.
+    - CaveCode blocks embedded as comments.
+    - Visual shell: Buckeye Bash line, unified with Mind-Chambers/Haze-Maze style.
+  -->
+
   <style>
     :root {
       --bg: #020617;
@@ -13,7 +28,6 @@
       --text-main: #e5e7eb;
       --text-soft: #9ca3af;
       --accent: #fb923c;
-      --danger: #f97373;
 
       --lane-good: #22c55e;
       --lane-bad: #ef4444;
@@ -91,8 +105,9 @@
 
     #hud-row {
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 0.5rem;
@@ -109,6 +124,12 @@
       align-items: center;
       gap: 0.3rem;
       font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .pill span.value {
+      font-weight: 600;
+      color: var(--text-main);
     }
 
     #start-btn {
@@ -119,6 +140,7 @@
       background: radial-gradient(circle at top, rgba(251, 146, 60, 0.5), rgba(15, 23, 42, 1));
       color: var(--text-main);
       cursor: pointer;
+      white-space: nowrap;
     }
 
     #start-btn:active {
@@ -130,7 +152,7 @@
       aspect-ratio: 3 / 4;
       border-radius: 0.75rem;
       border: 1px solid rgba(15, 23, 42, 1);
-      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+      background: radial-gradient(circle at top, #020617 0, #020617 70%);
       overflow: hidden;
       position: relative;
       touch-action: manipulation;
@@ -141,6 +163,7 @@
       inset: 0;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      pointer-events: none;
     }
 
     .lane {
@@ -151,6 +174,7 @@
     .lane:first-child {
       border-left: none;
     }
+
     .lane:last-child {
       border-right: none;
     }
@@ -200,7 +224,7 @@
       font-size: 0.8rem;
       color: var(--text-soft);
       text-align: center;
-      min-height: 1.2rem;
+      min-height: 1.3rem;
     }
 
     #info-panel {
@@ -251,10 +275,16 @@
       <section id="playfield-panel">
         <div id="hud-row">
           <div class="pill">
-            Score: <span id="scoreVal">0</span>
+            Lvl: <span class="value" id="levelVal">1</span> / <span class="value">5</span>
           </div>
           <div class="pill">
-            Health: <span id="healthVal">5</span>
+            Score: <span class="value" id="scoreVal">0</span>
+          </div>
+          <div class="pill">
+            Health: <span class="value" id="healthVal">5</span>
+          </div>
+          <div class="pill">
+            Best Lvl: <span class="value" id="bestLevelVal">1</span>
           </div>
           <button id="start-btn">Start Harvest</button>
         </div>
@@ -268,54 +298,180 @@
           <div id="basket">Basket</div>
         </div>
 
-        <div id="status-text">Tap Start Harvest to begin.</div>
+        <div id="status-text">Tap Start Harvest to begin Level 1.</div>
       </section>
 
       <aside id="info-panel">
         <h2>How to Play</h2>
-        <p>Harvest Catch is a lane-based fall mini-game:</p>
+        <p>Harvest Catch is a lane-based fall mini-game with a 5-level track:</p>
         <ul>
-          <li>Tap <strong>Start Harvest</strong> to begin a run.</li>
-          <li>Move the basket with arrow keys or by tapping left/right on the field.</li>
+          <li>Tap <strong>Start Harvest</strong> to begin the current level.</li>
+          <li>Move the basket with arrow keys (<strong>← →</strong>) or by tapping left/right in the field.</li>
           <li>Catching <strong>good</strong> items adds to your score.</li>
           <li>Catching <strong>bad</strong> items reduces your health.</li>
+          <li>Reach the level’s target score before your health hits zero to advance.</li>
         </ul>
-        <p>The game slowly speeds up over time. When your health reaches zero, the harvest ends.</p>
+        <p>Each level gets a bit faster and more crowded. Clear all five to finish the Buckeye harvest run.</p>
       </aside>
     </div>
   </div>
 
+  <!--
+    🎚️ BLOCK 2 — TUNING KNOBS
+
+    The LEVELS array is the main knob set. Edit values only; keep names/shape.
+
+    LEVEL 1 — Gentle start
+      targetScore:   80
+      startingHealth: 5
+      fallSpeed:    130 px/sec
+      spawnInterval: 900 ms
+      goodItemChance: 0.75
+
+    LEVEL 2 — Slightly faster
+      targetScore:   160
+      startingHealth: 5
+      fallSpeed:    155
+      spawnInterval: 820
+      goodItemChance: 0.72
+
+    LEVEL 3 — Mid-harvest
+      targetScore:   260
+      startingHealth: 4
+      fallSpeed:    180
+      spawnInterval: 760
+      goodItemChance: 0.70
+
+    LEVEL 4 — Busy field
+      targetScore:   380
+      startingHealth: 4
+      fallSpeed:    205
+      spawnInterval: 700
+      goodItemChance: 0.68
+
+    LEVEL 5 — Rush hour
+      targetScore:   520
+      startingHealth: 3
+      fallSpeed:    235
+      spawnInterval: 640
+      goodItemChance: 0.65
+
+    Global knobs:
+      laneCount:         3
+      scorePerGood:      10
+      healthLossBad:      1
+      difficultyScale: 0.015   (small speed factor on elapsed time)
+      minSpawnInterval: 350    (clamp)
+  -->
+
   <script>
-    // ============================================================
-    // 🎚️ TUNING (sync with harvest-catch.cavecode)
-    // ============================================================
-    const TUNING = {
-      laneCount: 3,
-      startingHealth: 5,
-      fallSpeed: 140,           // base px/sec
-      spawnIntervalMs: 900,
-      goodItemChance: 0.7,
-      scorePerGood: 10,
-      healthLossBad: 1,
-      difficultyScale: 0.015    // small factor on elapsed time
+    // 🌐 BLOCK 3 — PUBLIC TEXT (labels / messages)
+
+    const TEXT = {
+      idle: (level) => `Tap Start Harvest to begin Level ${level}.`,
+      running: "Catch the good harvest. Dodge the junk.",
+      levelComplete: (level, last) =>
+        last
+          ? `Level ${level} complete! You finished the Buckeye harvest. Tap Start to replay the final run.`
+          : `Level ${level} complete. Tap Start to begin the next harvest.`,
+      gameOver: (level) =>
+        `Harvest over on Level ${level}. Tap Start to try that level again.`,
     };
 
-    // ============================================================
-    // STATE
-    // ============================================================
+    // 🔧 BLOCK 4 — BEHAVIOR (game flow & logic)
+    //
+    // FLOW_START:
+    //  - Current level index selects LEVELS[i] from tuning knobs.
+    //  - Start button:
+    //      • Resets score, health, items, timers.
+    //      • Places basket in middle lane.
+    //      • Begins requestAnimationFrame loop.
+    //  - Each frame:
+    //      • Update elapsed time.
+    //      • Apply difficultyScale to fallSpeed.
+    //      • Spawn new items on a shrinking interval.
+    //      • Move items downward; remove off-screen.
+    //      • Check catch window against basket lane.
+    //      • Update score/health on catches.
+    //      • If score >= targetScore → Level complete.
+    //      • If health <= 0 → Game over.
+    //  - Input:
+    //      • Arrow keys / A,D for left/right sliding.
+    //      • Touch zones (left third / right third) for mobile.
+    //
+    // FLOW_END.
+
+    // 🎚️ TUNING (must stay in sync with comment block above)
+    const LEVELS = [
+      {
+        name: "Level 1",
+        targetScore: 80,
+        startingHealth: 5,
+        fallSpeed: 130,
+        spawnIntervalMs: 900,
+        goodItemChance: 0.75,
+      },
+      {
+        name: "Level 2",
+        targetScore: 160,
+        startingHealth: 5,
+        fallSpeed: 155,
+        spawnIntervalMs: 820,
+        goodItemChance: 0.72,
+      },
+      {
+        name: "Level 3",
+        targetScore: 260,
+        startingHealth: 4,
+        fallSpeed: 180,
+        spawnIntervalMs: 760,
+        goodItemChance: 0.7,
+      },
+      {
+        name: "Level 4",
+        targetScore: 380,
+        startingHealth: 4,
+        fallSpeed: 205,
+        spawnIntervalMs: 700,
+        goodItemChance: 0.68,
+      },
+      {
+        name: "Level 5",
+        targetScore: 520,
+        startingHealth: 3,
+        fallSpeed: 235,
+        spawnIntervalMs: 640,
+        goodItemChance: 0.65,
+      },
+    ];
+
+    const GLOBAL_TUNING = {
+      laneCount: 3,
+      scorePerGood: 10,
+      healthLossBad: 1,
+      difficultyScale: 0.015,
+      minSpawnIntervalMs: 350,
+    };
+
+    // Elements
     const fieldWrapper = document.getElementById("field-wrapper");
     const basketEl = document.getElementById("basket");
     const scoreValEl = document.getElementById("scoreVal");
     const healthValEl = document.getElementById("healthVal");
+    const levelValEl = document.getElementById("levelVal");
+    const bestLevelValEl = document.getElementById("bestLevelVal");
     const statusTextEl = document.getElementById("status-text");
     const startBtn = document.getElementById("start-btn");
 
+    // State
     let laneWidthPx = 0;
-    let basketLane = 1;         // middle lane (0,1,2)
-    let items = [];             // { id, lane, y, type }
+    let basketLane = 1; // 0,1,2
+    let items = []; // { id, lane, y, type }
     let nextItemId = 1;
+
     let score = 0;
-    let health = TUNING.startingHealth;
+    let health = 0;
+
     let running = false;
     let lastTime = 0;
     let spawnTimer = 0;
@@ -323,66 +479,122 @@
 
     let leftHeld = false;
     let rightHeld = false;
-
-    // movement debounce so we don't slide continuously holding
     let moveCooldown = 0;
-    const MOVE_COOLDOWN = 0.12; // seconds
+    const MOVE_COOLDOWN = 0.12;
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
+    let currentLevelIndex = 0;
+    let bestLevelReached = 1;
+
+    // SFX — small beeps using Web Audio
+    let audioCtx = null;
+    function ensureAudio() {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
+      }
+    }
+
+    function playBeep(freq, duration, volume) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "square";
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioCtx.currentTime + duration
+      );
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playGoodCatch() {
+      ensureAudio();
+      playBeep(720, 0.08, 0.16);
+    }
+
+    function playBadCatch() {
+      ensureAudio();
+      playBeep(260, 0.09, 0.17);
+    }
+
+    function playLevelWin() {
+      ensureAudio();
+      playBeep(660, 0.08, 0.18);
+      setTimeout(() => playBeep(880, 0.08, 0.18), 90);
+    }
+
+    function playGameOver() {
+      ensureAudio();
+      playBeep(220, 0.1, 0.17);
+      setTimeout(() => playBeep(160, 0.12, 0.16), 110);
+    }
+
+    // Helpers
     function recalcLaneWidth() {
       const rect = fieldWrapper.getBoundingClientRect();
-      laneWidthPx = rect.width / TUNING.laneCount;
+      laneWidthPx = rect.width / GLOBAL_TUNING.laneCount;
     }
 
     function placeBasket() {
       recalcLaneWidth();
-      const x = basketLane * laneWidthPx + laneWidthPx / 2;
-      const offset = laneWidthPx / 2 - basketEl.offsetWidth / 2;
-      basketEl.style.transform = `translateX(${x - offset - laneWidthPx / 2}px)`;
+      const offset = basketEl.offsetWidth / 2;
+      const xCenter = basketLane * laneWidthPx + laneWidthPx / 2;
+      const translateX = xCenter - offset - (laneWidthPx / 2 - offset);
+      basketEl.style.transform = `translateX(${translateX}px)`;
+    }
+
+    function randomLane() {
+      return Math.floor(Math.random() * GLOBAL_TUNING.laneCount);
+    }
+
+    function randomItemType(levelCfg) {
+      return Math.random() < levelCfg.goodItemChance ? "good" : "bad";
+    }
+
+    function spawnItem(levelCfg) {
+      const lane = randomLane();
+      const type = randomItemType(levelCfg);
+      items.push({
+        id: nextItemId++,
+        lane,
+        y: -24,
+        type,
+      });
     }
 
     function resetRun() {
+      const lvl = LEVELS[currentLevelIndex];
       score = 0;
-      health = TUNING.startingHealth;
-      scoreValEl.textContent = score;
-      healthValEl.textContent = health;
+      health = lvl.startingHealth;
+      scoreValEl.textContent = String(score);
+      healthValEl.textContent = String(health);
+      levelValEl.textContent = String(currentLevelIndex + 1);
+      bestLevelValEl.textContent = String(bestLevelReached);
+
       basketLane = 1;
       items = [];
       nextItemId = 1;
       spawnTimer = 0;
       elapsedTotal = 0;
+      moveCooldown = 0;
+      leftHeld = rightHeld = false;
+
       placeBasket();
-      statusTextEl.textContent = "Catch the fall goodies. Dodge the junk.";
+      statusTextEl.textContent = TEXT.running;
     }
 
-    function randomLane() {
-      return Math.floor(Math.random() * TUNING.laneCount);
-    }
+    function updateItemPositions(dtSec, levelCfg) {
+      const rect = fieldWrapper.getBoundingClientRect();
+      const height = rect.height;
 
-    function randomItemType() {
-      return Math.random() < TUNING.goodItemChance ? "good" : "bad";
-    }
+      const speedFactor = 1 + elapsedTotal * GLOBAL_TUNING.difficultyScale;
+      const speed = levelCfg.fallSpeed * speedFactor;
 
-    function spawnItem() {
-      const lane = randomLane();
-      const type = randomItemType();
-      items.push({
-        id: nextItemId++,
-        lane,
-        y: -24,
-        type
-      });
-    }
-
-    function updateItemPositions(dtSec) {
-      // Difficulty scaling: speed up over time
-      const speedFactor = 1 + elapsedTotal * TUNING.difficultyScale;
-      const speed = TUNING.fallSpeed * speedFactor;
-      const height = fieldWrapper.getBoundingClientRect().height;
-
-      const basketTopY = height - 36; // near basket container
+      const basketTopY = height - 36;
       const basketCatchWindow = 18;
 
       const remaining = [];
@@ -390,24 +602,25 @@
       for (const item of items) {
         item.y += speed * dtSec;
 
-        // Check catch window
-        if (item.y >= basketTopY - basketCatchWindow && item.y <= basketTopY + basketCatchWindow) {
-          if (item.lane === basketLane) {
-            // Caught
-            if (item.type === "good") {
-              score += TUNING.scorePerGood;
-              scoreValEl.textContent = score;
-            } else {
-              health -= TUNING.healthLossBad;
-              healthValEl.textContent = Math.max(0, health);
-            }
-            continue; // remove this item
+        if (
+          item.y >= basketTopY - basketCatchWindow &&
+          item.y <= basketTopY + basketCatchWindow &&
+          item.lane === basketLane
+        ) {
+          if (item.type === "good") {
+            score += GLOBAL_TUNING.scorePerGood;
+            scoreValEl.textContent = String(score);
+            playGoodCatch();
+          } else {
+            health -= GLOBAL_TUNING.healthLossBad;
+            healthValEl.textContent = String(Math.max(0, health));
+            playBadCatch();
           }
+          continue;
         }
 
-        // Drop off bottom
         if (item.y > height + 32) {
-          continue; // remove
+          continue;
         }
 
         remaining.push(item);
@@ -417,24 +630,16 @@
     }
 
     function renderItems() {
-      // Remove old elements
-      const oldEls = fieldWrapper.querySelectorAll(".item");
-      oldEls.forEach(el => el.remove());
+      const old = fieldWrapper.querySelectorAll(".item");
+      old.forEach((el) => el.remove());
 
-      const height = fieldWrapper.getBoundingClientRect().height;
-      items.forEach(item => {
+      items.forEach((item) => {
         const el = document.createElement("div");
         el.className = "item " + item.type;
-        el.dataset.id = item.id;
-        el.style.left = (item.lane * laneWidthPx) + "px";
+        el.dataset.id = String(item.id);
+        el.style.left = item.lane * laneWidthPx + "px";
         el.style.top = item.y + "px";
-
-        if (item.type === "good") {
-          el.textContent = "🍂";
-        } else {
-          el.textContent = "🪨";
-        }
-
+        el.textContent = item.type === "good" ? "🍂" : "🪨";
         fieldWrapper.appendChild(el);
       });
     }
@@ -449,20 +654,32 @@
 
     function moveBasketRight() {
       if (!running) return;
-      if (basketLane < TUNING.laneCount - 1) {
+      if (basketLane < GLOBAL_TUNING.laneCount - 1) {
         basketLane++;
         placeBasket();
       }
     }
 
-    function gameOver() {
+    function levelComplete() {
       running = false;
-      statusTextEl.textContent = "Harvest over. Tap Start to try again.";
+      const levelNum = currentLevelIndex + 1;
+      if (levelNum > bestLevelReached) {
+        bestLevelReached = levelNum;
+        bestLevelValEl.textContent = String(bestLevelReached);
+      }
+      playLevelWin();
+      const isLast = currentLevelIndex === LEVELS.length - 1;
+      statusTextEl.textContent = TEXT.levelComplete(levelNum, isLast);
     }
 
-    // ============================================================
-    // MAIN LOOP
-    // ============================================================
+    function gameOver() {
+      running = false;
+      playGameOver();
+      const levelNum = currentLevelIndex + 1;
+      statusTextEl.textContent = TEXT.gameOver(levelNum);
+    }
+
+    // Main loop
     function loop(timestamp) {
       if (!running) return;
       if (!lastTime) lastTime = timestamp;
@@ -470,11 +687,12 @@
       const dtSec = dtMs / 1000;
       lastTime = timestamp;
 
+      const levelCfg = LEVELS[currentLevelIndex];
+
       elapsedTotal += dtSec;
       spawnTimer += dtMs;
       moveCooldown -= dtSec;
 
-      // Input movement
       if (moveCooldown <= 0) {
         if (leftHeld) {
           moveBasketLeft();
@@ -485,18 +703,24 @@
         }
       }
 
-      // Spawning
-      const dynamicSpawnInterval = Math.max(350, TUNING.spawnIntervalMs - elapsedTotal * 80);
+      const dynamicSpawnInterval = Math.max(
+        GLOBAL_TUNING.minSpawnIntervalMs,
+        levelCfg.spawnIntervalMs - elapsedTotal * 80
+      );
+
       if (spawnTimer >= dynamicSpawnInterval) {
-        spawnItem();
+        spawnItem(levelCfg);
         spawnTimer = 0;
       }
 
-      // Items
-      updateItemPositions(dtSec);
+      updateItemPositions(dtSec, levelCfg);
       renderItems();
 
-      // Health check
+      if (score >= levelCfg.targetScore) {
+        levelComplete();
+        return;
+      }
+
       if (health <= 0) {
         gameOver();
         return;
@@ -505,59 +729,71 @@
       requestAnimationFrame(loop);
     }
 
-    // ============================================================
-    // EVENTS
-    // ============================================================
+    // Events
     window.addEventListener("resize", () => {
       placeBasket();
       renderItems();
     });
 
-    document.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = true;
-      if (e.key === "ArrowRight" || e.key === "d") rightHeld = true;
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") leftHeld = true;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") rightHeld = true;
     });
 
-    document.addEventListener("keyup", e => {
-      if (e.key === "ArrowLeft" || e.key === "a") leftHeld = false;
-      if (e.key === "ArrowRight" || e.key === "d") rightHeld = false;
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") leftHeld = false;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") rightHeld = false;
     });
 
-    fieldWrapper.addEventListener("touchstart", e => {
-      const rect = fieldWrapper.getBoundingClientRect();
-      const x = e.changedTouches[0].clientX - rect.left;
-      const third = rect.width / 3;
-      if (x < third) {
-        leftHeld = true;
-        rightHeld = false;
-        moveBasketLeft();
-      } else if (x > 2 * third) {
-        rightHeld = true;
-        leftHeld = false;
-        moveBasketRight();
-      } else {
+    fieldWrapper.addEventListener(
+      "touchstart",
+      (e) => {
+        const rect = fieldWrapper.getBoundingClientRect();
+        const x = e.changedTouches[0].clientX - rect.left;
+        const third = rect.width / 3;
+        if (x < third) {
+          leftHeld = true;
+          rightHeld = false;
+          moveBasketLeft();
+        } else if (x > 2 * third) {
+          rightHeld = true;
+          leftHeld = false;
+          moveBasketRight();
+        } else {
+          leftHeld = rightHeld = false;
+        }
+      },
+      { passive: true }
+    );
+
+    fieldWrapper.addEventListener(
+      "touchend",
+      () => {
         leftHeld = rightHeld = false;
-      }
-    }, { passive: true });
-
-    fieldWrapper.addEventListener("touchend", () => {
-      leftHeld = rightHeld = false;
-    }, { passive: true });
+      },
+      { passive: true }
+    );
 
     startBtn.addEventListener("click", () => {
+      ensureAudio();
       running = true;
       lastTime = 0;
       resetRun();
       requestAnimationFrame(loop);
     });
 
-    // ============================================================
-    // INIT
-    // ============================================================
-    // Kick initial layout
+    // Initial layout
     setTimeout(() => {
       placeBasket();
+      statusTextEl.textContent = TEXT.idle(currentLevelIndex + 1);
     }, 0);
+
+    // 📝 BLOCK 5 — HUMAN NOTES
+    //
+    // [IDEAS]
+    // - Add seasonal skins (icons + lane tint) via a simple theme knob.
+    // - Add a “perfect harvest” bonus if no bad items are caught on a level.
+    // - Add an endless mode that unlocks after clearing Level 5.
   </script>
 </body>
 </html>
