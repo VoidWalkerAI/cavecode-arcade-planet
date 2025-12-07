@@ -2,22 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mind Chambers — Echo Sequence (ARC-MC-001)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mind Chambers — Echo Sequence · ARC-MC-001</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!--
+    CaveCode Arcade Planet — Mind Chambers Line
+    Pattern memory / Simon-style
+    Mobile-first unified shell (same family as Scarlet Crush / Haze Maze / Retro Quarter)
+  -->
 
   <style>
     :root {
-      --bg: #020617;
-      --panel: #0b1120;
-      --border: #1f2937;
-      --text-main: #e5e7eb;
-      --text-soft: #9ca3af;
-      --accent: #22c55e;
+      --cc-bg: #020617;
+      --cc-panel: #02081b;
+      --cc-panel-soft: #0b1120;
+      --cc-border: #1f2937;
+      --cc-accent: #22c55e;
+      --cc-accent-soft: #4ade80;
+      --cc-text-main: #e5e7eb;
+      --cc-text-soft: #9ca3af;
 
-      --pad-0: #f97316;
-      --pad-1: #22c55e;
-      --pad-2: #3b82f6;
-      --pad-3: #eab308;
+      --pad-radius: 1.1rem;
+      --pad-gap: 0.55rem;
     }
 
     * {
@@ -28,94 +34,224 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
       background: radial-gradient(circle at top, #111827 0, #020617 60%);
-      color: var(--text-main);
+      color: var(--cc-text-main);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    #game-shell {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0.75rem 1rem 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      align-items: center;
+      padding: 1.25rem 0.75rem 2.5rem;
     }
 
     header {
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.75rem;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid var(--border);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    header .sub {
-      margin-top: 0.15rem;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-    }
-
-    #main-row {
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, #020617, #031525);
+      border-radius: 999px;
+      border: 1px solid var(--cc-border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+      padding: 0.9rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.15rem;
     }
 
-    @media (min-width: 768px) {
-      #main-row {
-        flex-direction: row;
-        align-items: flex-start;
+    .title-line {
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .title-line span.code {
+      color: var(--cc-accent-soft);
+    }
+
+    .subtitle-line {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.15rem;
+    }
+
+    .subtitle-pill {
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--cc-text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    main {
+      width: 100%;
+      max-width: 960px;
+      margin-top: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel {
+      border-radius: 1.5rem;
+      border: 1px solid var(--cc-border);
+      background: radial-gradient(circle at top left, #02081b 0, #020617 55%);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.85);
+      padding: 1.1rem 1.1rem 1.4rem;
+    }
+
+    @media (min-width: 720px) {
+      .panel {
+        padding: 1.5rem 1.6rem 1.9rem;
       }
     }
 
-    #board-panel {
-      flex: 2;
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at top, #0b1120 0, #020617 70%);
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .tag {
+      padding: 0.2rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #101827;
+      background: #020617;
+      color: var(--cc-text-soft);
+    }
+
+    .tag.highlight {
+      border-color: var(--cc-accent-soft);
+      color: var(--cc-accent-soft);
+    }
+
+    .hud-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+      margin-bottom: 0.9rem;
+    }
+
+    @media (min-width: 640px) {
+      .hud-row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .stat-card {
+      border-radius: 0.9rem;
+      border: 1px solid #111827;
+      background: linear-gradient(145deg, #020617, #020b23);
+      padding: 0.55rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.8);
+      min-height: 2.4rem;
+    }
+
+    .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.6rem;
+      color: var(--cc-text-soft);
+    }
+
+    .stat-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .stat-sub {
+      font-size: 0.7rem;
+      color: var(--cc-text-soft);
+    }
+
+    .board-shell {
+      border-radius: 1.2rem;
+      border: 1px solid #111827;
+      background: radial-gradient(circle at top, #020617 0, #020617 55%);
       padding: 0.9rem;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      align-items: center;
     }
 
-    #pads-wrapper {
+    .board-header-line {
+      display: flex;
+      flex-direction: column;
+      gap: 0.22rem;
+      font-size: 0.8rem;
+      color: var(--cc-text-soft);
+    }
+
+    .board-title {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.72rem;
+      color: var(--cc-text-soft);
+    }
+
+    .board-subtitle {
+      font-size: 0.8rem;
+    }
+
+    .board-status {
+      font-size: 0.78rem;
+      color: var(--cc-accent-soft);
+    }
+
+    .field-shell {
+      border-radius: 1.1rem;
+      padding: 0.65rem;
+      background: radial-gradient(circle at top, #020b24 0, #020617 60%);
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+    }
+
+    .field-inner {
+      border-radius: 1rem;
+      border: 1px solid #020617;
+      background: #020617;
+      padding: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pads-grid {
       width: min(320px, 100%);
       aspect-ratio: 1 / 1;
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
-      gap: 0.6rem;
+      gap: var(--pad-gap);
     }
 
     .pad {
-      border-radius: 1rem;
+      border-radius: var(--pad-radius);
       position: relative;
       cursor: pointer;
       box-shadow:
         0 0 0 1px rgba(15, 23, 42, 0.9),
         0 10px 18px rgba(0, 0, 0, 0.7);
-      transition:
-        transform 0.08s ease-out,
+      transition: transform 0.08s ease-out,
         box-shadow 0.08s ease-out,
         filter 0.08s ease-out,
         opacity 0.15s ease-out;
     }
 
-    .pad[data-id="0"] { background: var(--pad-0); }
-    .pad[data-id="1"] { background: var(--pad-1); }
-    .pad[data-id="2"] { background: var(--pad-2); }
-    .pad[data-id="3"] { background: var(--pad-3); }
+    .pad[data-id="0"] { background: #f97316; }
+    .pad[data-id="1"] { background: #22c55e; }
+    .pad[data-id="2"] { background: #3b82f6; }
+    .pad[data-id="3"] { background: #eab308; }
 
     .pad::after {
       content: "";
@@ -141,246 +277,184 @@
       filter: grayscale(0.1);
     }
 
-    #status-text {
-      font-size: 0.85rem;
-      color: var(--text-soft);
-      text-align: center;
-      min-height: 1.2rem;
-    }
-
-    #hud-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.75rem;
-      width: 100%;
-      max-width: 320px;
-      flex-wrap: wrap;
-    }
-
-    #level-panel {
-      display: flex;
-      gap: 0.35rem;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      padding: 0.1rem 0.6rem;
-      font-size: 0.78rem;
-      background: rgba(15, 23, 42, 0.95);
-      display: inline-flex;
-      gap: 0.35rem;
-      align-items: center;
-      white-space: nowrap;
-    }
-
-    #start-btn {
-      font-size: 0.8rem;
-      padding: 0.3rem 0.8rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.4), rgba(15, 23, 42, 1));
-      color: var(--text-main);
-      cursor: pointer;
-    }
-
-    #start-btn:active {
-      transform: translateY(1px);
-    }
-
-    #info-panel {
-      flex: 1;
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.96);
-      padding: 0.75rem;
-      font-size: 0.8rem;
-      color: var(--text-soft);
+    .bottom-panel {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--cc-text-soft);
     }
 
-    #info-panel h2 {
+    .bottom-panel h2 {
       margin: 0;
-      font-size: 0.85rem;
-      letter-spacing: 0.08em;
+      font-size: 0.82rem;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--text-soft);
+      color: var(--cc-text-soft);
     }
 
-    #info-panel ul {
-      margin: 0.2rem 0 0;
+    .bottom-panel p {
+      margin: 0.1rem 0 0.4rem;
+    }
+
+    .bottom-panel ul {
+      margin: 0.1rem 0 0.4rem;
       padding-left: 1.1rem;
     }
 
-    #info-panel li {
-      margin-bottom: 0.18rem;
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.3rem;
     }
 
-    @media (max-width: 767px) {
-      #info-panel {
-        order: -1;
-      }
+    .btn {
+      border-radius: 999px;
+      padding: 0.45rem 0.95rem;
+      font-size: 0.8rem;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: var(--cc-text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .btn-primary {
+      border-color: var(--cc-accent-soft);
+      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.5), #020617);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .footer-line {
+      margin-top: 0.5rem;
+      font-size: 0.72rem;
+      color: var(--cc-text-soft);
+      text-align: center;
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
-  <div id="game-shell">
-    <header>
-      <h1>Mind Chambers — Echo Sequence · ARC-MC-001</h1>
-      <div class="sub">Watch the pattern. Remember it. Echo it back.</div>
-    </header>
-
-    <div id="main-row">
-      <section id="board-panel">
-        <div id="pads-wrapper">
-          <div class="pad" data-id="0"></div>
-          <div class="pad" data-id="1"></div>
-          <div class="pad" data-id="2"></div>
-          <div class="pad" data-id="3"></div>
-        </div>
-
-        <div id="hud-row">
-          <div id="level-panel">
-            <span class="pill">Level: <span id="levelVal">0</span></span>
-            <span class="pill">Best: <span id="bestVal">0</span></span>
-            <span class="pill">Tier: <span id="tierVal">1</span>/5</span>
-          </div>
-          <button id="start-btn">Start</button>
-        </div>
-
-        <div id="status-text">Press Start to begin.</div>
-      </section>
-
-      <aside id="info-panel">
-        <h2>How to Play</h2>
-        <p>Echo Sequence is a pattern memory game:</p>
-        <ul>
-          <li>Press <strong>Start</strong> to watch the pads flash.</li>
-          <li>Wait until it says <em>Your turn</em>.</li>
-          <li>Tap the pads back in the exact same order.</li>
-          <li>Each round adds one more step to the sequence.</li>
-        </ul>
-        <p>If you tap the wrong pad, the run ends, but your best level remains.</p>
-      </aside>
+  <header>
+    <div class="title-line">
+      MIND CHAMBERS — ECHO SEQUENCE · <span class="code">ARC-MC-001</span>
     </div>
-  </div>
+    <div class="subtitle-line">
+      <span class="subtitle-pill">CaveCode Arcade Planet</span>
+      <span class="subtitle-pill">Mind-Chambers Line</span>
+      <span class="subtitle-pill">Pattern Memory · Simon-Style</span>
+      <span class="subtitle-pill">Single-File Engine</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="tag-row">
+        <span class="tag highlight">Level Track</span>
+        <span class="tag">Pattern Memory</span>
+        <span class="tag">Sequence Growth</span>
+        <span class="tag">Mobile-First</span>
+        <span class="tag">CaveCode V1 Blocks</span>
+      </div>
+
+      <div class="hud-row">
+        <div class="stat-card">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" id="hud-level">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Best</div>
+          <div class="stat-value" id="hud-best">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sequence</div>
+          <div class="stat-value" id="hud-length">0</div>
+          <div class="stat-sub">steps</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tier</div>
+          <div class="stat-value" id="hud-tier">1</div>
+          <div class="stat-sub">1–5 difficulty band</div>
+        </div>
+      </div>
+
+      <div class="board-shell">
+        <div class="board-header-line">
+          <div class="board-title">Echo the sequence.</div>
+          <div class="board-subtitle">
+            Watch the pads flash in order, then tap them back the same way.
+          </div>
+          <div class="board-status" id="status-text">Press Start to begin.</div>
+        </div>
+
+        <div class="field-shell">
+          <div class="field-inner">
+            <div class="pads-grid">
+              <div class="pad" data-id="0"></div>
+              <div class="pad" data-id="1"></div>
+              <div class="pad" data-id="2"></div>
+              <div class="pad" data-id="3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="bottom-panel">
+        <h2>Controls & Rules</h2>
+        <p>Echo Sequence is a simple pattern memory run:</p>
+        <ul>
+          <li>Tap <strong>Start Run</strong> and watch the pads flash.</li>
+          <li>Wait for <em>Your turn</em>, then tap the pads in the same order.</li>
+          <li>Each correct round adds one more step to the pattern.</li>
+          <li>One wrong pad ends the run, but your best level stays.</li>
+        </ul>
+
+        <div class="button-row">
+          <button class="btn" id="btn-restart">↻ Restart</button>
+          <button class="btn btn-primary" id="btn-start">▶ Start Run</button>
+        </div>
+
+        <div class="footer-line">
+          Match clean echoes, ride the tiers, and light up the grid. Forged in CaveCode Arcade Planet · SageWire Syndicate.
+        </div>
+      </div>
+    </section>
+  </main>
 
   <script>
     // ============================================================
-    // 🎚️ TUNING (must match echo-sequence.cavecode)
+    // TUNING — Keep these in sync with echo-sequence.cavecode
     // ============================================================
     const TUNING = {
       padCount: 4,
       startLength: 1,
-      flashDurationMs: 550,  // base speed for Tier 1
-      stepDelayMs: 250,      // base delay for Tier 1
+      flashDurationMs: 550,
+      stepDelayMs: 250,
       inputFlashMs: 200,
-      maxLevel: 32           // soft cap; not enforced hard
+      maxLevel: 32 // soft cap for teaching demos
     };
-
-    // Difficulty tiers (for the 5-level feel)
-    // Level 1–4 => Tier 1, 5–8 => Tier 2, 9–12 => Tier 3, 13–16 => Tier 4, 17+ => Tier 5
-    const TIER_THRESHOLDS = [4, 8, 12, 16];
-    const TIER_SPEED_SCALE = [1.0, 0.9, 0.8, 0.7, 0.6];
-
-    // ============================================================
-    // SIMPLE AUDIO ENGINE (Web Audio, no external assets)
-    // ============================================================
-    const AudioEngine = (() => {
-      let ctx = null;
-      const PAD_FREQ = [392, 329.63, 261.63, 523.25]; // four pleasant tones
-
-      function getCtx() {
-        if (!ctx) {
-          const AC = window.AudioContext || window.webkitAudioContext;
-          if (!AC) return null;
-          ctx = new AC();
-        }
-        if (ctx.state === "suspended") {
-          ctx.resume();
-        }
-        return ctx;
-      }
-
-      function beep(frequency, duration = 0.18, type = "sine", gainValue = 0.25) {
-        const audioCtx = getCtx();
-        if (!audioCtx) return;
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = type;
-        osc.frequency.value = frequency;
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        const now = audioCtx.currentTime;
-        gain.gain.setValueAtTime(gainValue, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-        osc.start(now);
-        osc.stop(now + duration);
-      }
-
-      function padTone(idx) {
-        const freq = PAD_FREQ[idx % PAD_FREQ.length];
-        beep(freq);
-      }
-
-      function success() {
-        const audioCtx = getCtx();
-        if (!audioCtx) return;
-
-        const base = audioCtx.currentTime;
-        const freqs = [440, 520, 600];
-        freqs.forEach((f, i) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.frequency.value = f;
-          osc.type = "sine";
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-
-          const t = base + i * 0.08;
-          gain.gain.setValueAtTime(0.22, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-
-          osc.start(t);
-          osc.stop(t + 0.22);
-        });
-      }
-
-      function fail() {
-        beep(180, 0.45, "sawtooth", 0.35);
-      }
-
-      function resumeOnGesture() {
-        const audioCtx = getCtx();
-        if (!audioCtx) return;
-        if (audioCtx.state === "suspended") {
-          audioCtx.resume();
-        }
-      }
-
-      return { padTone, success, fail, resumeOnGesture };
-    })();
 
     // ============================================================
     // STATE
     // ============================================================
     const pads = Array.from(document.querySelectorAll(".pad"));
     const statusTextEl = document.getElementById("status-text");
-    const levelValEl = document.getElementById("levelVal");
-    const bestValEl = document.getElementById("bestVal");
-    const tierValEl = document.getElementById("tierVal");
-    const startBtn = document.getElementById("start-btn");
+    const hudLevelEl = document.getElementById("hud-level");
+    const hudBestEl = document.getElementById("hud-best");
+    const hudLengthEl = document.getElementById("hud-length");
+    const hudTierEl = document.getElementById("hud-tier");
+    const startBtn = document.getElementById("btn-start");
+    const restartBtn = document.getElementById("btn-restart");
 
     let sequence = [];
     let inputIndex = 0;
@@ -389,32 +463,50 @@
     let state = "IDLE"; // IDLE, SHOWING, INPUT, FAIL
     let showTimeouts = [];
 
+    // Audio context
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Simple tone per pad
+    const PAD_FREQUENCIES = [440, 554, 659, 784];
+
+    function playTone(freq, durationMs = 180, type = "sine", gain = 0.18) {
+      if (!audioCtx) return;
+      const ctx = audioCtx;
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gainNode.gain.value = gain;
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      const now = ctx.currentTime;
+      osc.start(now);
+      osc.stop(now + durationMs / 1000);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + durationMs / 1000);
+    }
+
+    function playPadSound(idx) {
+      playTone(PAD_FREQUENCIES[idx % PAD_FREQUENCIES.length], 190, "sine", 0.2);
+    }
+
+    function playSuccess() {
+      playTone(880, 140, "triangle", 0.22);
+      setTimeout(() => playTone(1175, 160, "triangle", 0.22), 90);
+    }
+
+    function playFail() {
+      playTone(196, 260, "sawtooth", 0.25);
+    }
+
     // ============================================================
     // HELPERS
     // ============================================================
-    function computeTier(currentLevel) {
-      if (currentLevel <= 0) return 1;
-      if (currentLevel <= TIER_THRESHOLDS[0]) return 1;
-      if (currentLevel <= TIER_THRESHOLDS[1]) return 2;
-      if (currentLevel <= TIER_THRESHOLDS[2]) return 3;
-      if (currentLevel <= TIER_THRESHOLDS[3]) return 4;
-      return 5;
-    }
-
-    function refreshTierDisplay() {
-      const tier = computeTier(level);
-      tierValEl.textContent = tier;
-    }
-
-    function effectiveSpeeds() {
-      const tier = computeTier(level);
-      const scale = TIER_SPEED_SCALE[tier - 1] || 1;
-      return {
-        flash: TUNING.flashDurationMs * scale,
-        step: TUNING.stepDelayMs * scale
-      };
-    }
-
     function setState(newState) {
       state = newState;
       if (state === "IDLE") {
@@ -450,29 +542,42 @@
       sequence = [];
       inputIndex = 0;
       level = 0;
-      levelValEl.textContent = level;
-      refreshTierDisplay();
-    }
-
-    // ============================================================
-    // GAME FLOW
-    // ============================================================
-    function startRun() {
-      AudioEngine.resumeOnGesture();
-      resetTimers();
-      clearSequence();
-      extendSequence(TUNING.startLength);
-      level = sequence.length;
-      levelValEl.textContent = level;
-      refreshTierDisplay();
-      setState("SHOWING");
-      showSequence();
+      updateHud();
     }
 
     function extendSequence(addCount) {
       for (let i = 0; i < addCount; i++) {
         sequence.push(randomPadIndex());
       }
+    }
+
+    function levelToTier(lv) {
+      if (lv <= 4) return 1;
+      if (lv <= 8) return 2;
+      if (lv <= 12) return 3;
+      if (lv <= 20) return 4;
+      return 5;
+    }
+
+    function updateHud() {
+      hudLevelEl.textContent = level;
+      hudBestEl.textContent = bestLevel;
+      hudLengthEl.textContent = sequence.length;
+      hudTierEl.textContent = levelToTier(Math.max(1, level || 1));
+    }
+
+    // ============================================================
+    // GAME FLOW
+    // ============================================================
+    function startRun() {
+      ensureAudio();
+      resetTimers();
+      clearSequence();
+      extendSequence(TUNING.startLength);
+      level = sequence.length;
+      updateHud();
+      setState("SHOWING");
+      showSequence();
     }
 
     function showSequence() {
@@ -482,29 +587,23 @@
 
       pads.forEach(p => p.classList.remove("active"));
 
-      const speeds = effectiveSpeeds();
-      const flashMs = speeds.flash;
-      const stepMs = speeds.step;
-
-      let totalDelay = 300; // small initial delay
+      let totalDelay = 320;
       sequence.forEach((padIndex) => {
         const onTime = totalDelay;
-        const offTime = totalDelay + flashMs;
+        const offTime = totalDelay + TUNING.flashDurationMs;
 
-        // turn on
         showTimeouts.push(setTimeout(() => {
           flashPadOn(padIndex);
+          playPadSound(padIndex);
         }, onTime));
 
-        // turn off
         showTimeouts.push(setTimeout(() => {
           flashPadOff(padIndex);
         }, offTime));
 
-        totalDelay = offTime + stepMs;
+        totalDelay = offTime + TUNING.stepDelayMs;
       });
 
-      // After full sequence: enter INPUT state
       showTimeouts.push(setTimeout(() => {
         setState("INPUT");
       }, totalDelay + 20));
@@ -513,7 +612,6 @@
     function flashPadOn(idx) {
       const pad = pads[idx];
       pad.classList.add("active");
-      AudioEngine.padTone(idx);
     }
 
     function flashPadOff(idx) {
@@ -524,22 +622,20 @@
     function flashPadInput(idx) {
       const pad = pads[idx];
       pad.classList.add("active");
-      AudioEngine.padTone(idx);
+      playPadSound(idx);
       setTimeout(() => pad.classList.remove("active"), TUNING.inputFlashMs);
     }
 
     function handlePadInput(idx) {
       if (state !== "INPUT") return;
-
       flashPadInput(idx);
 
       const expected = sequence[inputIndex];
       if (idx !== expected) {
-        // Fail
         bestLevel = Math.max(bestLevel, level);
-        bestValEl.textContent = bestLevel;
-        AudioEngine.fail();
+        playFail();
         setState("FAIL");
+        updateHud();
         return;
       }
 
@@ -547,14 +643,13 @@
       if (inputIndex >= sequence.length) {
         // Round success
         bestLevel = Math.max(bestLevel, level);
-        bestValEl.textContent = bestLevel;
-        AudioEngine.success();
+        playSuccess();
 
-        // Extend sequence
-        sequence.push(randomPadIndex());
+        if (sequence.length < TUNING.maxLevel) {
+          sequence.push(randomPadIndex());
+        }
         level = sequence.length;
-        levelValEl.textContent = level;
-        refreshTierDisplay();
+        updateHud();
 
         setState("SHOWING");
         resetTimers();
@@ -563,23 +658,23 @@
     }
 
     // ============================================================
-    // EVENT WIRING
+    // EVENTS
     // ============================================================
     pads.forEach(pad => {
-      pad.addEventListener("click", () => {
-        const idx = parseInt(pad.dataset.id, 10);
-        handlePadInput(idx);
-      });
-
-      pad.addEventListener("touchstart", e => {
+      const idx = parseInt(pad.dataset.id, 10);
+      pad.addEventListener("click", () => handlePadInput(idx));
+      pad.addEventListener("touchstart", (e) => {
         e.preventDefault();
-        const idx = parseInt(pad.dataset.id, 10);
         handlePadInput(idx);
       }, { passive: false });
     });
 
     startBtn.addEventListener("click", () => {
-      if (state === "SHOWING") return; // ignore during playback
+      if (state === "SHOWING") return;
+      startRun();
+    });
+
+    restartBtn.addEventListener("click", () => {
       startRun();
     });
 
@@ -587,7 +682,7 @@
     // INITIAL
     // ============================================================
     setState("IDLE");
-    refreshTierDisplay();
+    updateHud();
   </script>
 </body>
 </html>
