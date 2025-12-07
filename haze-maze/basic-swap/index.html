@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Haze Maze — Basic Swap · ARC-HM-001</title>
+  <title>Mind Chambers — Focus Relay · ARC-MC-002</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!--
     BLOCK 1 — SHELL & BRAND (LOCKED)
-    CaveCode Arcade Planet · Haze-Maze Line
+    CaveCode Arcade Planet · Mind-Chambers Line
   -->
   <style>
     :root {
@@ -15,14 +15,14 @@
       --cc-panel: #02081b;
       --cc-panel-soft: #0b1120;
       --cc-border: #1f2937;
-      --cc-accent: #fb923c;
-      --cc-accent-soft: #fed7aa;
+      --cc-accent: #38bdf8;
+      --cc-accent-soft: #bae6fd;
       --cc-text-main: #e5e7eb;
       --cc-text-soft: #9ca3af;
       --cc-badge-bg: #0b1120;
-      --tile-radius: 0.45rem;
-      --tile-gap: 0.24rem;
-      --tile-size: min(7.2vw, 2.6rem);
+      --node-radius: 999px;
+      --node-gap: 0.4rem;
+      --node-size: min(18vw, 4.4rem);
     }
 
     * {
@@ -93,9 +93,9 @@
     }
 
     .subtitle-pill.level-pill {
-      border-color: rgba(248, 113, 113, 0.9);
-      background: radial-gradient(circle at top left, #7f1d1d 0, #020617 65%);
-      color: #fecaca;
+      border-color: rgba(59, 130, 246, 0.95);
+      background: radial-gradient(circle at top left, #0f172a 0, #020617 65%);
+      color: #bfdbfe;
       font-weight: 600;
     }
 
@@ -144,7 +144,7 @@
     }
 
     .tag.primary {
-      border-color: rgba(251, 146, 60, 0.96);
+      border-color: rgba(59, 130, 246, 0.96);
       color: var(--cc-accent-soft);
     }
 
@@ -206,77 +206,62 @@
 
     #board-grid {
       display: grid;
-      grid-template-columns: repeat(8, var(--tile-size));
-      grid-template-rows: repeat(8, var(--tile-size));
-      gap: var(--tile-gap);
+      grid-template-columns: repeat(3, var(--node-size));
+      grid-template-rows: repeat(3, var(--node-size));
+      gap: var(--node-gap);
       touch-action: manipulation;
     }
 
-    .tile {
-      width: var(--tile-size);
-      height: var(--tile-size);
-      border-radius: var(--tile-radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .node {
+      width: var(--node-size);
+      height: var(--node-size);
+      border-radius: var(--node-radius);
+      background: #020617;
+      border: 1px solid #1f2937;
       box-shadow:
         0 0 0 1px rgba(15, 23, 42, 0.9),
-        0 8px 14px rgba(0, 0, 0, 0.6);
+        0 8px 14px rgba(0, 0, 0, 0.65);
       cursor: pointer;
       user-select: none;
+      position: relative;
+      overflow: hidden;
       transition:
         transform 0.12s ease-out,
         box-shadow 0.12s ease-out,
+        background 0.12s ease-out,
         filter 0.12s ease-out;
-      font-size: 0.95rem;
+      font-size: 1.3rem;
       font-weight: 700;
-      color: rgba(15, 23, 42, 0.96);
-      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+      color: #e5e7eb;
     }
 
-    .tile.normal {
-      color: transparent; /* pure color blocks */
-      text-shadow: none;
+    .node-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .tile.selected {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow:
-        0 0 0 1px rgba(248, 250, 252, 0.8),
-        0 12px 20px rgba(0, 0, 0, 0.85);
-      filter: brightness(1.08);
+    .node.idle {
+      background: radial-gradient(circle at top, #020617 0, #020617 70%);
     }
 
-    .tile:active {
-      transform: translateY(1px) scale(0.96);
-      box-shadow:
-        0 0 0 1px rgba(15, 23, 42, 0.9),
-        0 5px 10px rgba(0, 0, 0, 0.7);
+    .node.reveal {
+      background: radial-gradient(circle at top, #1d4ed8 0, #0f172a 75%);
+      filter: brightness(1.15);
     }
 
-    .color-0 { background: #f97316; }
-    .color-1 { background: #22c55e; }
-    .color-2 { background: #3b82f6; }
-    .color-3 { background: #a855f7; }
-    .color-4 { background: #f43f5e; }
-
-    .special-bomb {
-      background: radial-gradient(circle at top left, #facc15 0, #f97316 42%, #c2410c 100%);
-      color: #111827;
+    .node.correct {
+      background: radial-gradient(circle at top, #16a34a 0, #052e16 75%);
     }
 
-    .special-row {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #022c22;
+    .node.wrong {
+      background: radial-gradient(circle at top, #b91c1c 0, #450a0a 75%);
     }
 
-    .special-col {
-      background: linear-gradient(135deg, #3b82f6, #0ea5e9);
-      color: #0b1120;
-    }
-
-    .tile-label {
-      pointer-events: none;
+    .node:hover {
+      filter: brightness(1.09);
     }
 
     #board-footer {
@@ -359,7 +344,7 @@
       border: 1px solid rgba(248, 250, 252, 0.05);
       box-shadow:
         0 24px 70px rgba(0, 0, 0, 0.9),
-        0 0 0 1px rgba(30, 64, 175, 0.45);
+        0 0 0 1px rgba(59, 130, 246, 0.45);
       padding: 1.1rem 1.2rem 1.25rem;
       display: flex;
       flex-direction: column;
@@ -403,6 +388,21 @@
       border-color: rgba(248, 113, 113, 0.9);
       color: #fecaca;
     }
+
+    @media (max-width: 720px) {
+      #status-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0 0.35rem;
+      }
+      #panel {
+        padding-inline: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -410,12 +410,12 @@
     <header>
       <div>
         <div class="title-line">
-          HAZE MAZE &mdash; BASIC SWAP &middot; ARC-HM-001
+          MIND CHAMBERS &mdash; FOCUS RELAY &middot; ARC-MC-002
         </div>
         <div class="subtitle-line">
           <span class="subtitle-pill">CaveCode Arcade Planet</span>
-          <span class="subtitle-pill">Haze-Maze Line</span>
-          <span class="subtitle-pill">Match-3 Grid</span>
+          <span class="subtitle-pill">Mind-Chambers Line</span>
+          <span class="subtitle-pill">Memory Grid</span>
         </div>
       </div>
       <div class="subtitle-line">
@@ -428,69 +428,69 @@
     <main>
       <section id="panel">
         <div id="tag-row">
-          <span class="tag primary">Level Track</span>
-          <span class="tag">8×8 Board</span>
-          <span class="tag">Special Tiles</span>
-          <span class="tag">Score Multipliers</span>
+          <span class="tag primary">Focus Track</span>
+          <span class="tag">3×3 Board</span>
+          <span class="tag">Pattern Growth</span>
+          <span class="tag">Time Pressure</span>
           <span class="tag">Single-File Engine</span>
           <span class="tag">CaveCode v1 Blocks</span>
         </div>
 
         <div id="prompt">
-          Tap two adjacent tiles to swap. Make a match of 3+ to clear.
-          Fill the score bar before you run out of moves.
+          Watch the numbers flash on the grid. When they vanish, tap the nodes back
+          in order: 1, 2, 3… Clear enough rounds to climb the Focus tiers.
         </div>
 
         <div id="status-row">
           <div class="stat-card">
-            <div class="stat-label">Level</div>
-            <div class="stat-value" id="level-display">1</div>
+            <div class="stat-label">Tier</div>
+            <div class="stat-value" id="tier-display">1</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Score</div>
-            <div class="stat-value" id="score-display">0</div>
+            <div class="stat-label">Round</div>
+            <div class="stat-value" id="round-display">0</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Target</div>
-            <div class="stat-value" id="target-display">0</div>
+            <div class="stat-label">Best Streak</div>
+            <div class="stat-value" id="best-display">0</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Moves Left</div>
-            <div class="stat-value" id="moves-display">0</div>
+            <div class="stat-label">Pattern Size</div>
+            <div class="stat-value" id="pattern-display">3</div>
           </div>
         </div>
 
         <div id="status-row" style="margin-top:0.2rem;">
           <div class="stat-card">
-            <div class="stat-label">Last Clear</div>
-            <div class="stat-value" id="last-clear-display">0</div>
+            <div class="stat-label">Reveal Time</div>
+            <div class="stat-value" id="reveal-display">1.6s</div>
           </div>
-            <div class="stat-card">
-              <div class="stat-label">Chain</div>
-              <div class="stat-value" id="chain-display">x1.0</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Best Level</div>
-              <div class="stat-value" id="best-display">1</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Specials Seen</div>
-              <div class="stat-value" id="specials-display">0</div>
-            </div>
+          <div class="stat-card">
+            <div class="stat-label">Chain Depth</div>
+            <div class="stat-value" id="chain-display">x1.0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Last Miss</div>
+            <div class="stat-value bad" id="last-miss-display">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">State</div>
+            <div class="stat-value" id="state-display">Idle</div>
+          </div>
         </div>
 
         <div id="board-shell">
-          <div id="board-grid" aria-label="Match-3 board"></div>
+          <div id="board-grid" aria-label="Focus grid"></div>
           <div id="board-footer">
-            Match 4+ tiles to forge special pieces:
-            rows, columns, and blast gems. Chains boost your score.
+            Higher tiers mean longer patterns and shorter reveal windows. When you fail,
+            the full correct path reappears so you can see what your mind dropped.
           </div>
         </div>
 
         <div id="buttons-row">
           <button class="cc-btn" id="restart-btn" type="button">
             <span class="icon">↻</span>
-            <span>Restart Level</span>
+            <span>Restart Run</span>
           </button>
         </div>
       </section>
@@ -501,20 +501,20 @@
     </footer>
   </div>
 
-  <!-- Small win / lose modal -->
+  <!-- Small run summary modal -->
   <div id="modal-backdrop" aria-hidden="true">
     <div id="modal-panel">
-      <div id="modal-title">Level Complete</div>
+      <div id="modal-title">Run Complete</div>
       <div id="modal-body">
-        You reached the target score. Ready for the next maze?
+        Your focus run has ended. Want to try again and push for a deeper tier?
       </div>
       <div id="modal-actions">
         <button class="cc-btn" id="modal-secondary" type="button">
-          <span>Replay</span>
+          <span>Close</span>
         </button>
         <button class="cc-btn" id="modal-primary" type="button">
-          <span class="icon">▶</span>
-          <span>Next Level</span>
+          <span class="icon">↻</span>
+          <span>Restart Run</span>
         </button>
       </div>
     </div>
@@ -523,539 +523,375 @@
   <!--
     BLOCK 2 — CORE LOOP SUMMARY (READABLE MAP)
 
-    - Board is always 8×8.
-    - Player selects tile A then adjacent tile B.
-    - Swap, check for matches:
-       * 3+ in a row or column = clear.
-       * 4+ forges a special tile (row / col / bomb).
-    - Clearing tiles:
-       * Grants score with a chain multiplier.
-       * Drops tiles down, new tiles fall in.
-       * May create cascades → higher multiplier.
-    - Level ends:
-       * Win: score >= target before moves hit 0.
-       * Loss: moves hit 0 and score < target.
+    - Board is always 3×3.
+    - Game picks a pattern of nodes and labels them 1..N.
+    - REVEAL:
+        * All nodes in the pattern show their numbers for a short time.
+    - INPUT:
+        * Player taps nodes in ascending order (1, 2, 3...).
+        * Correct tap → node flashes green, advance expected index.
+        * Wrong tap → node flashes red, run ends; re-show full correct pattern.
+    - After a completed round:
+        * Pattern grows by +1 node.
+        * Reveal time shrinks a bit (down to a floor).
+        * Round counter increments, Tier may increase.
+    - Run ends:
+        * On first wrong tap.
+        * Modal shows your round + tier; restart puts you back at Tier 1.
   -->
 
   <script>
     // BLOCK 3 — LEVEL TRACK & RULES (GAME TUNING)
 
-    const LEVELS = [
-      { target: 800, moves: 18 },
-      { target: 1700, moves: 22 },
-      { target: 2600, moves: 26 },
-      { target: 3600, moves: 28 },
-      { target: 4800, moves: 30 },
-    ];
+    const FOCUS_TUNING = {
+      gridSize: 3,              // 3×3
+      startPatternLength: 3,    // first pattern size
+      patternIncrement: 1,      // +1 per completed round
+      revealTimeMs: 1600,       // starting reveal window (ms)
+      minRevealTimeMs: 700,     // shortest reveal window
+      revealTimeDecayMs: 100,   // shrink per completed round (ms)
+      chainStep: 0.25           // just for display: “depth” of correct streaks
+    };
 
-    const ROWS = 8;
-    const COLS = 8;
-    const COLORS = [0, 1, 2, 3, 4]; // indexes → CSS color classes
-
-    const BASE_POINTS_PER_TILE = 10;
-    const EXTRA_MATCH_BONUS = 4; // per tile beyond 3
-    const CHAIN_STEP = 0.25;     // each cascade adds +0.25 to multiplier
+    function patternLengthToTier(len) {
+      if (len <= 4) return 1;
+      if (len <= 6) return 2;
+      if (len <= 8) return 3;
+      if (len <= 10) return 4;
+      return 5;
+    }
 
     // BLOCK 4 — ENGINE & BOARD (GAME LOGIC)
 
-    let board = [];
-    let selected = null;
-    let score = 0;
-    let lastClearCount = 0;
-    let chainDepth = 0;
-    let currentLevelIndex = 0;
-    let movesLeft = 0;
-    let bestLevel = 1;
-    let specialsSeen = 0;
-
     const boardEl = document.getElementById("board-grid");
-    const levelDisplay = document.getElementById("level-display");
-    const scoreDisplay = document.getElementById("score-display");
-    const targetDisplay = document.getElementById("target-display");
-    const movesDisplay = document.getElementById("moves-display");
-    const lastClearDisplay = document.getElementById("last-clear-display");
-    const chainDisplay = document.getElementById("chain-display");
+    const tierDisplay = document.getElementById("tier-display");
+    const roundDisplay = document.getElementById("round-display");
     const bestDisplay = document.getElementById("best-display");
-    const specialsDisplay = document.getElementById("specials-display");
+    const patternDisplay = document.getElementById("pattern-display");
+    const revealDisplay = document.getElementById("reveal-display");
+    const chainDisplay = document.getElementById("chain-display");
+    const lastMissDisplay = document.getElementById("last-miss-display");
+    const stateDisplay = document.getElementById("state-display");
     const headerLevelPill = document.getElementById("header-level-pill");
 
+    const restartBtn = document.getElementById("restart-btn");
     const modalBackdrop = document.getElementById("modal-backdrop");
     const modalTitle = document.getElementById("modal-title");
     const modalBody = document.getElementById("modal-body");
     const modalPrimary = document.getElementById("modal-primary");
     const modalSecondary = document.getElementById("modal-secondary");
 
-    const restartBtn = document.getElementById("restart-btn");
+    const STATE = {
+      IDLE: "Idle",
+      REVEAL: "Reveal",
+      INPUT: "Input",
+      GAME_OVER: "Game Over",
+    };
 
-    // SFX — tiny beeps using Web Audio (kept minimal)
+    let currentState = STATE.IDLE;
+
+    let nodes = [];          // { el, inner }
+    let pattern = [];        // array of node indexes 0..8
+    let patternLength = FOCUS_TUNING.startPatternLength;
+    let revealTimeMs = FOCUS_TUNING.revealTimeMs;
+    let expectedIndex = 1;   // what number we’re waiting for
+    let chainDepth = 0;
+    let roundsCompleted = 0;
+    let bestRounds = 0;
+    let lastMiss = "—";
+    let revealTimeoutId = null;
+
+    // Web Audio
     let audioCtx = null;
+
     function ensureAudio() {
       if (!audioCtx) {
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (Ctx) audioCtx = new Ctx();
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
       }
     }
 
-    function playBeep(freq = 880, duration = 0.08, volume = 0.16) {
+    function playTone(freq, duration = 0.14, type = "sine", gain = 0.2) {
       if (!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = "square";
+      const ctx = audioCtx;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+
+      osc.type = type;
       osc.frequency.value = freq;
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioCtx.currentTime + duration
-      );
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
+      g.gain.value = gain;
+      osc.connect(g);
+      g.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+      osc.start(now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      osc.stop(now + duration);
     }
 
-    function playMatchSound(chain) {
-      ensureAudio();
-      const base = 660;
-      playBeep(base + chain * 80, 0.11, 0.17);
+    function playRevealChime() {
+      playTone(660, 0.13, "sine", 0.22);
     }
 
-    function playFailSound() {
-      ensureAudio();
-      playBeep(260, 0.09, 0.15);
+    function playCorrectBlip() {
+      playTone(880, 0.09, "triangle", 0.22);
     }
 
-    function playLevelWinSound() {
-      ensureAudio();
-      playBeep(660, 0.07, 0.18);
-      setTimeout(() => playBeep(880, 0.08, 0.18), 80);
+    function playFailSting() {
+      playTone(280, 0.16, "sawtooth", 0.22);
+      setTimeout(() => playTone(180, 0.14, "sawtooth", 0.22), 120);
     }
 
-    function playLevelFailSound() {
-      ensureAudio();
-      playBeep(200, 0.1, 0.17);
-      setTimeout(() => playBeep(160, 0.12, 0.16), 110);
+    function playRestartChime() {
+      playTone(520, 0.11, "square", 0.18);
     }
 
-    function makeTile() {
-      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-      return { color, special: null };
-    }
-
-    function createBoard() {
-      board = [];
-      for (let r = 0; r < ROWS; r++) {
-        const row = [];
-        for (let c = 0; c < COLS; c++) {
-          row.push(makeTile());
-        }
-        board.push(row);
+    function setState(next, note) {
+      currentState = next;
+      stateDisplay.textContent = next;
+      if (note) {
+        modalBody.dataset.note = note;
       }
     }
 
-    function renderBoard() {
+    function buildBoard() {
       boardEl.innerHTML = "";
+      nodes = [];
 
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const tile = board[r][c];
-          const div = document.createElement("div");
-          div.className = "tile";
-          div.dataset.row = r;
-          div.dataset.col = c;
+      const total = FOCUS_TUNING.gridSize * FOCUS_TUNING.gridSize;
 
-          if (tile) {
-            let classes = ["tile", "color-" + tile.color];
-            let label = "";
-            if (tile.special === "bomb") {
-              classes.push("special-bomb");
-              label = "★";
-            } else if (tile.special === "row") {
-              classes.push("special-row");
-              label = "⇄";
-            } else if (tile.special === "col") {
-              classes.push("special-col");
-              label = "⇅";
-            } else {
-              classes.push("normal");
-            }
-            div.className = classes.join(" ");
+      for (let i = 0; i < total; i++) {
+        const node = document.createElement("button");
+        node.className = "node idle";
+        node.type = "button";
+        node.dataset.index = String(i);
 
-            if (
-              selected &&
-              selected.r === r &&
-              selected.c === c
-            ) {
-              div.classList.add("selected");
-            }
+        const inner = document.createElement("div");
+        inner.className = "node-inner";
+        inner.textContent = "";
+        node.appendChild(inner);
 
-            if (label) {
-              const span = document.createElement("span");
-              span.className = "tile-label";
-              span.textContent = label;
-              div.appendChild(span);
-            }
-          }
+        node.addEventListener("click", () => onNodeClick(i));
 
-          boardEl.appendChild(div);
-        }
+        boardEl.appendChild(node);
+        nodes.push({ el: node, inner });
+      }
+    }
+
+    function clearNodeStyles() {
+      nodes.forEach(n => {
+        n.el.classList.remove("reveal", "correct", "wrong");
+        n.el.classList.add("idle");
+        n.inner.textContent = "";
+      });
+    }
+
+    function generatePattern() {
+      const total = nodes.length;
+      const indices = Array.from({ length: total }, (_, i) => i);
+
+      // Fisher–Yates shuffle
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
       }
 
-      levelDisplay.textContent = currentLevelIndex + 1;
-      headerLevelPill.textContent = "LEVEL " + (currentLevelIndex + 1);
-      scoreDisplay.textContent = score;
-      targetDisplay.textContent = LEVELS[currentLevelIndex].target;
-      movesDisplay.textContent = movesLeft;
-      lastClearDisplay.textContent = lastClearCount;
-      chainDisplay.textContent = "x" + (1 + chainDepth * CHAIN_STEP).toFixed(1);
-      bestDisplay.textContent = bestLevel;
-      specialsDisplay.textContent = specialsSeen;
+      pattern = indices.slice(0, patternLength);
     }
 
-    function inBounds(r, c) {
-      return r >= 0 && r < ROWS && c >= 0 && c < COLS;
+    function updateHud() {
+      const tier = patternLengthToTier(patternLength);
+      tierDisplay.textContent = String(tier);
+      headerLevelPill.textContent = "TIER " + tier;
+
+      roundDisplay.textContent = String(roundsCompleted);
+      bestDisplay.textContent = String(bestRounds);
+
+      patternDisplay.textContent = String(patternLength);
+      revealDisplay.textContent = (revealTimeMs / 1000).toFixed(1) + "s";
+
+      const mult = 1 + chainDepth * FOCUS_TUNING.chainStep;
+      chainDisplay.textContent = "x" + mult.toFixed(1);
+
+      lastMissDisplay.textContent = lastMiss;
     }
 
-    function areAdjacent(a, b) {
-      return (
-        Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1
-      );
-    }
+    function revealPattern() {
+      setState(STATE.REVEAL);
+      chainDepth = 0;
+      expectedIndex = 1;
+      clearNodeStyles();
+      updateHud();
+      playRevealChime();
 
-    // Find groups of 3+ same-color tiles. Returns array of groups.
-    function findMatches() {
-      const groups = [];
+      pattern.forEach((nodeIndex, i) => {
+        const n = nodes[nodeIndex];
+        n.el.classList.remove("idle");
+        n.el.classList.add("reveal");
+        n.inner.textContent = String(i + 1);
+      });
 
-      // rows
-      for (let r = 0; r < ROWS; r++) {
-        let runColor = null;
-        let runStart = 0;
-        let runLen = 0;
-        for (let c = 0; c <= COLS; c++) {
-          let tile = c < COLS ? board[r][c] : null;
-          let color = tile ? tile.color : null;
-
-          if (color !== null && color === runColor) {
-            runLen++;
-          } else {
-            if (runColor !== null && runLen >= 3) {
-              const cells = [];
-              for (let k = 0; k < runLen; k++) {
-                cells.push({ r, c: runStart + k });
-              }
-              groups.push({
-                cells,
-                length: runLen,
-                orientation: "row",
-              });
-            }
-            runColor = color;
-            runLen = tile ? 1 : 0;
-            runStart = c;
-          }
-        }
+      if (revealTimeoutId) {
+        clearTimeout(revealTimeoutId);
       }
 
-      // columns
-      for (let c = 0; c < COLS; c++) {
-        let runColor = null;
-        let runStart = 0;
-        let runLen = 0;
-        for (let r = 0; r <= ROWS; r++) {
-          let tile = r < ROWS ? board[r][c] : null;
-          let color = tile ? tile.color : null;
-
-          if (color !== null && color === runColor) {
-            runLen++;
-          } else {
-            if (runColor !== null && runLen >= 3) {
-              const cells = [];
-              for (let k = 0; k < runLen; k++) {
-                cells.push({ r: runStart + k, c });
-              }
-              groups.push({
-                cells,
-                length: runLen,
-                orientation: "col",
-              });
-            }
-            runColor = color;
-            runLen = tile ? 1 : 0;
-            runStart = r;
-          }
-        }
-      }
-
-      return groups;
+      revealTimeoutId = setTimeout(() => {
+        clearNodeStyles();
+        setState(STATE.INPUT);
+      }, revealTimeMs);
     }
 
-    function resolveMatchesAndScore() {
-      const groups = findMatches();
-      if (!groups.length) return false;
+    function startRun() {
+      if (revealTimeoutId) {
+        clearTimeout(revealTimeoutId);
+        revealTimeoutId = null;
+      }
 
-      const toClear = Array.from({ length: ROWS }, () =>
-        Array(COLS).fill(false)
+      roundsCompleted = 0;
+      patternLength = FOCUS_TUNING.startPatternLength;
+      revealTimeMs = FOCUS_TUNING.revealTimeMs;
+      lastMiss = "—";
+      chainDepth = 0;
+
+      generatePattern();
+      updateHud();
+      revealPattern();
+    }
+
+    function nextRound() {
+      roundsCompleted++;
+      if (roundsCompleted > bestRounds) {
+        bestRounds = roundsCompleted;
+      }
+
+      patternLength += FOCUS_TUNING.patternIncrement;
+      revealTimeMs = Math.max(
+        FOCUS_TUNING.minRevealTimeMs,
+        revealTimeMs - FOCUS_TUNING.revealTimeDecayMs
       );
 
-      const spawnSpecials = []; // { col, type }
+      generatePattern();
+      updateHud();
 
-      let totalTilesCleared = 0;
-      let gained = 0;
-      const multiplier = 1 + chainDepth * CHAIN_STEP;
-
-      // Initial marking + scoring + special spawn
-      for (const g of groups) {
-        const len = g.length;
-        totalTilesCleared += len;
-
-        for (const cell of g.cells) {
-          toClear[cell.r][cell.c] = true;
+      setTimeout(() => {
+        if (currentState !== STATE.GAME_OVER) {
+          revealPattern();
         }
+      }, 650);
+    }
 
-        let base = len * BASE_POINTS_PER_TILE;
-        if (len > 3) {
-          base += (len - 3) * EXTRA_MATCH_BONUS * BASE_POINTS_PER_TILE;
+    function showCorrectPattern() {
+      pattern.forEach((nodeIndex, i) => {
+        const n = nodes[nodeIndex];
+        if (!n.el.classList.contains("wrong")) {
+          n.el.classList.remove("idle");
+          n.el.classList.add("reveal");
+          n.inner.textContent = String(i + 1);
         }
-        gained += Math.round(base * multiplier);
+      });
+    }
 
-        if (len >= 4) {
-          const midIndex = Math.floor(g.cells.length / 2);
-          const anchor = g.cells[midIndex];
-          const type =
-            len >= 5
-              ? "bomb"
-              : g.orientation === "row"
-              ? "row"
-              : "col";
-          spawnSpecials.push({ col: anchor.c, type });
-        }
-      }
-
-      // Existing specials in cleared tiles explode farther
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (!toClear[r][c] || !board[r][c]) continue;
-          const special = board[r][c].special;
-          if (!special) continue;
-
-          if (special === "bomb") {
-            for (let dr = -1; dr <= 1; dr++) {
-              for (let dc = -1; dc <= 1; dc++) {
-                const nr = r + dr;
-                const nc = c + dc;
-                if (inBounds(nr, nc)) {
-                  toClear[nr][nc] = true;
-                }
-              }
-            }
-          } else if (special === "row") {
-            for (let nc = 0; nc < COLS; nc++) {
-              toClear[r][nc] = true;
-            }
-          } else if (special === "col") {
-            for (let nr = 0; nr < ROWS; nr++) {
-              toClear[nr][c] = true;
-            }
-          }
-        }
-      }
-
-      // Clear+drop
-      for (let c = 0; c < COLS; c++) {
-        let writeRow = ROWS - 1;
-        for (let r = ROWS - 1; r >= 0; r--) {
-          if (!toClear[r][c]) {
-            board[writeRow][c] = board[r][c];
-            writeRow--;
-          }
-        }
-        while (writeRow >= 0) {
-          board[writeRow][c] = makeTile();
-          writeRow--;
-        }
-      }
-
-      // Place specials after gravity
-      for (const spec of spawnSpecials) {
-        let placed = false;
-        for (let r = ROWS - 1; r >= 0; r--) {
-          if (board[r][spec.col]) {
-            board[r][spec.col].special = spec.type;
-            specialsSeen++;
-            placed = true;
-            break;
-          }
-        }
-        if (!placed && board[ROWS - 1][spec.col]) {
-          board[ROWS - 1][spec.col].special = spec.type;
-          specialsSeen++;
-        }
-      }
-
-      score += gained;
-      lastClearCount = totalTilesCleared;
+    function handleCorrectTap(nodeIndex) {
+      const n = nodes[nodeIndex];
+      n.el.classList.remove("idle");
+      n.el.classList.add("correct");
+      playCorrectBlip();
 
       chainDepth++;
-      playMatchSound(chainDepth);
+      updateHud();
 
-      return true;
+      expectedIndex++;
+
+      if (expectedIndex > patternLength) {
+        // full pattern cleared
+        nextRound();
+      }
     }
 
-    function swapTiles(a, b) {
-      const tmp = board[a.r][a.c];
-      board[a.r][a.c] = board[b.r][b.c];
-      board[b.r][b.c] = tmp;
+    function handleWrongTap(nodeIndex) {
+      const n = nodes[nodeIndex];
+      n.el.classList.remove("idle");
+      n.el.classList.add("wrong");
+      playFailSting();
+
+      lastMiss = "Step " + expectedIndex;
+      updateHud();
+
+      setState(STATE.GAME_OVER);
+      showCorrectPattern();
+      openRunModal();
     }
 
-    function handleTileClick(evt) {
-      const target = evt.target.closest(".tile");
-      if (!target) return;
+    function onNodeClick(idx) {
+      if (currentState !== STATE.INPUT) return;
 
       ensureAudio();
 
-      const r = Number(target.dataset.row);
-      const c = Number(target.dataset.col);
-
-      if (selected && selected.r === r && selected.c === c) {
-        selected = null;
-        renderBoard();
-        return;
-      }
-
-      if (!selected) {
-        selected = { r, c };
-        renderBoard();
-        return;
-      }
-
-      // second tile
-      const second = { r, c };
-      if (!areAdjacent(selected, second)) {
-        selected = { r, c };
-        renderBoard();
-        return;
-      }
-
-      // Attempt swap
-      swapTiles(selected, second);
-      movesLeft--;
-      chainDepth = 0; // reset chain for this move
-
-      if (!resolveMatchesAndScore()) {
-        // no match — undo
-        swapTiles(selected, second);
-        playFailSound();
+      const expectedNodeIndex = pattern[expectedIndex - 1];
+      if (idx === expectedNodeIndex) {
+        handleCorrectTap(idx);
       } else {
-        // cascades
-        while (resolveMatchesAndScore()) {
-          // keep resolving; chainDepth already steps inside
-        }
-      }
-
-      selected = null;
-      renderBoard();
-      checkLevelEnd();
-    }
-
-    function checkLevelEnd() {
-      const target = LEVELS[currentLevelIndex].target;
-      if (score >= target) {
-        if (currentLevelIndex + 1 > bestLevel - 1) {
-          bestLevel = currentLevelIndex + 1;
-        }
-        playLevelWinSound();
-        showModal(true);
-      } else if (movesLeft <= 0) {
-        playLevelFailSound();
-        showModal(false);
+        handleWrongTap(idx);
       }
     }
 
-    function showModal(didWin) {
+    function openRunModal() {
+      modalTitle.textContent = "Run Complete";
+      modalBody.innerHTML =
+        "You reached Round <strong>" +
+        roundsCompleted +
+        "</strong> at Tier <strong>" +
+        patternLengthToTier(patternLength) +
+        "</strong>.<br/>" +
+        "Restart and see if you can push deeper into the chambers.";
       modalBackdrop.classList.add("show");
       modalBackdrop.setAttribute("aria-hidden", "false");
-
-      if (didWin) {
-        modalTitle.textContent = "Level Complete";
-        modalBody.innerHTML =
-          "You reached the target score for this maze.<br/>" +
-          "Step into the next chamber?";
-        modalPrimary.style.display = "inline-flex";
-        modalPrimary.querySelector("span:nth-child(2)").textContent =
-          currentLevelIndex + 1 < LEVELS.length
-            ? "Next Level"
-            : "Replay Final";
-        modalPrimary.dataset.action = "next";
-        modalSecondary.querySelector("span").textContent = "Replay";
-        modalSecondary.dataset.action = "replay";
-      } else {
-        modalTitle.textContent = "Maze Failed";
-        modalBody.innerHTML =
-          "You ran out of moves before reaching the target.<br/>" +
-          "Try this level again?";
-        modalPrimary.style.display = "none";
-        modalSecondary.querySelector("span").textContent = "Try Again";
-        modalSecondary.dataset.action = "replay";
-      }
     }
 
-    function hideModal() {
+    function closeRunModal() {
       modalBackdrop.classList.remove("show");
       modalBackdrop.setAttribute("aria-hidden", "true");
     }
 
     // BLOCK 5 — BOOTSTRAP & EVENT WIRING
 
-    function startLevel(index) {
-      currentLevelIndex = index;
-      const lvl = LEVELS[currentLevelIndex];
-      score = 0;
-      lastClearCount = 0;
-      chainDepth = 0;
-      movesLeft = lvl.moves;
-      createBoard();
-
-      // Avoid accidental ready-made matches on first draw by re-roll pass or two.
-      for (let i = 0; i < 2; i++) {
-        if (findMatches().length) {
-          createBoard();
-        } else {
-          break;
-        }
-      }
-
-      renderBoard();
-    }
-
-    boardEl.addEventListener("click", handleTileClick);
+    boardEl.addEventListener("click", (evt) => {
+      const node = evt.target.closest(".node");
+      if (!node) return;
+      const idx = Number(node.dataset.index);
+      onNodeClick(idx);
+    });
 
     restartBtn.addEventListener("click", () => {
       ensureAudio();
-      startLevel(currentLevelIndex);
+      playRestartChime();
+      setState(STATE.IDLE);
+      closeRunModal();
+      startRun();
     });
 
     modalPrimary.addEventListener("click", () => {
       ensureAudio();
-      hideModal();
-      const nextIndex =
-        currentLevelIndex + 1 < LEVELS.length ? currentLevelIndex + 1 : currentLevelIndex;
-      startLevel(nextIndex);
+      playRestartChime();
+      closeRunModal();
+      setState(STATE.IDLE);
+      startRun();
     });
 
     modalSecondary.addEventListener("click", () => {
       ensureAudio();
-      hideModal();
-      startLevel(currentLevelIndex);
+      closeRunModal();
     });
 
-    // Click outside modal → just hide (no state change)
     modalBackdrop.addEventListener("click", (evt) => {
       if (evt.target === modalBackdrop) {
-        hideModal();
+        closeRunModal();
       }
     });
 
     // Kick off
-    startLevel(0);
+    buildBoard();
+    updateHud();
   </script>
 </body>
 </html>
