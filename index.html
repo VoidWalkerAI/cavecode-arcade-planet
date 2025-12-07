@@ -2,17 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CaveCode Arcade Planet</title>
+  <title>SageWire Arcade Planet — CaveCode Index</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!--
+    //////////////////////////////////////////////////////////////
+    // 🪨 BLOCK 1 — IDENTITY (LOCKED)
+    //////////////////////////////////////////////////////////////
+    TITLE: SageWire Arcade Planet — Master Index
+    VERSION: 1.0
+    ID: ARCADE-INDEX-001
+    AUTHOR: SageWire Syndicate · Ash (Forge) & Massive (Flamekeeper)
+    PURPOSE: Mobile-first, public-facing index of all Arcade Planet cabinets.
+    AUDIENCE: Players, tinkerers, and engines reading CaveCode.
+    NOTES: This file lives at /arcade/index.html in the repo.
+  -->
+
+  <!--
+    //////////////////////////////////////////////////////////////
+    // 🎚️ BLOCK 2 — TUNING KNOBS (HUMAN-EDITABLE)
+    //////////////////////////////////////////////////////////////
+    layout_max_width: 1100px
+    cards_per_row_desktop: 3
+    accent_color_main: #fb923c
+    accent_color_cold: #38bdf8
+    accent_color_grass: #22c55e
+    show_category_badges: true
+  -->
+
+  <!--
+    //////////////////////////////////////////////////////////////
+    // 🌐 BLOCK 3 — PUBLIC TEXT (HEADERS / COPY)
+    //////////////////////////////////////////////////////////////
+    hero_title: "SageWire Arcade Planet"
+    hero_subtitle: "A public, CaveCode-powered game hall · Tap a cabinet to play."
+    hero_tagline: "Every cabinet is a blueprint — read it, remix it, rebuild it."
+
+    group_buckeye_bash_label:   "Buckeye Bash — Seasonal Throws"
+    group_cavern_run_label:     "Cavern-Run — Endless Lanes"
+    group_ember_adventures_label:"Ember Adventures — Micro-RPG Trails"
+    group_haze_maze_label:      "Haze-Maze — Pattern & Swap"
+    group_mind_chambers_label:  "Mind-Chambers — Focus & Echo"
+    group_retro_quarter_label:  "Retro-Quarter — Pixel Classics"
+    group_scarlet_crush_label:  "Scarlet-Crush — Linear Stackers"
+    group_pasture_run_label:    "Pasture-Run — HerdMate Specials"
+  -->
+
   <style>
     :root {
       --bg: #020617;
-      --panel: #0b1120;
+      --panel: #020617;
       --border: #1f2937;
-      --accent: #f97316;
       --text-main: #e5e7eb;
       --text-soft: #9ca3af;
-      --chip: #111827;
+      --accent: #fb923c;
+      --accent-soft: #fed7aa;
+      --accent-cold: #38bdf8;
+      --accent-grass: #22c55e;
     }
 
     * {
@@ -28,296 +74,663 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 1.25rem 0.75rem 2.5rem;
+      align-items: stretch;
+    }
+
+    #shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0.75rem 1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
 
     header {
-      max-width: 960px;
-      width: 100%;
-      text-align: center;
-      margin-bottom: 1.25rem;
+      padding: 0.7rem 0.9rem;
+      border-radius: 0.9rem;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
     }
 
     header h1 {
       margin: 0;
-      font-size: 1.4rem;
-      letter-spacing: 0.08em;
+      font-size: 1.25rem;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
     }
 
-    header p {
-      margin: 0.4rem 0 0;
-      font-size: 0.9rem;
+    header .sub {
+      margin-top: 0.25rem;
+      font-size: 0.86rem;
       color: var(--text-soft);
     }
 
-    #grid {
-      max-width: 960px;
-      width: 100%;
+    header .tagline {
+      margin-top: 0.15rem;
+      font-size: 0.78rem;
+      color: var(--accent-soft);
+    }
+
+    .hero-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .hero-pill {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 0.15rem 0.6rem;
+      background: rgba(15, 23, 42, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    section.category {
+      border-radius: 0.9rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #020617 0, #020617 70%);
+      padding: 0.7rem 0.8rem 0.9rem;
+      box-shadow:
+        0 16px 32px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(15, 23, 42, 0.8);
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .category-title {
+      font-size: 0.88rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+
+    .category-tag {
+      font-size: 0.7rem;
+      color: var(--accent-soft);
+      opacity: 0.8;
+    }
+
+    .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 0.9rem;
-      margin-top: 0.75rem;
+      grid-template-columns: 1fr;
+      gap: 0.55rem;
+    }
+
+    @media (min-width: 640px) {
+      .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 960px) {
+      .card-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
 
     .card {
-      background: var(--panel);
-      border-radius: 0.85rem;
-      border: 1px solid var(--border);
-      padding: 0.75rem 0.9rem 0.9rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.65);
-      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out,
-                  border-color 0.1s ease-out, background 0.1s ease-out;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border-radius: 0.8rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 1), #020617 75%);
+      padding: 0.55rem 0.65rem 0.6rem;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.8);
+      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, border-color 0.12s ease-out;
     }
 
     .card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.9);
-      border-color: rgba(249, 115, 22, 0.6);
-      background: #020617;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+      border-color: rgba(251, 146, 60, 0.8);
     }
 
-    .card a {
-      color: inherit;
-      text-decoration: none;
-      display: block;
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.25rem;
     }
 
     .card-title {
-      font-size: 0.98rem;
-      font-weight: 600;
+      font-size: 0.88rem;
       display: flex;
-      justify-content: space-between;
-      gap: 0.4rem;
+      flex-direction: column;
+      gap: 0.05rem;
     }
 
-    .card-tag {
+    .card-title span.label {
+      font-weight: 500;
+    }
+
+    .card-title span.id {
       font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: var(--accent);
-      opacity: 0.9;
-      white-space: nowrap;
-    }
-
-    .card-sub {
-      font-size: 0.82rem;
       color: var(--text-soft);
     }
 
+    .card-sub {
+      margin-top: 0.15rem;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      min-height: 2.2em;
+      line-height: 1.35;
+    }
+
     .chips {
+      margin-top: 0.3rem;
       display: flex;
       flex-wrap: wrap;
       gap: 0.25rem;
-      margin-top: 0.2rem;
     }
 
     .chip {
       font-size: 0.7rem;
-      padding: 0.12rem 0.5rem;
+      padding: 0.08rem 0.45rem;
       border-radius: 999px;
-      background: var(--chip);
-      border: 1px solid #1f2937;
+      border: 1px solid rgba(148, 163, 184, 0.6);
       color: var(--text-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .chip.hot {
+      border-color: rgba(251, 146, 60, 0.9);
+      color: var(--accent-soft);
+    }
+
+    .chip.cold {
+      border-color: rgba(56, 189, 248, 0.9);
+      color: var(--accent-cold);
+    }
+
+    .chip.grass {
+      border-color: rgba(34, 197, 94, 0.9);
+      color: var(--accent-grass);
+    }
+
+    .thumb {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .thumb svg {
+      width: 22px;
+      height: 22px;
     }
 
     footer {
-      margin-top: 1.5rem;
-      font-size: 0.75rem;
+      margin-top: 0.5rem;
+      padding-top: 0.4rem;
+      border-top: 1px solid rgba(30, 64, 175, 0.7);
+      font-size: 0.72rem;
       color: var(--text-soft);
       text-align: center;
-      opacity: 0.85;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>CaveCode · Arcade Planet</h1>
-    <p>Tap a cabinet to play. All games are single-file HTML engines forged with CaveCode.</p>
-  </header>
+  <div id="shell">
+    <header>
+      <h1>SageWire Arcade Planet</h1>
+      <div class="sub">A public, CaveCode-powered game hall · Tap a cabinet to play.</div>
+      <div class="tagline">Every cabinet is a blueprint — read it, remix it, rebuild it.</div>
+      <div class="hero-row">
+        <span class="hero-pill">🪨 CaveCode v1.1 spine</span>
+        <span class="hero-pill">🎮 Games in minutes · engines in hours</span>
+        <span class="hero-pill">🌐 All HTML + CaveCode · GitHub visible</span>
+      </div>
+    </header>
 
-  <section id="grid">
+    <main>
+      <!-- ==========================
+           BUCKEYE BASH
+      =========================== -->
+      <section class="category" id="buckeye-bash">
+        <div class="category-header">
+          <div class="category-title">Buckeye Bash — Seasonal Throws</div>
+          <div class="category-tag">Farm & harvest-themed arcade one-shots.</div>
+        </div>
 
-    <!-- Haze-Maze -->
-    <article class="card">
-      <a href="haze-maze/basic-swap/">
-        <div class="card-title">
-          <span>Basic Swap Match-3</span>
-          <span class="card-tag">Haze-Maze · ARC-HM-001</span>
+        <div class="card-grid">
+          <!-- Harvest Catch -->
+          <a class="card" href="buckeye-bash/harvest-catch/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.4">
+                  <circle cx="12" cy="8" r="4" fill="#fb923c" stroke="none" />
+                  <path d="M5 20c1.5-3 3.8-4.5 7-4.5s5.5 1.5 7 4.5" stroke="#fed7aa" stroke-linecap="round"/>
+                  <path d="M7 10.5c-1.2.6-2 1.7-2.5 3.4" stroke="#92400e" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Harvest Catch</span>
+                <span class="id">Buckeye Bash · ARC-BB-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Slide your basket between lanes. Catch the good, dodge the junk, ride the harvest ramp.
+            </div>
+            <div class="chips">
+              <span class="chip hot">Lane Dodge</span>
+              <span class="chip">Mobile-first</span>
+              <span class="chip">CaveCode · HTML</span>
+            </div>
+          </a>
         </div>
-        <div class="card-sub">
-          Swap neighboring tiles to line up 3+ of a kind and clear the board.
-        </div>
-        <div class="chips">
-          <span class="chip">Match-3</span>
-          <span class="chip">Puzzle</span>
-        </div>
-      </a>
-    </article>
+      </section>
 
-    <!-- Scarlet-Crush -->
-    <article class="card">
-      <a href="scarlet-crush/lane-stacker/">
-        <div class="card-title">
-          <span>Lane Stacker</span>
-          <span class="card-tag">Scarlet-Crush · ARC-SC-001</span>
+      <!-- ==========================
+           CAVERN-RUN
+      =========================== -->
+      <section class="category" id="cavern-run">
+        <div class="category-header">
+          <div class="category-title">Cavern-Run — Endless Lanes</div>
+          <div class="category-tag">Fast-twitch runners and dodgers.</div>
         </div>
-        <div class="card-sub">
-          Drop colored blocks into lanes and align rows to clear them before the stack overflows.
-        </div>
-        <div class="chips">
-          <span class="chip">Falling Blocks</span>
-          <span class="chip">Puzzle</span>
-        </div>
-      </a>
-    </article>
 
-    <!-- Retro-Quarter: Pixel Paddle -->
-    <article class="card">
-      <a href="retro-quarter/pixel-paddle/">
-        <div class="card-title">
-          <span>Pixel Paddle</span>
-          <span class="card-tag">Retro-Quarter · ARC-RQ-001</span>
-        </div>
-        <div class="card-sub">
-          Classic paddle-and-ball action. Keep the ball alive and clear the bricks.
-        </div>
-        <div class="chips">
-          <span class="chip">Arcade</span>
-          <span class="chip">Paddle</span>
-        </div>
-      </a>
-    </article>
+        <div class="card-grid">
+          <!-- Bastion Runner -->
+          <a class="card" href="cavern-run/bastion-runner/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.6">
+                  <path d="M5 20V7l7-3 7 3v13l-7 3-7-3z" />
+                  <path d="M9 12h6" stroke-linecap="round" />
+                  <path d="M9 15h3" stroke-linecap="round" />
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Bastion Runner</span>
+                <span class="id">Cavern-Run · ARC-CR-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Sprint the fortress corridors, threading gaps and dodging falling hazards for as long as you can.
+            </div>
+            <div class="chips">
+              <span class="chip cold">Runner</span>
+              <span class="chip">Keyboard / touch</span>
+              <span class="chip">High score</span>
+            </div>
+          </a>
 
-    <!-- Retro-Quarter: Starfield Dodger -->
-    <article class="card">
-      <a href="retro-quarter/starfield-dodger/">
-        <div class="card-title">
-          <span>Starfield Dodger</span>
-          <span class="card-tag">Retro-Quarter · ARC-RQ-002</span>
+          <!-- Ceiling Breaker -->
+          <a class="card" href="cavern-run/ceiling-breaker/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.6">
+                  <path d="M4 5h16" stroke-linecap="round"/>
+                  <path d="M8 21l4-10 4 10" />
+                  <path d="M10 13h4" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Ceiling Breaker</span>
+                <span class="id">Cavern-Run · ARC-CR-002</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Time your moves to slip between falling slabs and punch upward through the cavern ceiling.
+            </div>
+            <div class="chips">
+              <span class="chip cold">Timing</span>
+              <span class="chip">Arcade</span>
+              <span class="chip">One more try</span>
+            </div>
+          </a>
         </div>
-        <div class="card-sub">
-          Slide your ship left and right to dodge falling asteroids in an endless starfield.
-        </div>
-        <div class="chips">
-          <span class="chip">Endless</span>
-          <span class="chip">Dodger</span>
-        </div>
-      </a>
-    </article>
+      </section>
 
-    <!-- Ember-Adventures -->
-    <article class="card">
-      <a href="ember-adventures/ember-trail/">
-        <div class="card-title">
-          <span>Ember Trail</span>
-          <span class="card-tag">Ember-Adventures · ARC-EA-001</span>
+      <!-- ==========================
+           EMBER ADVENTURES
+      =========================== -->
+      <section class="category" id="ember-adventures">
+        <div class="category-header">
+          <div class="category-title">Ember Adventures — Micro-RPG Trails</div>
+          <div class="category-tag">Tiny mythic stories with stats and fate.</div>
         </div>
-        <div class="card-sub">
-          Tiny grid-based micro-RPG: move, explore, and survive a short ember-lit trek.
-        </div>
-        <div class="chips">
-          <span class="chip">Micro-RPG</span>
-          <span class="chip">Adventure</span>
-        </div>
-      </a>
-    </article>
 
-    <!-- Cavern-Run: Bastion Runner -->
-    <article class="card">
-      <a href="cavern-run/bastion-runner/">
-        <div class="card-title">
-          <span>Bastion Runner</span>
-          <span class="card-tag">Cavern-Run · ARC-CR-001</span>
-        </div>
-        <div class="card-sub">
-          Side-view endless runner. Jump over hazards as the cavern floor races by.
-        </div>
-        <div class="chips">
-          <span class="chip">Endless Runner</span>
-          <span class="chip">Side-View</span>
-        </div>
-      </a>
-    </article>
+        <div class="card-grid">
+          <!-- Ember Trail -->
+          <a class="card" href="ember-adventures/ember-trail/">
+            <div class="card-header">
+              <span class="thumb">
+                <!-- ember coin -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.4">
+                  <circle cx="12" cy="12" r="8" fill="#111827" />
+                  <path d="M12 6c1.5 1.5 2.2 3 2.2 4.5 0 1.8-1.1 3.3-2.9 3.9" stroke-linecap="round"/>
+                  <path d="M10 18c1.4-.6 2.4-1.5 3.1-2.7" stroke-linecap="round"/>
+                  <circle cx="12" cy="12" r="8.5" stroke="#f97316" />
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Ember Trail: Crossroads</span>
+                <span class="id">Ember Adventures · ARC-EA-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              A quiet first walk from camp to crossroads. Health, bravery, and caution shape how the fire remembers you.
+            </div>
+            <div class="chips">
+              <span class="chip hot">Micro-RPG</span>
+              <span class="chip">Stats UI</span>
+              <span class="chip">Homeric flavor</span>
+            </div>
+          </a>
 
-    <!-- Cavern-Run: Ceiling Breaker -->
-    <article class="card">
-      <a href="cavern-run/ceiling-breaker/">
-        <div class="card-title">
-          <span>Ceiling Breaker</span>
-          <span class="card-tag">Cavern-Run · ARC-CR-002</span>
+          <!-- Frostwake Run -->
+          <a class="card" href="ember-adventures/frostwake-run/">
+            <div class="card-header">
+              <span class="thumb">
+                <!-- frost + ember -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.4">
+                  <path d="M12 3v18" stroke-linecap="round"/>
+                  <path d="M7 6l10 12" stroke-linecap="round"/>
+                  <path d="M17 6L7 18" stroke-linecap="round"/>
+                  <circle cx="12" cy="12" r="3" fill="#fb923c" stroke="#f97316" />
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Frostwake Run</span>
+                <span class="id">Ember Adventures · ARC-EA-002</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Carry a warm, unknown object along a frozen trail while unseen footsteps learn your stride.
+            </div>
+            <div class="chips">
+              <span class="chip hot">Horror</span>
+              <span class="chip cold">Hidden rolls</span>
+              <span class="chip">Audio hooks</span>
+            </div>
+          </a>
         </div>
-        <div class="card-sub">
-          Vertical ascender. Leap from ledge to ledge as the darkness rises below.
-        </div>
-        <div class="chips">
-          <span class="chip">Ascender</span>
-          <span class="chip">Platformer</span>
-        </div>
-      </a>
-    </article>
+      </section>
 
-    <!-- Mind-Chambers: Echo Sequence -->
-    <article class="card">
-      <a href="mind-chambers/echo-sequence/">
-        <div class="card-title">
-          <span>Echo Sequence</span>
-          <span class="card-tag">Mind-Chambers · ARC-MC-001</span>
+      <!-- ==========================
+           HAZE-MAZE
+      =========================== -->
+      <section class="category" id="haze-maze">
+        <div class="category-header">
+          <div class="category-title">Haze-Maze — Pattern & Swap</div>
+          <div class="category-tag">Simple puzzle bones for future generators.</div>
         </div>
-        <div class="card-sub">
-          Watch a light sequence, then repeat it back. Each round adds one more beat.
-        </div>
-        <div class="chips">
-          <span class="chip">Memory</span>
-          <span class="chip">Pattern</span>
-        </div>
-      </a>
-    </article>
 
-    <!-- Mind-Chambers: Focus Relay -->
-    <article class="card">
-      <a href="mind-chambers/focus-relay/">
-        <div class="card-title">
-          <span>Focus Relay</span>
-          <span class="card-tag">Mind-Chambers · ARC-MC-002</span>
+        <div class="card-grid">
+          <!-- Basic Swap -->
+          <a class="card" href="haze-maze/basic-swap/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.6">
+                  <rect x="4" y="4" width="7" height="7" rx="1.5"/>
+                  <rect x="13" y="13" width="7" height="7" rx="1.5"/>
+                  <path d="M9 8l6 0M9 8L6 11M9 8L6 5" stroke-linecap="round" />
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Basic Swap</span>
+                <span class="id">Haze-Maze · ARC-HM-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Minimal tile-swapping core. Built as a teaching spine for future match-style puzzles.
+            </div>
+            <div class="chips">
+              <span class="chip">Puzzle core</span>
+              <span class="chip">Teaching card</span>
+            </div>
+          </a>
         </div>
-        <div class="card-sub">
-          Numbers flash across a grid. Memorize the order and tap the nodes back in sequence.
-        </div>
-        <div class="chips">
-          <span class="chip">Memory</span>
-          <span class="chip">Focus</span>
-        </div>
-      </a>
-    </article>
+      </section>
 
-    <!-- Buckeye-Bash -->
-    <article class="card">
-      <a href="buckeye-bash/harvest-catch/">
-        <div class="card-title">
-          <span>Harvest Catch</span>
-          <span class="card-tag">Buckeye-Bash · ARC-BB-001</span>
+      <!-- ==========================
+           MIND-CHAMBERS
+      =========================== -->
+      <section class="category" id="mind-chambers">
+        <div class="category-header">
+          <div class="category-title">Mind-Chambers — Focus & Echo</div>
+          <div class="category-tag">Pattern, rhythm, and attention training.</div>
         </div>
-        <div class="card-sub">
-          Slide your basket to catch falling harvest icons and keep the streak alive.
-        </div>
-        <div class="chips">
-          <span class="chip">Arcade</span>
-          <span class="chip">Catch</span>
-        </div>
-      </a>
-    </article>
 
-  </section>
+        <div class="card-grid">
+          <!-- Echo Sequence -->
+          <a class="card" href="mind-chambers/echo-sequence/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5">
+                  <circle cx="9" cy="12" r="2.2" />
+                  <path d="M5 8a7 7 0 0 1 0 8" stroke-linecap="round"/>
+                  <path d="M13 7a8 8 0 0 1 0 10" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Echo Sequence</span>
+                <span class="id">Mind-Chambers · ARC-MC-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Watch the pattern, repeat the pulse, and see how long your focus can keep the echo alive.
+            </div>
+            <div class="chips">
+              <span class="chip">Memory</span>
+              <span class="chip">Pattern</span>
+            </div>
+          </a>
 
-  <footer>
-    Forge line v1 · CaveCode Arcade Planet · All games are single-file HTML engines.
-  </footer>
+          <!-- Focus Relay -->
+          <a class="card" href="mind-chambers/focus-relay/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="2.3" />
+                  <path d="M4 12h4M16 12h4" stroke-linecap="round"/>
+                  <path d="M6 7l2 2M6 17l2-2M16 9l2-2M16 15l2 2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Focus Relay</span>
+                <span class="id">Mind-Chambers · ARC-MC-002</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Move a single charge through changing nodes without letting your attention slip.
+            </div>
+            <div class="chips">
+              <span class="chip">Focus drill</span>
+              <span class="chip">Light puzzle</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ==========================
+           RETRO-QUARTER
+      =========================== -->
+      <section class="category" id="retro-quarter">
+        <div class="category-header">
+          <div class="category-title">Retro-Quarter — Pixel Classics</div>
+          <div class="category-tag">Tiny nods to cabinet days.</div>
+        </div>
+
+        <div class="card-grid">
+          <!-- Pixel Paddle -->
+          <a class="card" href="retro-quarter/pixel-paddle/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.6">
+                  <rect x="5" y="18" width="14" height="2" rx="1" />
+                  <circle cx="10" cy="8" r="1.4" fill="#fb923c" stroke="none"/>
+                  <path d="M10 9.5v5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Pixel Paddle</span>
+                <span class="id">Retro-Quarter · ARC-RQ-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Classic paddle-and-ball warmup. Tight, simple, and perfect for tinkering with physics knobs.
+            </div>
+            <div class="chips">
+              <span class="chip">Retro</span>
+              <span class="chip">Physics</span>
+            </div>
+          </a>
+
+          <!-- Starfield Dodger -->
+          <a class="card" href="retro-quarter/starfield-dodger/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.4">
+                  <circle cx="7" cy="7" r="1.4" />
+                  <circle cx="17" cy="10" r="1.2" />
+                  <circle cx="11" cy="16" r="1" />
+                  <path d="M4 20l4-3 4 2 5-4 3 1" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Starfield Dodger</span>
+                <span class="id">Retro-Quarter · ARC-RQ-002</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Glide through a simple starfield, weaving between hazards in a tight little space lane.
+            </div>
+            <div class="chips">
+              <span class="chip cold">Space</span>
+              <span class="chip">Endless</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ==========================
+           SCARLET-CRUSH
+      =========================== -->
+      <section class="category" id="scarlet-crush">
+        <div class="category-header">
+          <div class="category-title">Scarlet-Crush — Linear Stackers</div>
+          <div class="category-tag">Rhythm, risk, and falling lines.</div>
+        </div>
+
+        <div class="card-grid">
+          <!-- Lane Stacker -->
+          <a class="card" href="scarlet-crush/lane-stacker/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f97373" stroke-width="1.6">
+                  <rect x="4" y="16" width="4" height="4" />
+                  <rect x="10" y="12" width="4" height="8" />
+                  <rect x="16" y="8" width="4" height="12" />
+                  <path d="M4 10h4M10 6h4M16 4h4" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Lane Stacker</span>
+                <span class="id">Scarlet-Crush · ARC-SC-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Stack rising columns in time, chasing perfect alignment before the board overflows.
+            </div>
+            <div class="chips">
+              <span class="chip">Stacker</span>
+              <span class="chip">Rhythm</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ==========================
+           PASTURE-RUN — HERDMATE SPECIALS
+      =========================== -->
+      <section class="category" id="pasture-run">
+        <div class="category-header">
+          <div class="category-title">Pasture-Run — HerdMate Specials</div>
+          <div class="category-tag">Ranch-born prototypes and field-run experiments.</div>
+        </div>
+
+        <div class="card-grid">
+          <!-- Pasture Runner -->
+          <a class="card" href="pasture-runner/">
+            <div class="card-header">
+              <span class="thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5">
+                  <path d="M3 18c2-3 4.5-4.5 9-4.5s7 1.5 9 4.5" stroke-linecap="round"/>
+                  <path d="M7 11c.5-2.5 2.2-4 5-4 2.7 0 4.4 1.5 4.9 4" />
+                  <path d="M9 14l1.5-2.5 1.5 1 2-2.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="card-title">
+                <span class="label">Pasture Runner</span>
+                <span class="id">Field Prototype · ARC-FR-001</span>
+              </div>
+            </div>
+            <div class="card-sub">
+              Dodge rolling pasture hazards and see how long you can keep your boots under you.
+            </div>
+            <div class="chips">
+              <span class="chip grass">HerdMate</span>
+              <span class="chip">Prototype</span>
+              <span class="chip">Runner</span>
+            </div>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Forge Log: All cabinets are HTML + CaveCode artifacts.  
+      Read the source, learn the pattern, then add your own game to the planet.
+    </footer>
+  </div>
+
+  <!--
+    //////////////////////////////////////////////////////////////
+    // 🔧 BLOCK 4 — BEHAVIOR SUMMARY
+    //////////////////////////////////////////////////////////////
+    FLOW_START:
+      - Render hero header with project identity.
+      - List each category section in a fixed order (Buckeye Bash → Cavern-Run → Ember Adventures → Haze-Maze → Mind-Chambers → Retro-Quarter → Scarlet-Crush → Pasture-Run).
+      - Within each section, display cards that link directly to that game’s /index.html.
+      - Cards are fully clickable; hover / tap gives a subtle lift.
+      - Layout is 1-column on phones, 2-column on small tablets, 3-column on larger screens.
+
+    FLOW_END
+  -->
+
+  <!--
+    //////////////////////////////////////////////////////////////
+    // 📝 BLOCK 5 — HUMAN NOTES (APPEND ONLY)
+    //////////////////////////////////////////////////////////////
+    [TODO]
+      - When new cabinets are added, duplicate a card, update href/title/ID/tags.
+      - Keep category order stable so external docs can reference it.
+      - Optionally add a tiny nav bar at top that jumps to each category anchor.
+
+    [IDEA]
+      - Add a “CaveCode view” toggle that shows the .cavecode spec next to each game.
+  -->
 </body>
 </html>
