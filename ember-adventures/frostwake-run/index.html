@@ -402,16 +402,72 @@
 
   <!--
     //////////////////////////////////////////////////////////////
-    // 🔊 SFX HOOKS (NO NETWORK CALLS)
-    // User fills in src paths later (e.g. /audio/wind.mp3).
+    // 🔊 SFX HOOKS — FROSTWAKE RUN AUDIO KIT
+    // Files live in: /ember-adventures/frostwake-run/audio/
     //////////////////////////////////////////////////////////////
   -->
-  <audio id="sfx-wind"   src="" preload="auto"></audio>
-  <audio id="sfx-fire"   src="" preload="auto"></audio>
-  <audio id="sfx-howls"  src="" preload="auto"></audio>
-  <audio id="sfx-heart"  src="" preload="auto"></audio>
-  <audio id="sfx-object" src="" preload="auto"></audio>
-  <audio id="sfx-sting"  src="" preload="auto"></audio>
+  <!-- Core ambience loops -->
+  <audio id="sfx-wind"
+         src="audio/frostwake_blowing_gale_loop_174310900.mp3"
+         preload="auto"></audio>
+
+  <audio id="sfx-fire"
+         src="audio/frostwake_campfire_loop.mp3"
+         preload="auto"></audio>
+
+  <audio id="sfx-heart"
+         src="audio/frostwake_ominious_low_loop_175011435.mp3"
+         preload="auto"></audio>
+
+  <!-- Creature / danger stings -->
+  <audio id="sfx-howls"
+         src="audio/trail_failure_ending_01.mp3"
+         preload="auto"></audio>
+
+  <audio id="sfx-object"
+         src="audio/trail_intro_01.mp3"
+         preload="auto"></audio>
+
+  <audio id="sfx-sting"
+         src="audio/ui_danger_ping.mp3"
+         preload="auto"></audio>
+
+  <!-- Spare UI + VO channels (not all used yet, but ready) -->
+  <audio id="sfx-choice"
+         src="audio/ui_choice_tap.mp3"
+         preload="auto"></audio>
+
+  <audio id="sfx-stat-up"
+         src="audio/ui_stat_up.mp3"
+         preload="auto"></audio>
+
+  <audio id="sfx-stat-down"
+         src="audio/ui_stat_down.mp3"
+         preload="auto"></audio>
+
+  <audio id="sfx-ending-reveal"
+         src="audio/ui_ending_reveal.mp3"
+         preload="auto"></audio>
+
+  <audio id="vo-choice-prompt"
+         src="audio/trail_choice_prompt_01.mp3"
+         preload="auto"></audio>
+
+  <audio id="vo-success-small"
+         src="audio/trail_success_small_01.mp3"
+         preload="auto"></audio>
+
+  <audio id="vo-success-major"
+         src="audio/trail_success_major_01.mp3"
+         preload="auto"></audio>
+
+  <audio id="vo-failure-ouch"
+         src="audio/trail_failure_ouch_01.mp3"
+         preload="auto"></audio>
+
+  <audio id="vo-camp-return"
+         src="audio/trail_camp_return_01.mp3"
+         preload="auto"></audio>
 
   <script>
     // ////////////////////////////////////////////////////////////
