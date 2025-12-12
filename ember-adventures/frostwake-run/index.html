@@ -1,796 +1,1193 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Barn Reaper by HerdMate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Barn Reaper by HerdMate – fast, export-ready livestock market reports. A SageWire Syndicate Product."
-  />
-
-  <!--
-    //////////////////////////////////////////////////////////////
-    // 🪨 BLOCK 1 — IDENTITY (LOCKED)
-    // CaveCode · HerdMate Tools Line
-    //////////////////////////////////////////////////////////////
-    TITLE: Barn Reaper — Livestock Market Snapshot UI
-    ID: HM-BR-UI-001
-    LINE: HerdMate · Market Tools
-    VERSION: 1.0
-    AUTHOR: Massive (HerdMate) & Ash (Forge)
-    PURPOSE:
-      Field-readable market snapshot screen for trucks, tractors, barns, and kitchen tables.
-      Pulls cleaned market cuts from the Barn Reaper backend for quick decisions.
-    DOMAIN:
-      app / tool / monitor (frontend UI for FastAPI backend)
-
-    RULES:
-      - Block 1 defines WHAT this artifact is.
-      - Do not “tune” or localize this block; treat it as a nameplate.
-      - AI may read this block for context, but should not rewrite it automatically.
-  -->
-
-  <!--
-    //////////////////////////////////////////////////////////////
-    // 🌐 BLOCK 2 — OVERVIEW (READ-ONLY SUMMARY)
-    //////////////////////////////////////////////////////////////
-    SCREEN:
-      - Two-card layout:
-          * Left: filters (commodity, region, weight class, date range, optional custom dates).
-          * Right: live preview of table + export buttons.
-
-    INPUTS:
-      - commodity: required (e.g. feeder_steers, slaughter_cows).
-      - region:   required (e.g. midwest, plains).
-      - weight_class: optional weight bracket.
-      - date_range:
-          * latest   → backend chooses most recent available reports.
-          * 7d       → last 7 days.
-          * 30d      → last 30 days.
-          * custom   → use date_from + date_to fields.
-      - date_from / date_to:
-          * Visible only when date_range = "custom".
-
-    BACKEND CONTRACT (via /api/scrape POST):
-      Request JSON:
-        {
-          "commodity":   "<code>",
-          "region":      "<code>",
-          "weight_class": "<code or ''>",
-          "date_range":  "latest" | "7d" | "30d" | "custom",
-          "date_from":   "YYYY-MM-DD" | null,
-          "date_to":     "YYYY-MM-DD" | null
-        }
-
-      Response JSON (expected shape):
-        {
-          "summary": {
-            "commodity_label": "Feeder Steers",
-            "region_label":    "Midwest",
-            "weight_label":    "500–600 lbs",
-            "start_date":      "YYYY-MM-DD",
-            "end_date":        "YYYY-MM-DD",
-            "total_records":   42
-          },
-          "rows": [
-            { "weight_range": "500-550", "avg_price": 2.34, "volume_head": 27, ... },
-            ...
-          ],
-          "excel_url": "/download/excel/...",
-          "pdf_url":   "/download/pdf/..."
-        }
-
-    OUTPUT:
-      - On-screen, scrollable table with sticky header for quick reading.
-      - Summary “pill” line (commodity, region, weight bracket, date window, record count).
-      - Excel / PDF export buttons wired to backend URLs.
-
-    FIELD CONSTRAINTS:
-      - Ember-gradient primary button: large, high contrast, readable in glare.
-      - Simple selects only (no free-typing) to keep fat-finger errors low in the field.
-      - Status line explains current state (ready, reaping, success, error).
-  -->
-
-  <style>
-    :root {
-      --hm-bg-deep: #05070b;
-      --hm-panel: #0c1117;
-      --hm-panel-soft: #111921;
-      --hm-border: #1f2933;
-
-      --hm-ember-top: #ffe4b8;
-      --hm-ember-main: #f97316;
-      --hm-ember-bottom: #b45309;
-
-      --hm-text-main: #e5e7eb;
-      --hm-text-soft: #9ca3af;
-      --hm-text-muted: #6b7280;
-
-      --hm-radius-xl: 26px;
-      --hm-shadow-soft: 0 18px 40px rgba(15,23,42,0.75);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        linear-gradient(135deg, rgba(15,118,110,0.18), transparent 40%),
-        radial-gradient(circle at top, #111827 0, #020617 55%);
-      color: var(--hm-text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .page-shell {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 1.25rem 1.25rem 2.5rem;
-    }
-
-    /* HEADER */
-    header {
-      margin: 0 0 1rem;
-    }
-
-    .header-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.9rem 1.1rem;
-      border-radius: 20px;
-      background: linear-gradient(to right, #050816, #020617);
-      border: 1px solid rgba(148,163,184,0.25);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.75);
-    }
-
-    .brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .brand-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 16px;
-      background: radial-gradient(circle at 30% 20%, #f97316 0, #b91c1c 45%, #111827 90%);
-      box-shadow: 0 12px 22px rgba(0,0,0,0.55);
-    }
-
-    .brand-title {
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      font-size: clamp(1.7rem, 2.6vw, 2.4rem);
-      background: linear-gradient(to bottom, var(--hm-ember-top), var(--hm-ember-main), var(--hm-ember-bottom));
-      -webkit-background-clip: text;
-      color: transparent;
-      -webkit-text-stroke: 1px #000000;
-      text-shadow:
-        0 0 2px #000000,
-        0 2px 3px rgba(0,0,0,0.9),
-        0 0 8px rgba(249,115,22,0.9),
-        0 0 20px rgba(249,115,22,0.6);
-    }
-
-    .brand-sub {
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(249,250,251,0.8);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
-    }
-
-    .tag-chip {
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-      background: rgba(148,163,184,0.12);
-      border: 1px solid rgba(148,163,184,0.45);
-      font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      color: var(--hm-text-soft);
-      white-space: nowrap;
-    }
-
-    .tag-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--hm-ember-main);
-      box-shadow: 0 0 0 3px rgba(248,250,252,0.08);
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
-      gap: 1.25rem;
-    }
-
-    @media (max-width: 960px) {
-      main { grid-template-columns: minmax(0, 1fr); }
-    }
-
-    .card {
-      background:
-        radial-gradient(circle at top left, rgba(248,250,252,0.02), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(15,118,110,0.08), transparent 55%),
-        var(--hm-panel);
-      border-radius: var(--hm-radius-xl);
-      border: 1px solid var(--hm-border);
-      padding: 1.5rem 1.4rem 1.3rem;
-      box-shadow: var(--hm-shadow-soft);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-inner { position: relative; z-index: 1; }
-
-    .card-title {
-      font-size: 0.98rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--hm-text-main);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.85);
-      margin-bottom: 0.75rem;
-    }
-
-    .card-subtitle {
-      font-size: 0.82rem;
-      color: var(--hm-text-soft);
-      margin-bottom: 1rem;
-    }
-
-    .field-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.9rem;
-    }
-
-    @media (min-width: 720px) {
-      .field-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .field label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--hm-text-soft);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-      margin-bottom: 0.25rem;
-      display: block;
-    }
-
-    select, input[type="date"] {
-      width: 100%;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.5);
-      background: linear-gradient(to right, #020617, #020b10);
-      color: var(--hm-text-main);
-      padding: 0.55rem 0.9rem;
-      font-size: 0.86rem;
-      box-shadow: 0 0 0 1px rgba(15,23,42,0.85);
-      outline: none;
-    }
-
-    select:focus, input[type="date"]:focus {
-      border-color: var(--hm-ember-main);
-      box-shadow: 0 0 0 1px rgba(249,115,22,0.4);
-    }
-
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      margin-top: 1.1rem;
-      align-items: center;
-    }
-
-    .btn-primary {
-      border: none;
-      border-radius: 999px;
-      padding: 0.7rem 1.8rem;
-      min-width: 240px;
-      min-height: 46px;
-      font-size: 1.05rem;
-      font-weight: 800;
-      letter-spacing: 0.11em;
-      text-transform: uppercase;
-      color: #020617;
-      background: radial-gradient(circle at 20% 0,
-        var(--hm-ember-top) 0,
-        var(--hm-ember-main) 40%,
-        var(--hm-ember-bottom) 100%);
-      border: 1px solid rgba(251,146,60,0.9);
-      box-shadow:
-        0 14px 28px rgba(0,0,0,0.75),
-        0 0 16px rgba(249,115,22,0.75);
-      text-shadow:
-        0 1px 1px rgba(255,255,255,0.35),
-        0 0 4px rgba(0,0,0,0.8);
-    }
-
-    .btn-primary:disabled { opacity: 0.55; box-shadow: none; }
-
-    .btn-secondary {
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.55);
-      background: rgba(15,23,42,0.7);
-      color: var(--hm-text-soft);
-      padding: 0.55rem 1.3rem;
-      font-size: 0.82rem;
-      cursor: pointer;
-    }
-
-    .status-text {
-      font-size: 0.78rem;
-      color: var(--hm-text-soft);
-    }
-    .status-text.error   { color: #f97373; }
-    .status-text.success { color: #4ade80; }
-
-    .empty-state {
-      font-size: 0.8rem;
-      color: var(--hm-text-muted);
-      padding-top: 0.8rem;
-    }
-
-    .export-row {
-      margin-top: 1rem;
-      display: flex;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .table-wrap {
-      margin-top: 0.5rem;
-      border-radius: 14px;
-      border: 1px solid rgba(30,41,59,0.85);
-      background: #020617;
-      overflow: auto;
-      max-height: 380px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-      color: var(--hm-text-soft);
-    }
-
-    thead {
-      background: rgba(15,23,42,0.95);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    th, td {
-      padding: 0.5rem 0.55rem;
-      border-bottom: 1px solid rgba(30,41,59,0.85);
-      white-space: nowrap;
-      text-align: left;
-    }
-
-    th {
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--hm-text-main);
-      font-size: 0.75rem;
-    }
-
-    tbody tr:nth-child(even) {
-      background: rgba(15,23,42,0.75);
-    }
-
-    tbody tr:hover {
-      background: rgba(30,64,175,0.75);
-    }
-
-    footer {
-      text-align: center;
-      padding: 1.25rem;
-      font-size: 0.75rem;
-      color: var(--hm-text-muted);
-    }
-  </style>
-</head>
-
-<body>
-  <div class="page-shell">
-    <header>
-      <div class="header-banner">
-        <div class="brand-wrap">
-          <div class="brand-icon" aria-hidden="true"></div>
-          <div>
-            <div class="brand-title">HerdMate</div>
-            <div class="brand-sub">Barn Reaper · Livestock Market Snapshot</div>
-          </div>
-        </div>
-        <div class="tag-chip">
-          <span class="tag-dot"></span>
-          MVP Forge
-        </div>
-      </div>
-    </header>
-
-    <main>
-      <!-- FILTER CARD -->
-      <section class="card">
-        <div class="card-inner">
-          <h2 class="card-title">Reap a Market Snapshot</h2>
-          <p class="card-subtitle">
-            Choose commodity, region, and time window. Barn Reaper will harvest a clean,
-            export-ready cut of the market.
-          </p>
-
-          <div class="field-grid">
-            <div class="field">
-              <label for="commodity">Commodity</label>
-              <select id="commodity">
-                <option value="">Select commodity...</option>
-                <option value="feeder_steers">Feeder Steers</option>
-                <option value="feeder_heifers">Feeder Heifers</option>
-                <option value="slaughter_cows">Slaughter Cows</option>
-                <option value="slaughter_bulls">Slaughter Bulls</option>
-                <option value="pairs_cow_calf">Pairs / Cow-Calf</option>
-                <option value="calves_unweaned">Calves (Unweaned)</option>
-                <option value="other">Other / Mixed</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="region">Region</label>
-              <select id="region">
-                <option value="">Select region...</option>
-                <option value="midwest">Midwest</option>
-                <option value="plains">Plains</option>
-                <option value="tx_ok">Texas / Oklahoma</option>
-                <option value="southeast">Southeast</option>
-                <option value="mountain_west">Mountain West</option>
-                <option value="nationwide">Nationwide</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="weight_class">Weight Class (optional)</label>
-              <select id="weight_class">
-                <option value="">Any / Not specified</option>
-                <option value="300_400">300–400 lbs</option>
-                <option value="400_500">400–500 lbs</option>
-                <option value="500_600">500–600 lbs</option>
-                <option value="600_700">600–700 lbs</option>
-                <option value="700_800">700–800 lbs</option>
-                <option value="800_plus">800+ lbs</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="date_range">Date Range</label>
-              <select id="date_range">
-                <option value="latest">Latest reports</option>
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="custom">Custom range</option>
-              </select>
-            </div>
-
-            <div class="field" id="date_from_wrap" style="display:none;">
-              <label for="date_from">From (date)</label>
-              <input id="date_from" type="date" />
-            </div>
-
-            <div class="field" id="date_to_wrap" style="display:none;">
-              <label for="date_to">To (date)</label>
-              <input id="date_to" type="date" />
-            </div>
-          </div>
-
-          <div class="btn-row">
-            <button id="run-report" class="btn-primary">
-              Reap Market Data
-            </button>
-            <button id="clear-filters" class="btn-secondary">
-              Reset
-            </button>
-            <span id="status-text" class="status-text">
-              Ready. Choose filters and let Barn Reaper work the market.
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <!-- PREVIEW CARD -->
-      <section class="card">
-        <div class="card-inner">
-          <h2 class="card-title">Today's Cut</h2>
-          <p class="card-subtitle">
-            Live data snapshot. Export to Excel or PDF for herd meetings, lenders, or sale-day prep.
-          </p>
-
-          <div id="summary-pill" class="status-text" style="margin-bottom:0.75rem; display:none;"></div>
-
-          <div id="report-preview">
-            <div class="empty-state">
-              No snapshot yet. Run Barn Reaper to harvest live data here.
-            </div>
-          </div>
-
-          <div class="export-row">
-            <button id="export-excel" class="btn-secondary" disabled>Excel</button>
-            <button id="export-pdf" class="btn-secondary" disabled>PDF</button>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      © HerdMate · Barn Reaper · A SageWire Syndicate Product.<br />
-      “There are no sale prices safe from the Barn Reaper.”
-    </footer>
-  </div>
-
-  <script>
-    (function () {
-      // ////////////////////////////////////////////////////////////
-      // 🎚️ BLOCK 3 — TUNING KNOBS (HUMAN-EDITABLE)
-      // ////////////////////////////////////////////////////////////
-      // Backend endpoint for Barn Reaper scrape engine.
-      // Adjust if you mount the API behind a path prefix or proxy.
-      const SCRAPE_URL    = "/api/scrape";
-
-      // Optional: centralize status message text for easy tweaking.
-      const STATUS_MESSAGES = {
-        idle:    "Ready. Choose filters and let Barn Reaper work the market.",
-        loading: "Reaping live market data from the Barn Reaper engine…",
-        ok:      "Report generated successfully. Review or export it.",
-        error:   "Could not retrieve market data. Try again shortly or adjust filters."
-      };
-
-      // ////////////////////////////////////////////////////////////
-      // 🔧 BLOCK 4 — UI WIRING & ENGINE (BEHAVIOR)
-      // ////////////////////////////////////////////////////////////
-
-      const commodityEl   = document.getElementById("commodity");
-      const regionEl      = document.getElementById("region");
-      const weightEl      = document.getElementById("weight_class");
-      const dateRangeEl   = document.getElementById("date_range");
-      const dateFromWrap  = document.getElementById("date_from_wrap");
-      const dateToWrap    = document.getElementById("date_to_wrap");
-      const dateFromEl    = document.getElementById("date_from");
-      const dateToEl      = document.getElementById("date_to");
-
-      const runBtn        = document.getElementById("run-report");
-      const resetBtn      = document.getElementById("clear-filters");
-      const statusText    = document.getElementById("status-text");
-
-      const summaryPill   = document.getElementById("summary-pill");
-      const previewEl     = document.getElementById("report-preview");
-      const excelBtn      = document.getElementById("export-excel");
-      const pdfBtn        = document.getElementById("export-pdf");
-
-      let lastExcelUrl = null;
-      let lastPdfUrl   = null;
-
-      function setStatus(msg, type) {
-        statusText.textContent = msg;
-        statusText.className = "status-text";
-        if (type === "error")   statusText.classList.add("error");
-        if (type === "success") statusText.classList.add("success");
-      }
-
-      function setLoading(isLoading) {
-        runBtn.disabled = isLoading;
-        runBtn.textContent = isLoading ? "Reaping…" : "Reap Market Data";
-        if (isLoading) {
-          setStatus(STATUS_MESSAGES.loading, null);
-        }
-      }
-
-      function resetResults() {
-        previewEl.innerHTML = `
-          <div class="empty-state">
-            No snapshot yet. Run Barn Reaper to harvest live data here.
-          </div>
-        `;
-        excelBtn.disabled = true;
-        pdfBtn.disabled   = true;
-        summaryPill.style.display = "none";
-        lastExcelUrl = null;
-        lastPdfUrl   = null;
-      }
-
-      function toggleCustomDates() {
-        const isCustom = dateRangeEl.value === "custom";
-        dateFromWrap.style.display = isCustom ? "block" : "none";
-        dateToWrap.style.display   = isCustom ? "block" : "none";
-        if (!isCustom) {
-          dateFromEl.value = "";
-          dateToEl.value   = "";
-        }
-      }
-
-      dateRangeEl.addEventListener("change", toggleCustomDates);
-      toggleCustomDates();
-
-      function buildPayload() {
-        return {
-          commodity:    commodityEl.value || "",
-          region:       regionEl.value || "",
-          weight_class: weightEl.value || "",
-          date_range:   dateRangeEl.value || "latest",
-          date_from:    dateFromEl.value || null,
-          date_to:      dateToEl.value || null,
-        };
-      }
-
-      function renderSummary(summary) {
-        if (!summary) {
-          summaryPill.style.display = "none";
-          return;
-        }
-        const {
-          commodity_label,
-          region_label,
-          weight_label,
-          start_date,
-          end_date,
-          total_records,
-        } = summary;
-
-        const bits = [];
-        if (commodity_label) bits.push(commodity_label);
-        if (region_label)    bits.push(region_label);
-        if (weight_label)    bits.push(weight_label);
-        if (start_date && end_date) {
-          bits.push(start_date + " \u2192 " + end_date);
-        } else if (start_date) {
-          bits.push("From " + start_date);
-        }
-        if (typeof total_records === "number") {
-          bits.push(total_records + " records");
-        }
-
-        summaryPill.textContent = bits.join(" • ");
-        summaryPill.style.display = bits.length ? "inline-block" : "none";
-      }
-
-      function renderTable(rows) {
-        if (!rows || !rows.length) {
-          previewEl.innerHTML = `
-            <div class="empty-state">
-              No records returned for the selected filters.
-            </div>
-          `;
-          return;
-        }
-
-        const keys = Object.keys(rows[0]);
-        const thead = `
-          <thead>
-            <tr>${keys.map(k => `<th>${k.replace(/_/g," ")}</th>`).join("")}</tr>
-          </thead>
-        `;
-        const tbody = `
-          <tbody>
-            ${rows.map(row => `
-              <tr>
-                ${keys.map(k => `<td>${row[k] == null ? "" : String(row[k])}</td>`).join("")}
-              </tr>
-            `).join("")}
-          </tbody>
-        `;
-
-        previewEl.innerHTML = `
-          <div class="table-wrap">
-            <table>${thead}${tbody}</table>
-          </div>
-        `;
-      }
-
-      excelBtn.addEventListener("click", () => {
-        if (lastExcelUrl) window.open(lastExcelUrl, "_blank");
-      });
-
-      pdfBtn.addEventListener("click", () => {
-        if (lastPdfUrl) window.open(lastPdfUrl, "_blank");
-      });
-
-      async function runReport() {
-        const payload = buildPayload();
-
-        if (!payload.commodity || !payload.region) {
-          setStatus("Please select at least a commodity and region.", "error");
-          return;
-        }
-        if (payload.date_range === "custom" && (!payload.date_from || !payload.date_to)) {
-          setStatus("Please choose both From and To dates for a custom range.", "error");
-          return;
-        }
-
-        resetResults();
-        setLoading(true);
-
-        try {
-          const resp = await fetch(SCRAPE_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-
-          if (!resp.ok) throw new Error("HTTP " + resp.status);
-          const data = await resp.json();
-
-          renderSummary(data.summary || null);
-          renderTable(data.rows || []);
-
-          lastExcelUrl = data.excel_url || null;
-          lastPdfUrl   = data.pdf_url || null;
-
-          excelBtn.disabled = !lastExcelUrl;
-          pdfBtn.disabled   = !lastPdfUrl;
-
-          setStatus(STATUS_MESSAGES.ok, "success");
-        } catch (err) {
-          console.error("Barn Reaper error:", err);
-          resetResults();
-          setStatus(
-            STATUS_MESSAGES.error,
-            "error"
-          );
-        } finally {
-          setLoading(false);
-        }
-      }
-
-      function resetFilters() {
-        commodityEl.value = "";
-        regionEl.value    = "";
-        weightEl.value    = "";
-        dateRangeEl.value = "latest";
-        dateFromEl.value  = "";
-        dateToEl.value    = "";
-        toggleCustomDates();
-        resetResults();
-        setStatus(STATUS_MESSAGES.idle, null);
-      }
-
-      runBtn.addEventListener("click", (e) => { e.preventDefault(); runReport(); });
-      resetBtn.addEventListener("click", (e) => { e.preventDefault(); resetFilters(); });
-
-      resetFilters(); // initial state
-    })();
-  </script>
-
-  <!--
-    //////////////////////////////////////////////////////////////
-    // 📝 BLOCK 5 — HUMAN NOTES (APPEND ONLY)
-    //////////////////////////////////////////////////////////////
-    [NOTE]
-      - This file is the RanchBoardroom / Barn Reaper UI only.
-      - Backend is a FastAPI (or similar) service mounted at SCRAPE_URL.
-
-    [NOTE — FIELD USAGE]
-      - Primary button is intentionally oversized + ember gradient for daylight visibility.
-      - Table uses sticky header + alternating rows for quick scan on small screens.
-
-    [INTEGRATION CHECKLIST]
-      - Confirm /api/scrape is reachable from the same origin as this page.
-      - Confirm response JSON has keys: summary, rows, excel_url, pdf_url.
-      - If you mount the API under a prefix (e.g. /barnreaper/api/scrape),
-        change SCRAPE_URL in Block 3.
-
-    [FUTURE IDEAS]
-      - Add presets: e.g. “Feeder Steers · Midwest · Last 7 days” buttons.
-      - Add a “Compare vs last sale” small trend chip under the summary-pill.
-      - Pipe one-click exports directly into a HerdMate report packet.
-  -->
-
-</body>
-</html>
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <title>Ember Adventures — Frostwake Run (ARC-EA-002)</title>  
+  <meta name="viewport" content="width=device-width,initial-scale=1" />    <!--  
+    //////////////////////////////////////////////////////////////  
+    // 🪨 BLOCK 1 — IDENTITY (LOCKED)  
+    // CaveCode Arcade Planet · Ember Adventures Line  
+    //////////////////////////////////////////////////////////////  
+    TITLE: Ember Adventures — Frostwake Run  
+    ID: ARC-EA-002  
+    LINE: Ember Adventures (Micro-RPG Engines)  
+    VERSION: 1.0  
+    AUTHOR: SageWire Syndicate · Ash (Forge) & Massive (Flamekeeper)  
+    PURPOSE: Micro horror RPG — one-run trail story with hidden fate rolls.  
+    AUDIENCE: Readers/players comfortable with PG-13 horror and mythic tone.  
+  -->    <!--  
+    //////////////////////////////////////////////////////////////  
+    // 🌐 BLOCK 2 — WORLD & RULES SUMMARY (READ-ONLY OVERVIEW)  
+    //////////////////////////////////////////////////////////////  
+    - Setting: Frosted northern trail, sled team, relay cabin, unknown warm object.  
+    - Structure: 8 scenes, branching choices, hidden fate rolls, multiple endings.  
+    - Stats:  
+        * health   → physical condition  
+        * bravery  → step-forward impulse  
+        * caution  → risk management  
+        * fear     → inner shadow (drives creature form)  
+    - Flow:  
+        1) Player reads scene.  
+        2) Chooses one of several options.  
+        3) Choice applies stat changes and hidden fate roll.  
+        4) Story advances to next scene or an ending camp scene.  
+    - Rolls:  
+        * Internal RNG on every choice.  
+        * Results influence subtle text, fear, and final ending.  
+    - Audio:  
+        * SFX hooks only (HTML audio tags, JS helpers).  
+        * User later plugs in .mp3/.ogg from ElevenLabs or other source.  
+  -->    <style>  
+    :root {  
+      --bg: #020617;  
+      --panel: #0b1120;  
+      --border: #1f2937;  
+      --text-main: #e5e7eb;  
+      --text-soft: #9ca3af;  
+      --accent: #fb923c;  
+      --accent-soft: #fed7aa;  
+      --accent-cold: #38bdf8;  
+    }  
+  
+    * {  
+      box-sizing: border-box;  
+      -webkit-tap-highlight-color: transparent;  
+    }  
+  
+    body {  
+      margin: 0;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: stretch;  
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);  
+      color: var(--text-main);  
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;  
+    }  
+  
+    #game-shell {  
+      max-width: 900px;  
+      margin: 0 auto;  
+      padding: 0.75rem 1rem 1.25rem;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 0.75rem;  
+    }  
+  
+    header {  
+      padding: 0.5rem 0.75rem;  
+      border-radius: 0.75rem;  
+      background: rgba(15, 23, 42, 0.9);  
+      border: 1px solid var(--border);  
+    }  
+  
+    header h1 {  
+      margin: 0;  
+      font-size: 1.1rem;  
+      letter-spacing: 0.05em;  
+      text-transform: uppercase;  
+    }  
+  
+    header .sub {  
+      margin-top: 0.1rem;  
+      font-size: 0.8rem;  
+      color: var(--text-soft);  
+    }  
+  
+    #main-row {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 0.75rem;  
+    }  
+  
+    @media (min-width: 768px) {  
+      #main-row {  
+        flex-direction: row;  
+        align-items: flex-start;  
+      }  
+    }  
+  
+    /* Story panel */  
+  
+    #story-panel {  
+      flex: 2;  
+      border-radius: 0.75rem;  
+      border: 1px solid var(--border);  
+      background: radial-gradient(circle at top, #020617 0, #020617 70%);  
+      padding: 0.9rem 0.9rem 1rem;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 0.75rem;  
+      box-shadow:  
+        0 20px 40px rgba(0, 0, 0, 0.8),  
+        0 0 0 1px rgba(15, 23, 42, 0.8);  
+    }  
+  
+    #scene-meta {  
+      display: flex;  
+      flex-wrap: wrap;  
+      justify-content: space-between;  
+      gap: 0.4rem;  
+      font-size: 0.75rem;  
+      color: var(--text-soft);  
+    }  
+  
+    #scene-title {  
+      font-size: 0.9rem;  
+      text-transform: uppercase;  
+      letter-spacing: 0.12em;  
+      color: var(--accent-soft);  
+    }  
+  
+    #scene-tagline {  
+      font-size: 0.75rem;  
+      color: var(--accent-cold);  
+    }  
+  
+    #scene-text {  
+      font-size: 0.9rem;  
+      line-height: 1.6;  
+      color: var(--text-main);  
+      white-space: pre-line;  
+    }  
+  
+    #choices {  
+      display: flex;  
+      flex-direction: column;  
+      gap: 0.4rem;  
+    }  
+  
+    .choice-btn {  
+      text-align: left;  
+      border-radius: 0.6rem;  
+      border: 1px solid rgba(148, 163, 184, 0.35);  
+      background: radial-gradient(circle at top, rgba(56, 189, 248, 0.09), rgba(15, 23, 42, 0.98));  
+      color: var(--text-main);  
+      padding: 0.45rem 0.7rem;  
+      font-size: 0.84rem;  
+      cursor: pointer;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 0.15rem;  
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.8);  
+    }  
+  
+    .choice-btn span.secondary {  
+      font-size: 0.74rem;  
+      color: var(--text-soft);  
+    }  
+  
+    .choice-btn:active {  
+      transform: translateY(1px);  
+      filter: brightness(0.96);  
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.75);  
+    }  
+  
+    #fate-line {  
+      font-size: 0.78rem;  
+      color: var(--text-soft);  
+      min-height: 1.1rem;  
+      font-style: italic;  
+    }  
+  
+    #ending-banner {  
+      border-radius: 0.6rem;  
+      border: 1px solid rgba(251, 146, 60, 0.6);  
+      background: rgba(15, 23, 42, 0.96);  
+      padding: 0.5rem 0.7rem;  
+      font-size: 0.8rem;  
+      color: var(--accent-soft);  
+      display: none;  
+      line-height: 1.5;  
+    }  
+  
+    #controls-row {  
+      display: flex;  
+      justify-content: space-between;  
+      margin-top: 0.3rem;  
+      gap: 0.5rem;  
+      flex-wrap: wrap;  
+    }  
+  
+    .pill-label {  
+      font-size: 0.75rem;  
+      color: var(--text-soft);  
+    }  
+  
+    #restart-btn,  
+    #soft-reroll-btn {  
+      font-size: 0.78rem;  
+      padding: 0.3rem 0.8rem;  
+      border-radius: 999px;  
+      border: 1px solid rgba(148, 163, 184, 0.8);  
+      background: radial-gradient(circle at top, rgba(148, 163, 184, 0.15), rgba(15, 23, 42, 1));  
+      color: var(--text-main);  
+      cursor: pointer;  
+      display: inline-flex;  
+      align-items: center;  
+      gap: 0.3rem;  
+    }  
+  
+    #restart-btn:active,  
+    #soft-reroll-btn:active {  
+      transform: translateY(1px);  
+    }  
+  
+    /* Stats panel */  
+  
+    #stats-panel {  
+      flex: 1;  
+      border-radius: 0.75rem;  
+      border: 1px solid var(--border);  
+      background: rgba(15, 23, 42, 0.96);  
+      padding: 0.75rem;  
+      font-size: 0.8rem;  
+      display: flex;  
+      flex-direction: column;  
+      gap: 0.6rem;  
+      box-shadow:  
+        0 16px 32px rgba(0, 0, 0, 0.85),  
+        0 0 0 1px rgba(15, 23, 42, 0.9);  
+    }  
+  
+    #stats-panel h2 {  
+      font-size: 0.85rem;  
+      margin: 0;  
+      letter-spacing: 0.08em;  
+      text-transform: uppercase;  
+      color: var(--text-soft);  
+    }  
+  
+    .stat-row {  
+      display: flex;  
+      justify-content: space-between;  
+      align-items: center;  
+      gap: 0.4rem;  
+    }  
+  
+    .stat-label {  
+      color: var(--text-soft);  
+      font-size: 0.78rem;  
+      white-space: nowrap;  
+    }  
+  
+    .stat-value {  
+      font-size: 0.78rem;  
+      color: var(--accent-soft);  
+      min-width: 2rem;  
+      text-align: right;  
+    }  
+  
+    .stat-bar-outer {  
+      flex: 1;  
+      margin-left: 0.3rem;  
+      height: 6px;  
+      border-radius: 999px;  
+      background: #020617;  
+      border: 1px solid #1f2937;  
+      overflow: hidden;  
+    }  
+  
+    .stat-bar-inner {  
+      height: 100%;  
+      border-radius: 999px;  
+      background: linear-gradient(to right, #fb923c, #f97316);  
+      width: 0%;  
+    }  
+  
+    .stat-bar-inner.cold {  
+      background: linear-gradient(to right, #38bdf8, #0ea5e9);  
+    }  
+  
+    #ending-summary {  
+      font-size: 0.78rem;  
+      color: var(--text-soft);  
+      border-top: 1px solid rgba(148, 163, 184, 0.4);  
+      padding-top: 0.4rem;  
+      margin-top: 0.2rem;  
+    }  
+  
+    #runid {  
+      font-size: 0.7rem;  
+      color: var(--text-soft);  
+      opacity: 0.8;  
+    }  
+  
+    @media (max-width: 767px) {  
+      #stats-panel {  
+        order: -1;  
+      }  
+    }  
+  </style>  </head>  
+<body>  
+  <div id="game-shell">  
+    <header>  
+      <h1>Ember Adventures — Frostwake Run · ARC-EA-002</h1>  
+      <div class="sub">  
+        A tiny horror trail in the Ember-Adventures line · Tap choices to walk the frost.  
+      </div>  
+    </header>  <div id="main-row">  
+  <!-- Story side -->  
+  <section id="story-panel">  
+    <div id="scene-meta">  
+      <div id="scene-title"></div>  
+      <div id="scene-tagline"></div>  
+    </div>  
+    <div id="scene-text"></div>  
+
+    <div id="choices"></div>  
+
+    <div id="fate-line"></div>  
+
+    <div id="ending-banner"></div>  
+
+    <div id="controls-row">  
+      <span class="pill-label" id="runid"></span>  
+      <div>  
+        <button id="soft-reroll-btn" type="button">🎲 Nudge Fate</button>  
+        <button id="restart-btn" type="button">↻ Restart Run</button>  
+      </div>  
+    </div>  
+  </section>  
+
+  <!-- Stats side -->  
+  <aside id="stats-panel">  
+    <h2>Trail Stats</h2>  
+
+    <div class="stat-row">  
+      <span class="stat-label">Health</span>  
+      <span class="stat-value" id="stat-health-val"></span>  
+      <div class="stat-bar-outer">  
+        <div class="stat-bar-inner" id="stat-health"></div>  
+      </div>  
+    </div>  
+    <div class="stat-row">  
+      <span class="stat-label">Bravery</span>  
+      <span class="stat-value" id="stat-bravery-val"></span>  
+      <div class="stat-bar-outer">  
+        <div class="stat-bar-inner cold" id="stat-bravery"></div>  
+      </div>  
+    </div>  
+    <div class="stat-row">  
+      <span class="stat-label">Caution</span>  
+      <span class="stat-value" id="stat-caution-val"></span>  
+      <div class="stat-bar-outer">  
+        <div class="stat-bar-inner" id="stat-caution"></div>  
+      </div>  
+    </div>  
+    <div class="stat-row">  
+      <span class="stat-label">Fear</span>  
+      <span class="stat-value" id="stat-fear-val"></span>  
+      <div class="stat-bar-outer">  
+        <div class="stat-bar-inner cold" id="stat-fear"></div>  
+      </div>  
+    </div>  
+
+    <div id="ending-summary">  
+      Walk once to unlock your first ending.    
+      Different choices and hidden rolls shape what follows you on the trail.  
+    </div>  
+  </aside>  
+</div>
+
+  </div>    <!--  
+    //////////////////////////////////////////////////////////////  
+    // 🔊 SFX HOOKS — FROSTWAKE RUN AUDIO KIT  
+    // Files live in: /ember-adventures/frostwake-run/audio/  
+    //////////////////////////////////////////////////////////////  
+  -->    <!-- Core ambience loops -->  <audio id="sfx-wind"  
+src="audio/frostwake_blowing_gale_loop_174310900.mp3"  
+preload="auto"></audio>
+
+<audio id="sfx-fire"  
+src="audio/frostwake_campfire_loop.mp3"  
+preload="auto"></audio>
+
+<audio id="sfx-heart"  
+src="audio/frostwake_ominious_low_loop_175011435.mp3"  
+preload="auto"></audio>
+
+  <!-- Creature / danger stings -->  <audio id="sfx-howls"  
+src="audio/trail_failure_ending_01.mp3"  
+preload="auto"></audio>
+
+<audio id="sfx-object"  
+src="audio/trail_intro_01.mp3"  
+preload="auto"></audio>
+
+<audio id="sfx-sting"  
+src="audio/ui_danger_ping.mp3"  
+preload="auto"></audio>
+
+  <!-- Spare UI + VO channels (not all used yet, but ready) -->  <audio id="sfx-choice"  
+src="audio/ui_choice_tap.mp3"  
+preload="auto"></audio>
+
+<audio id="sfx-stat-up"  
+src="audio/ui_stat_up.mp3"  
+preload="auto"></audio>
+
+<audio id="sfx-stat-down"  
+src="audio/ui_stat_down.mp3"  
+preload="auto"></audio>
+
+<audio id="sfx-ending-reveal"  
+src="audio/ui_ending_reveal.mp3"  
+preload="auto"></audio>
+
+<audio id="vo-choice-prompt"  
+src="audio/trail_choice_prompt_01.mp3"  
+preload="auto"></audio>
+
+<audio id="vo-success-small"  
+src="audio/trail_success_small_01.mp3"  
+preload="auto"></audio>
+
+<audio id="vo-success-major"  
+src="audio/trail_success_major_01.mp3"  
+preload="auto"></audio>
+
+<audio id="vo-failure-ouch"  
+src="audio/trail_failure_ouch_01.mp3"  
+preload="auto"></audio>
+
+<audio id="vo-camp-return"  
+src="audio/trail_camp_return_01.mp3"  
+preload="auto"></audio>
+
+  <script>  
+    // ////////////////////////////////////////////////////////////  
+    // 🎚️ BLOCK 3 — TUNING KNOBS (HUMAN-EDITABLE)  
+    // ////////////////////////////////////////////////////////////  
+    const STATS_START = {  
+      health: 10,  
+      bravery: 5,  
+      caution: 5,  
+      fear: 3  
+    };  
+  
+    const MAX_STAT = 15; // used for bar scaling  
+  
+    const FATE_CONFIG = {  
+      // Fate roll is 1–100. These thresholds categorize the result.  
+      lowCutoff: 33,  
+      midCutoff: 66,  
+      // Nudge magnitude when pressing "Nudge Fate"  
+      nudgeMagnitude: 8  
+    };  
+  
+    // Audio toggles — flip to false if you want it totally silent.  
+    const AUDIO_TUNING = {  
+      enabled: true,  
+      masterVolume: 0.6,  
+      // Scene-level ambience  
+      sceneAmbience: {  
+        camp: "wind",  
+        cabin: "fire",  
+        trail: "wind",  
+        river: "wind",  
+        ridge: "wind",  
+        echoLake: "heart",  
+        encircle: "heart",  
+        homeCold: "fire",  
+        homeShadowed: "fire",  
+        homeBearer: "object"  
+      },  
+      // One-shot stings on key moments  
+      stings: {  
+        glimpse: "sting",  
+        creatureClose: "howls",  
+        objectPulse: "object"  
+      }  
+    };  
+  
+    // ////////////////////////////////////////////////////////////  
+    // 🔧 BLOCK 4 — STORY GRAPH & ENGINE (BEHAVIOR)  
+    // ////////////////////////////////////////////////////////////  
+  
+    // SFX helpers  
+    const sfx = {  
+      wind:   document.getElementById("sfx-wind"),  
+      fire:   document.getElementById("sfx-fire"),  
+      howls:  document.getElementById("sfx-howls"),  
+      heart:  document.getElementById("sfx-heart"),  
+      object: document.getElementById("sfx-object"),  
+      sting:  document.getElementById("sfx-sting")  
+    };  
+  
+    function stopAllSfx() {  
+      Object.values(sfx).forEach(a => {  
+        if (!a) return;  
+        a.pause();  
+        a.currentTime = 0;  
+      });  
+    }  
+  
+    function playLoop(name) {  
+      if (!AUDIO_TUNING.enabled) return;  
+      const audio = sfx[name];  
+      if (!audio) return;  
+      try {  
+        audio.loop = true;  
+        audio.volume = AUDIO_TUNING.masterVolume;  
+        audio.currentTime = 0;  
+        audio.play().catch(() => {});  
+      } catch (_) {}  
+    }  
+  
+    function playSting(name) {  
+      if (!AUDIO_TUNING.enabled) return;  
+      const audio = sfx[name];  
+      if (!audio) return;  
+      try {  
+        audio.loop = false;  
+        audio.volume = AUDIO_TUNING.masterVolume;  
+        audio.currentTime = 0;  
+        audio.play().catch(() => {});  
+      } catch (_) {}  
+    }  
+  
+    // Story graph — 8 scenes including endings  
+    const SCENES = {  
+      camp: {  
+        id: "camp",  
+        title: "Relay Cabin",  
+        tagline: "Where the warmth began.",  
+        text: "The wind outside the relay cabin stills —\n" +  
+              "the kind of stillness that comes only when the land is listening.\n\n" +  
+              "Your gloves steam as you cinch shut the canvas pack. The object inside gives off a faint, steady warmth, " +  
+              "like a coal wrapped in snowcloth. No shape. No glimmer. Only heat… and the sense of something newly awake.\n\n" +  
+              "Your dogs shuffle in the frost, uneasy. Beyond the tree line, a hollow sound rides the air — " +  
+              "not quite a howl, not quite a voice. For a moment it matches your own breath, as if the night were " +  
+              "trying on your lungs.",  
+        choices: [  
+          {  
+            id: "camp-step",  
+            label: "Step out quickly and shut the cabin door as if nothing is wrong.",  
+            note: "+1 bravery",  
+            effects: { bravery: +1 },  
+            next: "cabin",  
+            fateFlavor: {  
+              low:  "As the door shuts, you hear the echo mimic your footfall on the boards.",  
+              mid:  "The latch catches with a clean click. Behind you, the cabin feels instantly distant.",  
+              high: "For a heartbeat, the echo breaks and the world sounds like itself again."  
+            },  
+            sfxSting: null  
+          },  
+          {  
+            id: "camp-listen",  
+            label: "Pause at the threshold, listening for the echo in the dark.",  
+            note: "+1 caution, +1 fear",  
+            effects: { caution: +1, fear: +1 },  
+            next: "cabin",  
+            fateFlavor: {  
+              low:  "The echo answers your breathing perfectly, half a heartbeat late.",  
+              mid:  "You catch nothing solid — just wind and the creak of snow-load in the trees.",  
+              high: "For a long moment there is only silence, thick as wool. The echo hides."  
+            },  
+            sfxSting: "glimpse"  
+          },  
+          {  
+            id: "camp-dogs",  
+            label: "Whisper to the dogs, calming them before you move.",  
+            note: "+1 caution, -1 fear",  
+            effects: { caution: +1, fear: -1 },  
+            next: "cabin",  
+            fateFlavor: {  
+              low:  "One dog refuses to look toward the trees, staring at your pack instead.",  
+              mid:  "Their ears flick to the dark, but they settle under your voice.",  
+              high: "For a moment they lean into you, sharing a warmth the pack does not own."  
+            },  
+            sfxSting: null  
+          }  
+        ],  
+        final: false  
+      },  
+  
+      cabin: {  
+        id: "cabin",  
+        title: "Leaving the Light",  
+        tagline: "The last door between you and the trail.",  
+        text: "The cabin lantern shrinks behind you as you step into the open.\n\n" +  
+              "Snow creaks under your boots. The dogs' breaths rise in pale plumes. " +  
+              "The pack on your shoulders pulses with a slow, inward heat, " +  
+              "as if something inside it dreams.\n\n" +  
+              "Ahead: the trail north, a dark vein through the trees.\n" +  
+              "Behind: the only door that still locks.",  
+        choices: [  
+          {  
+            id: "cabin-north",  
+            label: "Face north and start walking. The sooner you move, the sooner this ends.",  
+            note: "+1 bravery",  
+            effects: { bravery: +1 },  
+            next: "trail",  
+            fateFlavor: {  
+              low:  "Your first steps are echoed sharply — crunch, crunch — always a half-beat late.",  
+              mid:  "Your stride finds a rhythm. The echo lags, uncertain, farther back.",  
+              high: "For a moment, only your own sound exists. The night listens and waits."  
+            },  
+            sfxSting: null  
+          },  
+          {  
+            id: "cabin-lookback",  
+            label: "Look back at the cabin windows to see if anything watches from inside.",  
+            note: "+1 fear",  
+            effects: { fear: +1 },  
+            next: "trail",  
+            fateFlavor: {  
+              low:  "For an instant you think you see yourself at the window… then the glass goes dark.",  
+              mid:  "The pane shows only lamplight and your own faint reflection in the ice.",  
+              high: "Empty glass. Empty room. The warmth on your back feels heavier."  
+            },  
+            sfxSting: "glimpse"  
+          }  
+        ],  
+        final: false  
+      },  
+  
+      trail: {  
+        id: "trail",  
+        title: "Long Trail North",  
+        tagline: "Where footsteps double.",  
+        text: "Night stretches like a black hide pulled taut over the world.\n\n" +  
+              "Your boots crunch in time with your pulse. The pack's warmth seeps through coat and bone, " +  
+              "a gentle throb at the center of you. The dogs pull steady, breath pluming under a sky of " +  
+              "still, warm stars — the kind sailors once swore were the watchfires of gods.\n\n" +  
+              "Then the rhythm breaks.\n\n" +  
+              "Crunch.\n" +  
+              "…Crunch.\n\n" +  
+              "Something matches your step, always half a heartbeat behind.",  
+        choices: [  
+          {  
+            id: "trail-speed",  
+            label: "Increase your pace, pretending not to notice the second rhythm.",  
+            note: "+1 bravery, +1 fear",  
+            effects: { bravery: +1, fear: +1 },  
+            next: "river",  
+            fateFlavor: {  
+              low:  "The second crunch quickens with you, leaning close enough to feel in your spine.",  
+              mid:  "The echo stays behind you, never gaining, never fading.",  
+              high: "You outpace it for a while. The trail sounds like your own again."  
+            },  
+            sfxSting: "creatureClose"  
+          },  
+          {  
+            id: "trail-stop",  
+            label: "Stop dead and listen to see if it stops too.",  
+            note: "+1 caution",  
+            effects: { caution: +1 },  
+            next: "river",  
+            fateFlavor: {  
+              low:  "Your last crunch lingers. Then—another crunch, alone, stepping into your silence.",  
+              mid:  "For several breaths there is nothing. Then the trees shift, something backing away.",  
+              high: "Only your heartbeat in your ears. The dogs stare into the dark, but nothing moves."  
+            },  
+            sfxSting: null  
+          },  
+          {  
+            id: "trail-call",  
+            label: "Call out into the dark: \"Who walks?\"",  
+            note: "+1 bravery, +1 fear",  
+            effects: { bravery: +1, fear: +1 },  
+            next: "river",  
+            fateFlavor: {  
+              low:  "Your own voice answers from the trees, half-whispered and wrong.",  
+              mid:  "No word returns, but a thin howl lifts and dies, as if bitten off.",  
+              high: "The wind takes your words and tears them into frost. The echo keeps its name."  
+            },  
+            sfxSting: "howls"  
+          }  
+        ],  
+        final: false  
+      },  
+  
+      river: {  
+        id: "river",  
+        title: "River Cut",  
+        tagline: "Where the water remembers.",  
+        text: "The trail dips until you hear it — the steady rush of a narrow river, " +  
+              "a silver line sawn through the dark.\n\n" +  
+              "Stones glisten along the bank. Ice plates clink softly as the current nudges them downstream.\n" +  
+              "Behind you, the echo of your footsteps goes quiet, as if the sound itself fears to cross.\n\n" +  
+              "The pack at your back grows warmer, like a heartbeat held in both hands.",  
+        choices: [  
+          {  
+            id: "river-drink",  
+            label: "Kneel and drink from the edge, watching the opposite bank.",  
+            note: "+1 health, +1 caution",  
+            effects: { health: +1, caution: +1 },  
+            next: "ridge",  
+            fateFlavor: {  
+              low:  "Your reflection is joined by another shape, pale and tall, then shattered by your cupped hands.",  
+              mid:  "The water shows only your face, drawn and rimmed with frost.",  
+              high: "The cold burns your throat clean. For a breath, the thing behind you feels far away."  
+            },  
+            sfxSting: null  
+          },  
+          {  
+            id: "river-leap",  
+            label: "Leap across, just to prove you can outpace whatever follows.",  
+            note: "+2 bravery, -1 health",  
+            effects: { bravery: +2, health: -1 },  
+            next: "ridge",  
+            fateFlavor: {  
+              low:  "You slip. For a moment the river grabs your ankle — and something cold grabs with it.",  
+              mid:  "You land hard, knee barking, but upright. The echo hesitates on the other bank.",  
+              high: "You clear the gap cleanly. For one sharp heartbeat, you feel untouchable."  
+            },  
+            sfxSting: "creatureClose"  
+          }  
+        ],  
+        final: false  
+      },  
+  
+      ridge: {  
+        id: "ridge",  
+        title: "Ridge Back",  
+        tagline: "Where the sky feels too close.",  
+        text: "The climb is steeper than it looked from below.\n\n" +  
+              "Boot after boot, breath after breath, you drag yourself and the team up " +  
+              "toward a broken line of rock. The pack's warmth spreads between your shoulder blades, " +  
+              "now more insistent than comforting.\n\n" +  
+              "At the top, the world opens.\n" +  
+              "The trail winds below like a dark vein. The river glows faintly. " +  
+              "Far behind, the relay cabin is a dying ember.\n" +  
+              "Above, the sky feels low enough to touch.",  
+        choices: [  
+          {  
+            id: "ridge-vow",  
+            label: "Stand tall, breathe the thin air, and vow to carry this thing as far as it takes.",  
+            note: "+1 bravery, -1 fear",  
+            effects: { bravery: +1, fear: -1 },  
+            next: "echoLake",  
+            fateFlavor: {  
+              low:  "The vow tastes like iron. Something on the slope below answers with a low, eager rumble.",  
+              mid:  "Your words vanish into the cold. The echo listens, changes shape.",  
+              high: "For a moment the stars brighten, as if approving… or taking note."  
+            },  
+            sfxSting: "objectPulse"  
+          },  
+          {  
+            id: "ridge-hide",  
+            label: "Drop behind a rock outcrop and watch the trail below for your pursuer.",  
+            note: "+1 caution, +1 fear",  
+            effects: { caution: +1, fear: +1 },  
+            next: "echoLake",  
+            fateFlavor: {  
+              low:  "You see yourself on the trail below — same stride, same pack — walking where you just climbed.",  
+              mid:  "Something pale moves in the trees, too thin to be a bear, too tall to be a wolf.",  
+              high: "Nothing moves. But the feeling of being watched sinks deeper into your bones."  
+            },  
+            sfxSting: "glimpse"  
+          }  
+        ],  
+        final: false  
+      },  
+  
+      echoLake: {  
+        id: "echoLake",  
+        title: "Echo Lake",  
+        tagline: "Where mirrors are made of ice.",  
+        text: "The ridge bends into a shallow basin where an old lake has frozen over, " +  
+              "a sheet of black glass dusted with snow.\n\n" +  
+              "Your dogs balk at the edge. The pack at your back flares hotter, " +  
+              "as if the thing inside recognizes this place.\n\n" +  
+              "Across the lake, the faint lights of the village flicker — " +  
+              "small, human stars in the dark.",  
+        choices: [  
+          {  
+            id: "lake-cross",  
+            label: "Step onto the ice and cross straight toward the village lights.",  
+            note: "-1 health, +1 bravery, +1 fear",  
+            effects: { health: -1, bravery: +1, fear: +1 },  
+            next: "encircle",  
+            fateFlavor: {  
+              low:  "The ice sings under you — long, broken notes that match your footfalls too well.",  
+              mid:  "Cracks spider under your boots but hold. Your reflection lags a step behind.",  
+              high: "The lake bears your weight without protest. The thing behind you skates in silence."  
+            },  
+            sfxSting: "creatureClose"  
+          },  
+          {  
+            id: "lake-skirt",  
+            label: "Lead the team around the shore, keeping to thicker snow and shadow.",  
+            note: "+2 caution",  
+            effects: { caution: +2 },  
+            next: "encircle",  
+            fateFlavor: {  
+              low:  "Shapes move under the ice, pacing you — pale paws, long ears, something like your face.",  
+              mid:  "The lake holds its secrets, though the dogs keep glancing at the dark center.",  
+              high: "You move like a ghost along the shore. The echo loses track of your exact steps."  
+            },  
+            sfxSting: null  
+          },  
+          {  
+            id: "lake-pack",  
+            label: "Set the pack on the ice and watch how the warmth radiates.",  
+            note: "+1 fear, +1 bravery",  
+            effects: { fear: +1, bravery: +1 },  
+            next: "encircle",  
+            fateFlavor: {  
+              low:  "Frost recoils from the pack in a jagged circle. Within it, something tall and jointed stirs.",  
+              mid:  "The ice hazes beneath it, like breath on glass. For a moment you see a second shadow.",  
+              high: "The warmth forms a ring of safety around the object… and an answering ring farther out."  
+            },  
+            sfxSting: "objectPulse"  
+          }  
+        ],  
+        final: false  
+      },  
+  
+      encircle: {  
+        id: "encircle",  
+        title: "The Encircle",  
+        tagline: "Where the trail decides what follows.",  
+        text: "You reach the last stretch of snow between lake and village.\n\n" +  
+              "Moonlight crawls up over the ridge, a cracked pale disc shining through thin cloud. " +  
+              "The village lamps burn low and human ahead.\n\n" +  
+              "Behind you the footsteps finally stop hiding.\n" +  
+              "They close in until you can feel each one in your spine.",  
+        choices: [  
+          {  
+            id: "encircle-run",  
+            label: "Run for the village lights without looking back.",  
+            note: "Bravery vs fear ending",  
+            effects: {},  
+            next: "ENDING_DYNAMIC",  
+            fateFlavor: {  
+              low:  "You feel hot breath at your neck all the way to the first door.",  
+              mid:  "Something paces you in the snow just out of sight, never quite touching.",  
+              high: "For a few strides you are alone… then many footsteps follow."  
+            },  
+            sfxSting: "creatureClose"  
+          },  
+          {  
+            id: "encircle-face",  
+            label: "Turn and face whatever has followed you.",  
+            note: "Fear-shaped creature ending",  
+            effects: { bravery: +1 },  
+            next: "ENDING_DYNAMIC",  
+            fateFlavor: {  
+              low:  "What stands there wears your outline and something else's eyes.",  
+              mid:  "The shape shifts through bear, hare, wolf, and you, unable to decide.",  
+              high: "The snow between you holds a mirror made of frost, waiting to see who moves first."  
+            },  
+            sfxSting: "glimpse"  
+          },  
+          {  
+            id: "encircle-pack",  
+            label: "Set the pack down in the snow between you and the thing.",  
+            note: "Object-awakening ending",  
+            effects: { fear: -1, bravery: +1 },  
+            next: "ENDING_DYNAMIC",  
+            fateFlavor: {  
+              low:  "The warmth bursts outward, and all shadows lean toward it like starving things.",  
+              mid:  "The pack glows faintly. The footsteps hesitate.",  
+              high: "Heat flares, not from you but through you. Footsteps fall back."  
+            },  
+            sfxSting: "objectPulse"  
+          }  
+        ],  
+        final: false  
+      },  
+  
+      // Endings are resolved dynamically but we keep three IDs  
+      homeCold: {  
+        id: "homeCold",  
+        title: "Back at Camp — Taken by Echo",  
+        tagline: "Some footsteps never stop.",  
+        isEnding: true  
+      },  
+      homeShadowed: {  
+        id: "homeShadowed",  
+        title: "Back at Camp — The Haunt Follows",  
+        tagline: "You made it. It did too.",  
+        isEnding: true  
+      },  
+      homeBearer: {  
+        id: "homeBearer",  
+        title: "Back at Camp — Bearer of the Ember Core",  
+        tagline: "You brought back more than they asked for.",  
+        isEnding: true  
+      }  
+    };  
+  
+    let stats = { ...STATS_START };  
+    let currentSceneId = "camp";  
+    let lastFateRoll = null;  
+    let fateBias = 0;  // nudged by "Nudge Fate"  
+    let runSeed = Math.floor(Math.random() * 999999);  
+  
+    // DOM  
+    const sceneTitleEl = document.getElementById("scene-title");  
+    const sceneTaglineEl = document.getElementById("scene-tagline");  
+    const sceneTextEl = document.getElementById("scene-text");  
+    const choicesEl = document.getElementById("choices");  
+    const fateLineEl = document.getElementById("fate-line");  
+    const endingBannerEl = document.getElementById("ending-banner");  
+    const restartBtn = document.getElementById("restart-btn");  
+    const rerollBtn = document.getElementById("soft-reroll-btn");  
+    const endingSummaryEl = document.getElementById("ending-summary");  
+    const runIdEl = document.getElementById("runid");  
+  
+    const healthBar = document.getElementById("stat-health");  
+    const braveryBar = document.getElementById("stat-bravery");  
+    const cautionBar = document.getElementById("stat-caution");  
+    const fearBar = document.getElementById("stat-fear");  
+  
+    const healthValEl = document.getElementById("stat-health-val");  
+    const braveryValEl = document.getElementById("stat-bravery-val");  
+    const cautionValEl = document.getElementById("stat-caution-val");  
+    const fearValEl = document.getElementById("stat-fear-val");  
+  
+    function clampStat(value) {  
+      return Math.max(0, Math.min(MAX_STAT, value));  
+    }  
+  
+    function rollFate() {  
+      const base = Math.floor(Math.random() * 100) + 1;  
+      const biased = Math.max(1, Math.min(100, base + fateBias));  
+      lastFateRoll = biased;  
+      // decay bias each roll  
+      fateBias = Math.round(fateBias * 0.4);  
+      return biased;  
+    }  
+  
+    function updateStatsUI() {  
+      const h = clampStat(stats.health);  
+      const b = clampStat(stats.bravery);  
+      const c = clampStat(stats.caution);  
+      const f = clampStat(stats.fear);  
+  
+      const toPct = v => (v / MAX_STAT) * 100;  
+  
+      healthBar.style.width = toPct(h) + "%";  
+      braveryBar.style.width = toPct(b) + "%";  
+      cautionBar.style.width = toPct(c) + "%";  
+      fearBar.style.width = toPct(f) + "%";  
+  
+      healthValEl.textContent = h;  
+      braveryValEl.textContent = b;  
+      cautionValEl.textContent = c;  
+      fearValEl.textContent = f;  
+    }  
+  
+    function buildEndingSummary(endingId) {  
+      const { health, bravery, caution, fear } = stats;  
+      let flavor = "";  
+  
+      if (endingId === "homeCold") {  
+        flavor += "The village doors never opened in time. Their lamps still burn, " +  
+                  "but you walk a colder trail now — one step behind yourself forever.\n\n";  
+      } else if (endingId === "homeShadowed") {  
+        flavor += "You made it back alive, but each footprint behind your door " +  
+                  "belongs to something that learned your stride.\n\n";  
+      } else if (endingId === "homeBearer") {  
+        flavor += "They asked for medicine. You brought back a heart of waking fire. " +  
+                  "Whatever hunted you now circles the village instead of the cabin.\n\n";  
+      }  
+  
+      if (bravery > caution + 2) {  
+        flavor += "Tonight the trail names you bold — the kind who steps forward before the embers fade.\n";  
+      } else if (caution > bravery + 2) {  
+        flavor += "Tonight the trail marks you careful — weighing each shadow before moving again.\n";  
+      } else {  
+        flavor += "Tonight the trail remembers you as balanced — wary enough to live, willing enough to walk.\n";  
+      }  
+  
+      if (fear >= 10) {  
+        flavor += "Fear has teeth now. It knows the way to your door.\n";  
+      } else if (fear <= 3) {  
+        flavor += "Your fear is not gone, but it walks behind you instead of ahead.\n";  
+      }  
+  
+      if (health <= 5) {  
+        flavor += "Your body will carry the bruises of this run for a long winter.\n";  
+      } else if (health >= 12) {  
+        flavor += "You return stronger than you left, as if the cold hammered you into something sharper.\n";  
+      }  
+  
+      return flavor.trim();  
+    }  
+  
+    function describeFate(choice, roll) {  
+      if (!choice.fateFlavor) return "";  
+      const { lowCutoff, midCutoff } = FATE_CONFIG;  
+  
+      if (roll <= lowCutoff) {  
+        return choice.fateFlavor.low || "";  
+      } else if (roll <= midCutoff) {  
+        return choice.fateFlavor.mid || "";  
+      } else {  
+        return choice.fateFlavor.high || "";  
+      }  
+    }  
+  
+    function resolveDynamicEnding(finalChoiceId) {  
+      const { bravery, caution, fear, health } = stats;  
+      const roll = rollFate();  
+  
+      let endingId = "homeShadowed";  
+  
+      if (health <= 0 || (fear >= bravery + 3 && fear >= caution + 3 && roll <= FATE_CONFIG.lowCutoff)) {  
+        endingId = "homeCold";  
+      } else if (finalChoiceId === "encircle-pack" && roll >= FATE_CONFIG.midCutoff) {  
+        endingId = "homeBearer";  
+      } else if (finalChoiceId === "encircle-face" && bravery >= caution && roll >= FATE_CONFIG.midCutoff) {  
+        endingId = "homeBearer";  
+      } else if (fear >= 10 && roll <= FATE_CONFIG.midCutoff) {  
+        endingId = "homeCold";  
+      } else if (roll >= 92) {  
+        endingId = "homeBearer";  
+      } else {  
+        endingId = "homeShadowed";  
+      }  
+  
+      const endingScene = SCENES[endingId];  
+      const summary = buildEndingSummary(endingId);  
+  
+      stopAllSfx();  
+      playLoop(AUDIO_TUNING.sceneAmbience[endingId] || "fire");  
+  
+      sceneTitleEl.textContent = endingScene.title;  
+      sceneTaglineEl.textContent = endingScene.tagline;  
+      sceneTextEl.textContent =  
+        "You return to a circle of light, though not the one you left.\n\n" +  
+        "The embers greet you. The village listens. The trail remembers.\n\n" +  
+        "Somewhere out on the snow, something keeps walking.";  
+  
+      choicesEl.innerHTML = "";  
+      fateLineEl.textContent = "";  
+  
+      endingBannerEl.textContent = summary;  
+      endingBannerEl.style.display = "block";  
+  
+      endingSummaryEl.textContent =  
+        "Each run writes a new memory into the frost. Restart to walk a different line of footprints.";  
+    }  
+  
+    function renderScene() {  
+      const scene = SCENES[currentSceneId];  
+      if (!scene) return;  
+  
+      // ambience  
+      stopAllSfx();  
+      const ambKey = AUDIO_TUNING.sceneAmbience[currentSceneId];  
+      if (ambKey) {  
+        playLoop(ambKey);  
+      }  
+  
+      sceneTitleEl.textContent = scene.title || "";  
+      sceneTaglineEl.textContent = scene.tagline || "";  
+      sceneTextEl.textContent = scene.text || "";  
+  
+      choicesEl.innerHTML = "";  
+      fateLineEl.textContent = "";  
+      endingBannerEl.style.display = "none";  
+  
+      if (scene.final || scene.isEnding) {  
+        return;  
+      }  
+  
+      (scene.choices || []).forEach(choice => {  
+        const btn = document.createElement("button");  
+        btn.className = "choice-btn";  
+  
+        const main = document.createElement("span");  
+        main.textContent = choice.label;  
+        btn.appendChild(main);  
+  
+        if (choice.note) {  
+          const sub = document.createElement("span");  
+          sub.className = "secondary";  
+          sub.textContent = choice.note;  
+          btn.appendChild(sub);  
+        }  
+  
+        btn.addEventListener("click", () => {  
+          applyChoice(scene, choice);  
+        });  
+  
+        choicesEl.appendChild(btn);  
+      });  
+    }  
+  
+    function applyChoice(scene, choice) {  
+      // Apply stat effects  
+      const effects = choice.effects || {};  
+      for (const key of Object.keys(effects)) {  
+        stats[key] = (stats[key] ?? 0) + effects[key];  
+      }  
+  
+      // Fate roll and soft description  
+      const roll = rollFate();  
+      const flavor = describeFate(choice, roll);  
+      fateLineEl.textContent = flavor;  
+  
+      // Play sting if any  
+      if (choice.sfxSting) {  
+        playSting(choice.sfxSting);  
+      }  
+  
+      updateStatsUI();  
+  
+      // Move to next  
+      if (choice.next === "ENDING_DYNAMIC") {  
+        resolveDynamicEnding(choice.id);  
+        return;  
+      } else {  
+        currentSceneId = choice.next;  
+        renderScene();  
+      }  
+    }  
+  
+    function restartStory() {  
+      stats = { ...STATS_START };  
+      currentSceneId = "camp";  
+      fateBias = 0;  
+      lastFateRoll = null;  
+      runSeed = Math.floor(Math.random() * 999999);  
+      runIdEl.textContent = "Run ID: " + runSeed.toString().padStart(6, "0");  
+      endingSummaryEl.textContent =  
+        "Walk once to unlock your first ending.\nDifferent choices and hidden rolls shape what follows you.";  
+      updateStatsUI();  
+      renderScene();  
+    }  
+  
+    function nudgeFate() {  
+      // Gentle bias toward higher rolls but not guaranteed.  
+      fateBias += FATE_CONFIG.nudgeMagnitude;  
+      if (fateBias > 20) fateBias = 20;  
+      fateLineEl.textContent = "You steady your breathing, nudging the night a little toward your side.";  
+    }  
+  
+    // Events  
+    restartBtn.addEventListener("click", restartStory);  
+    rerollBtn.addEventListener("click", nudgeFate);  
+  
+    // Boot  
+    restartStory();  
+  </script>    <!--  
+    //////////////////////////////////////////////////////////////  
+    // 📝 BLOCK 5 — HUMAN NOTES (DO NOT ERASE, APPEND BELOW)  
+    //////////////////////////////////////////////////////////////  
+    [TODO][SFX FILE CHECKLIST]  
+      - wind:   looping cold wind with occasional gusts (low/medium intensity)  
+      - fire:   cabin / campfire crackle, low and warm  
+      - howls:  distant creature howl or wind-howl hybrid  
+      - heart:  low, slow heartbeat or subtle tension drone  
+      - object: soft pulsing hum or ember-like flare sound  
+      - sting:  short horror sting (for glimpses / jump moments)  
+  
+    [HOW TO WIRE AUDIO]  
+      - Place your .mp3/.ogg files in a folder (e.g. /audio/).  
+      - Set the src attributes above, e.g.:  
+          <audio id="sfx-wind" src="/audio/frost-wind.mp3" preload="auto"></audio>  
+      - Keep AUDIO_TUNING.enabled = true to hear them.  
+      - You can change which scene uses which ambience by editing AUDIO_TUNING.sceneAmbience.  
+  
+    [FUTURE IDEAS]  
+      - Log of paths taken across multiple runs.  
+      - Tie Run ID to seed-based roll system for reproducible runs.  
+      - Export last run summary as text snippet for narration / ElevenLabs VO script.  
+  -->  </body>  
+</html>  This is an example of a game we made
