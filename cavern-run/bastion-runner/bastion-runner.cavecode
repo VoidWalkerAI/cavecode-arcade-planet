@@ -1,7 +1,7 @@
 CAVECODE SPEC — BASTION RUNNER (ARC-CR-001)
 Category: cavern-run
 Engine: Side-view runner with five levels
-Version: 1.1
+Version: 1.2
 
 🪨 BLOCK 1 — IDENTITY
 Title: Cavern Run — Bastion Runner
@@ -9,6 +9,7 @@ Game ID: ARC-CR-001
 Goal: Jump grounded hazards, collect coins and reach each distance target.
 
 🎮 BLOCK 2 — CORE LOOP / BEHAVIOR
+- Wait for Start Level before moving or spawning. Restart returns to Ready.
 - Exactly one requestAnimationFrame loop per run; cancel it before restarting.
 - Measure jump position in pixels and velocity in pixels/second, upward positive.
 - Advance position with v*dt + 0.5*g*dt*dt, then velocity with g*dt.
@@ -17,16 +18,17 @@ Goal: Jump grounded hazards, collect coins and reach each distance target.
 - Move hazards left with level speed. Ground hazards sit on the ground;
   coins float 36-64px above it.
 - Each hazard can cost one life. Three lives per level; zero ends the run.
-- Coins increase chain by 0.2 up to 3.5 and add 40*chain to distance.
+- Coins increase chain by 0.2 up to 3.5 and add 5*chain to distance.
   A hit resets chain to 1.
-- Reach target to clear the level and unlock Next Level. Never skip uncleared levels.
+- Reach target AND at least 20 seconds of play to clear the level and unlock Next Level. Never skip uncleared levels.
 - Result modal stays available until the player chooses restart/replay/next.
 - Completing level five permits looping back to level one.
 - Best distance is session-only and measures an individual level attempt.
 
 🕹️ BLOCK 3 — INPUT
 Space / W / ArrowUp, Jump button, or tap/click playfield: jump if grounded.
-Restart Run: restart current level with three lives and zero distance.
+Start Level: begin the ready level.
+Restart Run: reset current level to Ready with three lives and zero distance.
 Next Level: available only after clearing the current level.
 
 🎚️ BLOCK 4 — TUNING KNOBS (HUMAN EDIT ZONE)
@@ -34,18 +36,19 @@ GRAVITY: -1400           # pixels / second squared
 JUMP_VELOCITY: 520       # pixels / second
 MAX_FRAME_MS: 50
 livesPerLevel: 3
-Level name          | target | speed | spawnInterval(ms) | coinChance
-Warm-Up Cavern      | 400    | 3.1   | 1100              | 0.25
-Low Ceiling Run     | 650    | 3.7   | 950               | 0.30
-Shardfall Tunnel    | 900    | 4.3   | 830               | 0.35
-Breaker Gallery    | 1200   | 4.9   | 720               | 0.40
-Deep Bastion        | 1600   | 5.4   | 620               | 0.45
-speed retains distance per nominal 16.67ms frame; hazard movement uses speed*3.2.
+Level name          | target | speed (units/s) | spawn(ms) | approach(s) | coinChance
+Warm-Up Cavern      | 400    | 20              | 1800      | 2.2         | 0.25
+Low Ceiling Run     | 650    | 24              | 1650      | 2.0         | 0.30
+Shardfall Tunnel    | 900    | 28              | 1500      | 1.9         | 0.35
+Breaker Gallery    | 1200   | 32              | 1400      | 1.8         | 0.40
+Deep Bastion        | 1600   | 36              | 1300      | 1.7         | 0.45
+Hazard speed = max(80, playfieldWidth*0.86-32) / approachSeconds pixels/s.
+Phone layout hides the verbose overview and keeps HUD, track and large Jump visible.
 Executable values live in index.html. Keep this companion map synchronized.
 
 🌐 BLOCK 5 — PUBLIC TEXT
 Title: Bastion Runner
-Buttons: Jump / Restart Run / Next Level
+Buttons: Start Level / Jump / Restart Run / Next Level
 Results: Level Clear / Deep Bastion Clear / Run Lost
 HUD: Level / Distance / Target / Lives / Best Run / Jumps
 

@@ -155,7 +155,7 @@ test('Basic Swap: win/loss block play; restart clears selection and result', () 
 test('Bastion: comparable jump height at 30, 60, 120 Hz; lands; no double jump', () => {
   const peaks=[];
   for (const hz of [30,60,120]) {
-    const g=game(bastionPath); g.frame(0); g.run('triggerJump();triggerJump()');
+    const g=game(bastionPath); g.run("startRun()"); g.frame(0); g.run('triggerJump();triggerJump()');
     assert.equal(g.run('jumps'),1);
     let peak=0;
     for(let i=1;i<=hz;i++){g.frame(i*1000/hz);peak=Math.max(peak,g.run('posY'));}
@@ -167,20 +167,43 @@ test('Bastion: comparable jump height at 30, 60, 120 Hz; lands; no double jump',
 test('Bastion: repeated restart keeps one frame; long gaps capped; level cannot skip', () => {
   const g=game(bastionPath);
   for(let i=0;i<20;i++)g.elements.get('restartBtn').click();
-  assert.equal(g.frames.size,1);g.frame(0);g.frame(60000);
+  assert.equal(g.frames.size,0);g.elements.get("startBtn").click();g.frame(0);g.frame(60000);
   assert.ok(g.run('distance')<10);assert.equal(g.frames.size,1);
   g.elements.get('nextLevelBtn').click();assert.equal(g.run('currentLevelIndex'),0);
-  g.run('distance=LEVELS[0].target');g.frame(60016);
+  g.run('distance=LEVELS[0].target;elapsedSeconds=20');g.frame(60016);
   assert.equal(g.run('levelCleared'),true);assert.equal(g.frames.size,0);
   g.elements.get('modalPrimary').click();assert.equal(g.run('currentLevelIndex'),1);
-  assert.equal(g.frames.size,1);
+  assert.equal(g.frames.size,0);assert.equal(g.run('running'),false);
 });
 test('Bastion: grounded hit costs one life; elevated jump clears same hazard', () => {
-  const g=game(bastionPath);g.frame(0);
+  const g=game(bastionPath);g.run("startRun()");g.frame(0);
   const hazard=`spawnHazard(); const h=[...hazards.values()].at(-1);h.isCoin=false;h.x=60;h.el.style.left='60px';h.el.style.bottom='78px';`;
   g.run('{'+hazard+'}');g.frame(0);assert.equal(g.run('lives'),2);
   g.run('hazards.forEach(h=>h.el.remove());hazards.clear();posY=95;isOnGround=false;applyRunnerPosition()');
   g.run('{'+hazard+'}');g.frame(0);assert.equal(g.run('lives'),2);
+});
+test('Bastion: waits for Start; first hit does not complete a two-second level', () => {
+  const g=game(bastionPath);
+  assert.equal(g.run('running'),false);assert.equal(g.frames.size,0);
+  g.frame(5000);assert.equal(g.run('distance'),0);
+  g.elements.get('startBtn').click();g.frame(0);
+  for(let i=1;i<=120;i++)g.frame(i*1000/60);
+  g.run('handleHit(null)');
+  assert.equal(g.run('lives'),2);assert.equal(g.run('levelCleared'),false);
+  assert.ok(g.run('distance')<45);
+  g.run('distance=LEVELS[0].target');g.frame(2016);
+  assert.equal(g.run('levelCleared'),false);
+});
+test('Bastion: visible warning time stays consistent on phone and desktop', () => {
+  for (const width of [280,360,640]) {
+    const g=game(bastionPath);g.elements.get('playfield').clientWidth=width;
+    g.run('startRun()');g.frame(0);
+    g.run('spawnHazard();spawnTimer=-10000');
+    const start=g.run('[...hazards.values()][0].x');
+    for(let i=1;i<=60;i++)g.frame(i*1000/60);
+    const moved=start-g.run('[...hazards.values()][0].x');
+    assert.ok(Math.abs(moved-(width*.86-32)/2.2)<.01);
+  }
 });
 let failed=0;
 for(const [name,fn] of tests){try{fn();console.log('PASS',name)}catch(e){failed++;console.error('FAIL',name,'\n',e.stack)}}

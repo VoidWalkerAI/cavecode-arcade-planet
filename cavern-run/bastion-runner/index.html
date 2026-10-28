@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Bastion Runner · ARC-CR-001</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!--
     BLOCK 1 — SHELL & BRAND (LOCKED)
@@ -345,6 +345,30 @@
     .hidden {
       display: none;
     }
+    .ready-panel { display:flex; flex-direction:column; gap:8px; text-align:center; padding:12px; }
+    .ready-panel[hidden] { display:none; }
+    .ready-panel span { font-size:.85rem; color:#cbd5e1; }
+    .track-cue { text-align:right; color:#fca5a5; font-size:.7rem; padding:4px 8px 8px; }
+    #playfield { height:220px; min-height:220px; touch-action:manipulation; }
+    #ground { border-top:2px solid #475569; }
+    .btn { min-height:48px; touch-action:manipulation; }
+    #jumpBtn { min-width:140px; font-size:1.05rem; }
+    @media (max-width:600px) {
+      body { padding:8px 8px 20px; }
+      header { padding:10px 12px; border-radius:14px; }
+      header .title-line { font-size:.9rem; letter-spacing:.03em; }
+      header .subtitle-line, .panel-header-row, .panel-body, footer { display:none; }
+      main { margin-top:8px; gap:8px; }
+      .panel { padding:8px; border-radius:14px; box-shadow:none; }
+      .stat-grid { margin:0; gap:4px; }
+      .stat-chip { padding:6px 8px; }
+      .stat-label { font-size:.62rem; }
+      .stat-value { font-size:.85rem; }
+      .playfield-wrap { padding:0; margin:0; }
+      .controls-row { gap:6px; }
+      #jumpBtn { width:100%; }
+      .hint { margin:8px 0 2px; }
+    }
   </style>
 </head>
 <body>
@@ -414,7 +438,13 @@
 
     <section class="panel">
       <div class="playfield-wrap">
-        <div id="playfield">
+        <div id="readyPanel" class="ready-panel">
+            <strong>Ready when you are.</strong>
+            <span>Red blocks approach from the right. Tap Jump to clear them.</span>
+            <button class="btn btn-primary" id="startBtn">Start Level</button>
+          </div>
+          <div class="track-cue" aria-hidden="true">JUMP RED BLOCKS · WATCH THE RIGHT EDGE ←</div>
+          <div id="playfield">
           <div id="ground"></div>
           <div id="runner"></div>
           <!-- Hazards & coins get injected here -->
@@ -457,6 +487,8 @@
   <script>
     // ---- DOM hooks ----
     const playfield = document.getElementById("playfield");
+    const readyPanel = document.getElementById("readyPanel");
+    const startBtn = document.getElementById("startBtn");
     const runnerEl = document.getElementById("runner");
 
     const statLevel = document.getElementById("stat-level");
@@ -477,18 +509,19 @@
     const modalSecondary = document.getElementById("modalSecondary");
 
     // 🎚️ BLOCK 2 — TUNING KNOBS (HUMAN EDIT ZONE)
-    // Physics uses pixels and seconds. Level speed retains its original
-    // distance-per-60Hz-frame scale; spawnInterval is milliseconds.
+    // Physics uses pixels and seconds; speed is distance units per second.
+    // approachSeconds is visible warning time, independent of screen width.
     const LEVELS = [
-      { name: "Warm-Up Cavern", target: 400, speed: 3.1, spawnInterval: 1100, coinChance: 0.25 },
-      { name: "Low Ceiling Run", target: 650, speed: 3.7, spawnInterval: 950, coinChance: 0.3 },
-      { name: "Shardfall Tunnel", target: 900, speed: 4.3, spawnInterval: 830, coinChance: 0.35 },
-      { name: "Breaker Gallery", target: 1200, speed: 4.9, spawnInterval: 720, coinChance: 0.4 },
-      { name: "Deep Bastion", target: 1600, speed: 5.4, spawnInterval: 620, coinChance: 0.45 }
+      { name: "Warm-Up Cavern", target: 400, speed: 20, approachSeconds: 2.2, spawnInterval: 1800, coinChance: 0.25 },
+      { name: "Low Ceiling Run", target: 650, speed: 24, approachSeconds: 2.0, spawnInterval: 1650, coinChance: 0.3 },
+      { name: "Shardfall Tunnel", target: 900, speed: 28, approachSeconds: 1.9, spawnInterval: 1500, coinChance: 0.35 },
+      { name: "Breaker Gallery", target: 1200, speed: 32, approachSeconds: 1.8, spawnInterval: 1400, coinChance: 0.4 },
+      { name: "Deep Bastion", target: 1600, speed: 36, approachSeconds: 1.7, spawnInterval: 1300, coinChance: 0.45 }
     ];
 
     let currentLevelIndex = 0;
     let distance = 0;
+    let elapsedSeconds = 0;
     let bestDistance = 0;
     let lives = 3;
     let jumps = 0;
@@ -563,6 +596,7 @@
       hideModal();
       currentLevelIndex = levelIndex;
       distance = 0;
+      elapsedSeconds = 0;
       chainMultiplier = 1;
       jumps = 0;
       lives = 3;
@@ -583,14 +617,24 @@
       isOnGround = true;
       applyRunnerPosition();
 
-      running = true;
+      running = false;
+      readyPanel.hidden = false;
       lastTime = null;
       spawnTimer = 0;
+      updateStatusButtonStates();
+    }
+
+    function startRun() {
+      if (running || levelCleared) return;
+      readyPanel.hidden = true;
+      running = true;
+      lastTime = null;
       updateStatusButtonStates();
       frameId = requestAnimationFrame(gameLoop);
     }
 
     function updateStatusButtonStates() {
+      jumpBtn.disabled = !running;
       nextLevelBtn.disabled = !levelCleared;
     }
 
@@ -643,7 +687,8 @@
       const cfg = LEVELS[currentLevelIndex];
 
       // Distance & spawn timing in ms
-      distance += cfg.speed * (delta / 16.67);
+      elapsedSeconds += dt;
+      distance += cfg.speed * dt;
       statDistance.textContent = Math.floor(distance) + " m";
 
       spawnTimer += delta;
@@ -672,7 +717,9 @@
       const runnerRect = runnerEl.getBoundingClientRect();
 
       hazards.forEach((obj, id) => {
-        obj.x -= cfg.speed * 3.2 * (delta / 16.67);
+        // Scale movement to the available runway, not fixed desktop pixels.
+        const runway = Math.max(80, pfWidth * 0.86 - 32);
+        obj.x -= (runway / cfg.approachSeconds) * dt;
         obj.el.style.left = obj.x + "px";
 
         if (obj.x < -60) {
@@ -696,7 +743,7 @@
           if (obj.isCoin) {
             // coin: score boost & chain bump
             chainMultiplier = Math.min(3.5, chainMultiplier + 0.2);
-            distance += 40 * chainMultiplier;
+            distance += 5 * chainMultiplier;
             statDistance.textContent = Math.floor(distance) + " m";
             playTone(720, 0.09, 0.06);
             obj.el.style.opacity = "0";
@@ -713,7 +760,7 @@
       });
 
       // Level clear?
-      if (distance >= cfg.target && running) {
+      if (distance >= cfg.target && elapsedSeconds >= 20 && running) {
         handleLevelClear();
         return;
       }
@@ -743,6 +790,7 @@
 
       if (lives <= 0) {
         running = false;
+        updateStatusButtonStates();
         bestDistance = Math.max(bestDistance, Math.floor(distance));
         statBest.textContent = bestDistance + " m";
         showModal(
@@ -819,6 +867,7 @@
       playJumpSound();
     }
 
+    startBtn.addEventListener("click", startRun);
     playfield.addEventListener("click", triggerJump);
     jumpBtn.addEventListener("click", triggerJump);
 
@@ -846,7 +895,9 @@
     // 🎮 BLOCK 3 — BEHAVIOR MAP
     // One animation loop per run. Jump in pixels/seconds; land at posY=0.
     // Hits cost one of three lives. Coins boost distance and chain.
-    // Reach the level target to unlock Next Level; five levels loop to one.
+    // Start Level begins play; restarting returns to Ready. No automatic starts.
+    // Reach target AND play at least 20 seconds to unlock Next Level.
+    // Hazards cross the visible runway in approachSeconds, even on narrow phones.
     document.addEventListener("visibilitychange", () => { lastTime = null; });
 
     // ---- Bootstrap ----
