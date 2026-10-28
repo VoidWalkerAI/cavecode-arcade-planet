@@ -1,7 +1,7 @@
 CAVECODE SPEC — BASIC SWAP (ARC-HM-001)
 Category: haze-maze
 Engine: Match-3 Swap
-Version: 1.0
+Version: 1.1
 
 ============================================================
 🪨 BLOCK 1 — IDENTITY
@@ -17,10 +17,15 @@ One-Liner: Swap tiles to form matches. Tiles clear, new ones fall.
 🎮 BLOCK 2 — CORE LOOP SUMMARY
 ------------------------------------------------------------
 Each tick:
+  - Start with no pre-existing matches and at least one legal swap.
   - Wait for player input (select tile A → select tile B).
+  - Ignore input after level win/loss until replay or next level.
+  - Each adjacent swap attempt costs one move, including invalid swaps.
   - If adjacent, attempt swap.
   - If swap creates a match → resolve matches → gravity → refill.
   - If no match created → swap back (invalid swap).
+  - After cascades settle, regenerate any dead board without extra move/score cost.
+  - Restart clears selection, score, counters and the result modal.
 Loop is event-driven, not time-driven.
 (LOCKED)
 
@@ -37,9 +42,13 @@ Optional drag gesture: detect direction to pick adjacent tile.
 ============================================================
 📈 BLOCK 4 — SCORING / PROGRESSION
 ------------------------------------------------------------
-Each cleared tile: +10 points
-Combo clearing: +5 bonus per extra match in chain
-No level system; score accumulates indefinitely
+Each matched group: length * 10 points, plus 40 per tile beyond three.
+Cascade multiplier: 1 + cascadeIndex * 0.25 (first clear uses 1.0).
+Four-tile groups create row/column specials; five or more create bombs.
+Special tiles activate when included in a clear.
+Five levels (target score / moves): 800/18, 1700/22, 2600/26, 3600/28, 4800/30.
+Score resets each level. Reach target to win; exhaust moves first to lose.
+Final level can be replayed. Sound provides match, invalid-swap and result feedback.
 (LOCKED)
 
 ============================================================
@@ -49,7 +58,8 @@ gridRows: 8
 gridCols: 8
 tileTypes: 5          # Number of different colored tiles
 clearScore: 10
-comboBonus: 5
+extraMatchBonus: 4   # multiplied by clearScore for each tile beyond three
+chainStep: 0.25
 gravityEnabled: true
 refillMode: "top-down"   # drop new tiles from above
 matchLength: 3
@@ -67,8 +77,8 @@ helpText: "Tap two adjacent tiles to swap them. Make a match of 3+ to clear tile
 🧩 BLOCK 7 — OPTIONAL EXPANSIONS
 ------------------------------------------------------------
 - Timed mode
-- Move-limited puzzles
-- Special tiles (bomb, color-clear, row-clear)
+- Alternative move-limited tracks
+- Color-clear specials (bomb, row-clear and column-clear already exist)
 - Gravity variants
 (OPEN)
 
@@ -81,4 +91,9 @@ Ideal starter project for teaching:
   - gravity + refill logic
   - tile swap validation
   - event-driven loops
+Restoration: recovered the five-level HTML from commit
+2b326b4db2e0661c9d044748012998a630cb8841; repaired board initialization,
+dead-board recovery and end-of-level input. Executable tuning lives in
+index.html beside its CaveCode comments; keep this companion map in sync.
 (END)
+

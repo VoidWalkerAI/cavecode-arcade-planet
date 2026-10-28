@@ -476,7 +476,9 @@
     const modalPrimary = document.getElementById("modalPrimary");
     const modalSecondary = document.getElementById("modalSecondary");
 
-    // ---- Level track ----
+    // 🎚️ BLOCK 2 — TUNING KNOBS (HUMAN EDIT ZONE)
+    // Physics uses pixels and seconds. Level speed retains its original
+    // distance-per-60Hz-frame scale; spawnInterval is milliseconds.
     const LEVELS = [
       { name: "Warm-Up Cavern", target: 400, speed: 3.1, spawnInterval: 1100, coinChance: 0.25 },
       { name: "Low Ceiling Run", target: 650, speed: 3.7, spawnInterval: 950, coinChance: 0.3 },
@@ -498,12 +500,14 @@
     let posY = 0;
     let isOnGround = true;
 
-    const GRAVITY = -0.0048;        // tuned in "distance space"
-    const JUMP_VELOCITY = 0.075;    // stronger jump = higher
-    const MAX_JUMP_HEIGHT_PX = 80;  // clamp visual
+    const GRAVITY = -1400;          // pixels / second squared
+    const JUMP_VELOCITY = 520;      // pixels / second, upward positive
+    const MAX_FRAME_MS = 50;       // discard long background-tab gaps
 
     // Game state
     let lastTime = null;
+    let frameId = null;
+    let levelCleared = false;
     let running = false;
     let spawnTimer = 0;
     let hazardIdCounter = 0;
@@ -553,6 +557,10 @@
     // ---- Helpers ----
 
     function resetLevel(levelIndex) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+      levelCleared = false;
+      hideModal();
       currentLevelIndex = levelIndex;
       distance = 0;
       chainMultiplier = 1;
@@ -579,19 +587,19 @@
       lastTime = null;
       spawnTimer = 0;
       updateStatusButtonStates();
-      requestAnimationFrame(gameLoop);
+      frameId = requestAnimationFrame(gameLoop);
     }
 
     function updateStatusButtonStates() {
-      nextLevelBtn.disabled = !running;
+      nextLevelBtn.disabled = !levelCleared;
     }
 
     function applyRunnerPosition() {
       const h = playfield.clientHeight;
       const groundHeight = h * 0.26;
       const baseBottom = groundHeight; // where bottom of runner sits when posY = 0
-      // Translate posY to pixels above ground, clamped
-      const jumpPixels = Math.min(MAX_JUMP_HEIGHT_PX, posY * 1800);
+      // posY is already measured in pixels above the ground.
+      const jumpPixels = posY;
       const bottomPx = baseBottom + jumpPixels;
       runnerEl.style.bottom = bottomPx + "px";
     }
@@ -607,11 +615,10 @@
       const pfHeight = playfield.clientHeight;
       const groundHeight = pfHeight * 0.26;
 
-      const minBottom = groundHeight;
-      const maxBottom = groundHeight + 64;
-      const bottom = minBottom + Math.random() * (maxBottom - minBottom);
+      // Grounded hazards can always be jumped; coins float above them.
+      const bottom = groundHeight + (isCoin ? 36 + Math.random() * 28 : 0);
 
-      el.style.right = "-40px";
+      el.style.left = (pfWidth + 40) + "px";
       el.style.bottom = bottom + "px";
 
       playfield.appendChild(el);
@@ -626,9 +633,11 @@
     }
 
     function gameLoop(timestamp) {
+      frameId = null;
       if (!running) return;
       if (lastTime == null) lastTime = timestamp;
-      const delta = timestamp - lastTime;
+      const delta = Math.min(MAX_FRAME_MS, Math.max(0, timestamp - lastTime));
+      const dt = delta / 1000;
       lastTime = timestamp;
 
       const cfg = LEVELS[currentLevelIndex];
@@ -644,9 +653,10 @@
       }
 
       // Physics
-      velocityY += GRAVITY * delta;
-      if (isOnGround && velocityY < 0) velocityY = 0;
-      posY += velocityY * delta;
+      if (!isOnGround) {
+        posY += velocityY * dt + 0.5 * GRAVITY * dt * dt;
+        velocityY += GRAVITY * dt;
+      }
 
       if (posY <= GROUND_Y) {
         posY = GROUND_Y;
@@ -708,10 +718,11 @@
         return;
       }
 
-      requestAnimationFrame(gameLoop);
+      if (running) frameId = requestAnimationFrame(gameLoop);
     }
 
     function handleHit(obj) {
+      if (!running) return;
       lives -= 1;
       statLives.textContent = lives.toString();
       chainMultiplier = 1;
@@ -747,6 +758,8 @@
 
     function handleLevelClear() {
       running = false;
+      levelCleared = true;
+      updateStatusButtonStates();
       bestDistance = Math.max(bestDistance, Math.floor(distance));
       statBest.textContent = bestDistance + " m";
       playLevelClearSound();
@@ -800,6 +813,7 @@
       if (!running) return;
       if (!isOnGround) return;
       velocityY = JUMP_VELOCITY;
+      isOnGround = false;
       jumps += 1;
       statJumps.textContent = jumps.toString();
       playJumpSound();
@@ -814,16 +828,13 @@
     });
 
     nextLevelBtn.addEventListener("click", () => {
+      if (!levelCleared) return;
       const nextIndex = (currentLevelIndex + 1) % LEVELS.length;
       hideModal();
       resetLevel(nextIndex);
     });
 
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) {
-        hideModal();
-      }
-    });
+    // Keep result choices available until the player selects an action.
 
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
@@ -832,8 +843,15 @@
       }
     });
 
+    // 🎮 BLOCK 3 — BEHAVIOR MAP
+    // One animation loop per run. Jump in pixels/seconds; land at posY=0.
+    // Hits cost one of three lives. Coins boost distance and chain.
+    // Reach the level target to unlock Next Level; five levels loop to one.
+    document.addEventListener("visibilitychange", () => { lastTime = null; });
+
     // ---- Bootstrap ----
     resetLevel(0);
   </script>
 </body>
   </html>
+

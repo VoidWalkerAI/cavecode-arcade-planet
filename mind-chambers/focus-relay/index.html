@@ -532,7 +532,9 @@
         * Correct tap → node flashes green, advance expected index.
         * Wrong tap → node flashes red, run ends; re-show full correct pattern.
     - After a completed round:
-        * Pattern grows by +1 node.
+        * Pattern grows by +1 node up to the board capacity (9).
+        * Nine-node patterns continue with a shorter reveal window, down to 700ms.
+        * Ignore input between rounds; restarting cancels both gameplay timers.
         * Reveal time shrinks a bit (down to a floor).
         * Round counter increments, Tier may increase.
     - Run ends:
@@ -541,7 +543,7 @@
   -->
 
   <script>
-    // BLOCK 3 — LEVEL TRACK & RULES (GAME TUNING)
+    // 🎚️ BLOCK 3 — LEVEL TRACK & RULES (HUMAN EDIT ZONE)
 
     const FOCUS_TUNING = {
       gridSize: 3,              // 3×3
@@ -554,10 +556,10 @@
     };
 
     function patternLengthToTier(len) {
-      if (len <= 4) return 1;
-      if (len <= 6) return 2;
-      if (len <= 8) return 3;
-      if (len <= 10) return 4;
+      if (len <= 3) return 1;
+      if (len <= 5) return 2;
+      if (len <= 7) return 3;
+      if (len <= 8) return 4;
       return 5;
     }
 
@@ -585,6 +587,7 @@
       IDLE: "Idle",
       REVEAL: "Reveal",
       INPUT: "Input",
+      TRANSITION: "Next Round",
       GAME_OVER: "Game Over",
     };
 
@@ -600,6 +603,7 @@
     let bestRounds = 0;
     let lastMiss = "—";
     let revealTimeoutId = null;
+    let nextRoundTimeoutId = null;
 
     // Web Audio
     let audioCtx = null;
@@ -671,8 +675,6 @@
         inner.textContent = "";
         node.appendChild(inner);
 
-        node.addEventListener("click", () => onNodeClick(i));
-
         boardEl.appendChild(node);
         nodes.push({ el: node, inner });
       }
@@ -696,6 +698,7 @@
         [indices[i], indices[j]] = [indices[j], indices[i]];
       }
 
+      patternLength = Math.min(patternLength, total);
       pattern = indices.slice(0, patternLength);
     }
 
@@ -742,6 +745,8 @@
     }
 
     function startRun() {
+      clearTimeout(nextRoundTimeoutId);
+      nextRoundTimeoutId = null;
       if (revealTimeoutId) {
         clearTimeout(revealTimeoutId);
         revealTimeoutId = null;
@@ -759,12 +764,13 @@
     }
 
     function nextRound() {
+      setState(STATE.TRANSITION);
       roundsCompleted++;
       if (roundsCompleted > bestRounds) {
         bestRounds = roundsCompleted;
       }
 
-      patternLength += FOCUS_TUNING.patternIncrement;
+      patternLength = Math.min(nodes.length, patternLength + FOCUS_TUNING.patternIncrement);
       revealTimeMs = Math.max(
         FOCUS_TUNING.minRevealTimeMs,
         revealTimeMs - FOCUS_TUNING.revealTimeDecayMs
@@ -773,8 +779,9 @@
       generatePattern();
       updateHud();
 
-      setTimeout(() => {
-        if (currentState !== STATE.GAME_OVER) {
+      nextRoundTimeoutId = setTimeout(() => {
+        nextRoundTimeoutId = null;
+        if (currentState === STATE.TRANSITION) {
           revealPattern();
         }
       }, 650);
@@ -802,7 +809,7 @@
 
       expectedIndex++;
 
-      if (expectedIndex > patternLength) {
+      if (expectedIndex > pattern.length) {
         // full pattern cleared
         nextRound();
       }
@@ -895,3 +902,4 @@
   </script>
 </body>
 </html>
+
