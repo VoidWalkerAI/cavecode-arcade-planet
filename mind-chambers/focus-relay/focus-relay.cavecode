@@ -6,7 +6,7 @@
 CAVECODE SPEC — FOCUS RELAY (ARC-MC-002)
 Category: mind-chambers
 Engine: visual sequence memory
-Version: 1.0
+Version: 1.1
 
 ============================================================
 🪨 BLOCK 1 — IDENTITY
@@ -42,6 +42,7 @@ Round flow:
                   - If expectedIndex > patternLength:
                         - Round success → increment score.
                         - Increase patternLength and adjust revealTime.
+                        - Enter TRANSITION for 650ms; ignore taps.
                         - Go back to REVEAL state for next round.
             - Else: mistake → GAME OVER.
   4. GAME OVER:
@@ -58,7 +59,7 @@ Desktop:
 Mobile:
   - Touch / tap on nodes during INPUT state.
 
-The "Start Round" button:
+The "Restart Run" button:
   - Starts a new run from Round 1 if in GAME OVER or IDLE.
   - Starts Round 1 if no run active yet.
 
@@ -73,8 +74,14 @@ Score:
 Progression:
   - patternLength starts at startPatternLength.
   - After each successful round:
-        - patternLength += patternIncrement
+        - patternLength = min(gridSize * gridSize, patternLength + patternIncrement)
         - revealTimeMs = max(minRevealTimeMs, revealTimeMs - revealTimeDecayMs)
+
+The 3x3 board caps patterns at nine unique cells; rounds continue at that
+capacity while reveal time decreases to its floor. Tiers: 3 cells = 1,
+4-5 = 2, 6-7 = 3, 8 = 4, 9 = 5. Completion uses actual pattern length.
+Each click is handled once by the board. Restart cancels reveal and
+transition timers before generating a fresh run.
 
 Game ends when:
   - Player clicks any node that is not the expected next index.
@@ -98,18 +105,18 @@ revealTimeDecayMs:   100
 ------------------------------------------------------------
 title: "Focus Relay"
 subtitle: "Remember the order. Tap it back."
-startLabel: "Start Round"
-statusIdle: "Tap Start Round to begin."
+startLabel: "Restart Run"
+statusIdle: "Tap Restart Run to begin."
 statusReveal: "Memorize the numbers..."
 statusInput: "Tap the nodes in order."
 statusRoundSuccess: "Nice. Get ready for the next pattern."
-statusGameOver: "Sequence broken. Tap Start to try again."
+statusGameOver: "Sequence broken. Tap Restart Run to try again."
 (Globe)
 
 ============================================================
 🧩 BLOCK 7 — OPTIONAL EXPANSIONS
 ------------------------------------------------------------
-- Add sound tones mapped to each index.
+- Add distinct sound tones mapped to each index (generic feedback tones already exist).
 - Add time pressure (input timer).
 - Add multi-grid modes (4x4, 5x5).
 - Add life system (e.g., 3 mistakes allowed).
@@ -123,3 +130,4 @@ Pedagogical:
   - Simple but scalable difficulty.
 
 (END)
+
