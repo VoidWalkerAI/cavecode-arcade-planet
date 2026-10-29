@@ -205,6 +205,28 @@ test('Bastion: visible warning time stays consistent on phone and desktop', () =
     assert.ok(Math.abs(moved-(width*.86-32)/2.2)<.01);
   }
 });
+test('Bastion: touch/mouse press jumps before release; hold/release never jumps again', () => {
+  for (const control of ['jumpBtn', 'playfield']) {
+    for (const pointerType of ['touch', 'mouse', 'pen']) {
+      const g=game(bastionPath);g.run('startRun()');g.frame(0);
+      const element=g.elements.get(control);
+      let prevented=false;
+      const event={button:0,isPrimary:true,pointerType,preventDefault(){prevented=true;}};
+      assert.ok(element.handlers.pointerdown, 'must handle contact');
+      element.handlers.pointerdown[0](event);
+      assert.equal(g.run('jumps'),1);assert.equal(prevented,true);
+      for(let i=1;i<=60;i++)g.frame(i*1000/60);
+      assert.equal(g.run('isOnGround'),true);
+      for(const fn of element.handlers.click||[])fn({detail:1});
+      assert.equal(g.run('jumps'),1, 'release must not retrigger after landing');
+      element.handlers.pointerdown[0]({...event,isPrimary:false});
+      element.handlers.pointerdown[0]({...event,button:2});
+      assert.equal(g.run('jumps'),1);
+      for(const fn of element.handlers.click||[])fn({detail:0});
+      assert.equal(g.run('jumps'),2, 'assistive activation remains available');
+    }
+  }
+});
 let failed=0;
 for(const [name,fn] of tests){try{fn();console.log('PASS',name)}catch(e){failed++;console.error('FAIL',name,'\n',e.stack)}}
 console.log(`${tests.length-failed}/${tests.length} passed`);process.exitCode=failed?1:0;

@@ -1,7 +1,7 @@
 CAVECODE SPEC — BASTION RUNNER (ARC-CR-001)
 Category: cavern-run
 Engine: Side-view runner with five levels
-Version: 1.2
+Version: 1.3
 
 🪨 BLOCK 1 — IDENTITY
 Title: Cavern Run — Bastion Runner
@@ -26,7 +26,11 @@ Goal: Jump grounded hazards, collect coins and reach each distance target.
 - Best distance is session-only and measures an individual level attempt.
 
 🕹️ BLOCK 3 — INPUT
-Space / W / ArrowUp, Jump button, or tap/click playfield: jump if grounded.
+Space / W / ArrowUp, Jump button, or press playfield: jump if grounded.
+Touch, pen and primary mouse input fire on pointerdown (contact), not release.
+Ignore the following pointer click so release never queues a second jump.
+Ignore secondary touches/right-clicks and repeated held keyboard keydowns.
+Keyboard/assistive click activation remains supported.
 Start Level: begin the ready level.
 Restart Run: reset current level to Ready with three lives and zero distance.
 Next Level: available only after clearing the current level.

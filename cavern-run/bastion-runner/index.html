@@ -868,8 +868,23 @@
     }
 
     startBtn.addEventListener("click", startRun);
-    playfield.addEventListener("click", triggerJump);
-    jumpBtn.addEventListener("click", triggerJump);
+    // Jump on contact, not release. Ignore the subsequent pointer click,
+    // including when a long hold outlasts the jump and the runner has landed.
+    function pressJump(event) {
+      if (event.button !== 0 || event.isPrimary === false) return;
+      event.preventDefault();
+      triggerJump();
+    }
+
+    function accessibleJump(event) {
+      // Keyboard/assistive activation has no pointer click count.
+      if (event.detail === 0) triggerJump();
+    }
+
+    playfield.addEventListener("pointerdown", pressJump);
+    jumpBtn.addEventListener("pointerdown", pressJump);
+    playfield.addEventListener("click", accessibleJump);
+    jumpBtn.addEventListener("click", accessibleJump);
 
     restartBtn.addEventListener("click", () => {
       hideModal();
@@ -888,7 +903,7 @@
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
         e.preventDefault();
-        triggerJump();
+        if (!e.repeat) triggerJump();
       }
     });
 
